@@ -1,0 +1,40 @@
+{
+  "overview": "Wet organic materials should read through roughness/specular response first, with color supporting the read and emissive used sparingly if at all.",
+  "visual_reads": [
+    "wet specular read",
+    "soft shell/core hue separation",
+    "localized organic breakup"
+  ],
+  "lane_order": [
+    "build_material_shell_core_lane",
+    "build_material_crack_mask_lane",
+    "build_material_fresnel_lane"
+  ],
+  "required_root_pins": [
+    "BaseColor",
+    "Roughness",
+    "Normal"
+  ],
+  "preferred_nodes": [
+    "Fresnel",
+    "Noise",
+    "BumpOffset"
+  ],
+  "preferred_parameters": [
+    "SurfaceColor",
+    "UnderlayerColor",
+    "WetRoughness",
+    "DryRoughness",
+    "BreakupContrast"
+  ],
+  "common_failure_modes": [
+    "whole surface equally glossy",
+    "neon emissive overpowering biological read",
+    "flat single-color flesh with no wet/dry contrast"
+  ],
+  "capture_review_checklist": [
+    "Front shot preserves color separation without flattening.",
+    "Three-quarter shot shows moist highlights in selected regions.",
+    "Grazing shot does not over-whiten the shell."
+  ]
+}

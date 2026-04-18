@@ -1,0 +1,83 @@
+{
+  "suite_name": "electric_orb_v2_eval",
+  "tasks": [
+    {
+      "id": "electric_arc_orb",
+      "description": "electric orb with one dominant crackling arc feeding a bright charged core",
+      "hero_reference": "one hero electric arc, thinner support filaments, charged white-blue core",
+      "negative_references": [
+        "closed ring shell",
+        "thick flame body"
+      ],
+      "expected_archetype": "electric_arc_orb",
+      "expected_absent_failure_labels": [
+        "hero_sweep_missing",
+        "wire_arc_cage",
+        "closed_ring_orb"
+      ]
+    },
+    {
+      "id": "charged_center_mass",
+      "description": "charged electric center mass with one dominant arc and spark punctuation",
+      "hero_reference": "charged core with crisp electric arc support",
+      "negative_references": [
+        "soft smoke haze",
+        "orbit shell"
+      ],
+      "expected_archetype": "electric_arc_orb",
+      "expected_absent_failure_labels": [
+        "soft_smoke_haze",
+        "closed_ring_orb"
+      ]
+    },
+    {
+      "id": "tesla_pull_orb",
+      "description": "tesla orb pulling electric wisps into a hot ionized center",
+      "hero_reference": "electric pull arc with crisp white-blue body",
+      "negative_references": [
+        "molten flame sweep",
+        "wire cage"
+      ],
+      "expected_archetype": "electric_arc_orb",
+      "expected_absent_failure_labels": [
+        "thick_flame_body",
+        "wire_arc_cage"
+      ]
+    },
+    {
+      "id": "static_charge_orb",
+      "description": "static charge orb with dominant electric arc and compact charged core",
+      "hero_reference": "one clear hero arc and compact electrical core",
+      "negative_references": [
+        "secondary overwhelms hero",
+        "closed ring orb"
+      ],
+      "expected_archetype": "electric_arc_orb",
+      "expected_absent_failure_labels": [
+        "secondary_overwhelms_hero",
+        "closed_ring_orb"
+      ]
+    },
+    {
+      "id": "lightning_feed_core",
+      "description": "lightning fed orb with a dominant electric sweep into a bright energized center",
+      "hero_reference": "hero electric sweep into a charged center",
+      "negative_references": [
+        "soft ambient haze",
+        "thin wireframe ribbon"
+      ],
+      "expected_archetype": "electric_arc_orb",
+      "expected_absent_failure_labels": [
+        "soft_smoke_haze",
+        "wire_arc_cage"
+      ]
+    }
+  ],
+  "scoring_rubric": {
+    "motion_family_match": "0-5",
+    "silhouette_family_match": "0-5",
+    "hero_secondary_hierarchy": "0-5",
+    "material_family_read": "0-5",
+    "gameplay_readability": "0-5"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "overview": "Frosted glass should prioritize controlled transparency, soft shell breakup, and roughness variation over emissive or heavy color tint.",
+  "visual_reads": [
+    "soft translucent shell",
+    "controlled roughness breakup",
+    "subtle depth fade"
+  ],
+  "lane_order": [
+    "build_material_depth_mask_lane",
+    "build_material_bump_offset_uv_lane",
+    "build_material_fresnel_lane"
+  ],
+  "required_root_pins": [
+    "Opacity",
+    "Roughness",
+    "BaseColor"
+  ],
+  "preferred_nodes": [
+    "DepthFade",
+    "PixelDepth",
+    "Fresnel",
+    "BumpOffset",
+    "Noise"
+  ],
+  "preferred_parameters": [
+    "FadeDistance",
+    "HeightRatio",
+    "RoughnessLow",
+    "RoughnessHigh",
+    "EdgeColor"
+  ],
+  "common_failure_modes": [
+    "opaque chalky shell",
+    "strong emissive making it look magical instead of glass",
+    "uniform roughness with no readability difference across the surface"
+  ],
+  "capture_review_checklist": [
+    "Front shot keeps the silhouette readable.",
+    "Three-quarter shot shows surface breakup without turning milky white.",
+    "Grazing shot has soft edge polish rather than blown-out highlights."
+  ]
+}

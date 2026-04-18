@@ -1,0 +1,97 @@
+{
+  "taxonomy_name": "electric_arc_orb_failure_taxonomy",
+  "scope": "Rules-based V2 critic for electric arc orb reads.",
+  "labels": {
+    "hero_sweep_missing": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroElectricArc emitter is missing or under-authored.",
+        "The hero electric arc is not visually distinct from the support filaments."
+      ],
+      "allowed_repair_ops": [
+        "build_main_attraction_layer",
+        "rebuild_hero_electric_arc_layer"
+      ],
+      "escalation_rule": "Two consecutive hero-layer failures force a rebuild."
+    },
+    "no_outside_to_core_read": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroElectricArc does not establish an outer-zone to hot-core read."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family",
+        "rebuild_hero_electric_arc_layer"
+      ],
+      "escalation_rule": "Two consecutive failures force a rebuild."
+    },
+    "closed_ring_orb": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": true,
+      "detection_rules": [
+        "Hero or support electric layers close into a ring shell around the orb."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer",
+        "rebuild_hero_electric_arc_layer"
+      ],
+      "escalation_rule": "If repeated on the hero silhouette, rebuild the hero electric arc layer."
+    },
+    "wire_arc_cage": {
+      "category": "shape_layering",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "Electric hero arc is rendered as a thin ribbon cage or wireframe shell."
+      ],
+      "allowed_repair_ops": [
+        "simplify_hero_ribbon_material",
+        "rebuild_hero_electric_arc_layer"
+      ],
+      "escalation_rule": "Two consecutive hits force a hero rebuild."
+    },
+    "secondary_overwhelms_hero": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "SecondaryElectricFilaments compete with HeroElectricArc."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer"
+      ],
+      "escalation_rule": "Reduce support density before touching the hero arc."
+    },
+    "thick_flame_body": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Electric hero body reads too flame-like, broad, or molten instead of crisp charged arcs."
+      ],
+      "allowed_repair_ops": [
+        "simplify_hero_ribbon_material",
+        "retune_longitudinal_flow"
+      ],
+      "escalation_rule": "Reduce flame-like body mass before adding more glow."
+    },
+    "soft_smoke_haze": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "CoreElectricMass or BindGlow reads as a soft haze rather than a charged electric center."
+      ],
+      "allowed_repair_ops": [
+        "build_core_merge_glow_material",
+        "build_core_turbulence_layer"
+      ],
+      "escalation_rule": "Fix the core charge read before polishing hero arcs."
+    }
+  }
+}

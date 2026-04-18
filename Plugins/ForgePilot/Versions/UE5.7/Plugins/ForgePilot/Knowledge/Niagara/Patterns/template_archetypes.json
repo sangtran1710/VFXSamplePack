@@ -1,0 +1,170 @@
+{
+  "_description": "Reusable emitter archetypes for bootstrapping Niagara authoring. The AI should map recipe layers onto one of these starting patterns before editing stack details.",
+  "archetypes": {
+    "sprite_fountain_loop": {
+      "description": "Looping sprite emitter with upward motion. Good base for fire cores, smoke plumes, ambient magical wisps, and fountain-like continuous motion.",
+      "use_when": [
+        "continuous_spawn",
+        "upward_motion",
+        "sprite_renderer",
+        "fire",
+        "smoke",
+        "ambient_magic"
+      ],
+      "template_search_terms": [
+        "Niagara fountain",
+        "looping sprite emitter",
+        "fire loop",
+        "smoke plume"
+      ]
+    },
+    "sprite_burst": {
+      "description": "Burst-oriented sprite emitter for one-shot impacts, dust pops, flashes, and short-lived energy hits.",
+      "use_when": [
+        "burst_spawn",
+        "impact",
+        "explosion",
+        "dust_cloud",
+        "flash"
+      ],
+      "template_search_terms": [
+        "Niagara burst",
+        "impact burst",
+        "dust burst",
+        "explosion sprite"
+      ]
+    },
+    "smoke_billow": {
+      "description": "Soft sprite emitter emphasizing drag, curl noise, growth over life, and translucent volume. Good base for smoke, fog, steam, and wisps.",
+      "use_when": [
+        "smoke",
+        "fog",
+        "steam",
+        "soft_volume",
+        "curl_noise"
+      ],
+      "template_search_terms": [
+        "Niagara smoke",
+        "billow smoke",
+        "fog emitter",
+        "steam plume"
+      ]
+    },
+    "spark_burst": {
+      "description": "Fast, lightweight accent emitter for embers, sparks, small debris, and energetic highlights.",
+      "use_when": [
+        "embers",
+        "sparks",
+        "accents",
+        "short_lifetime"
+      ],
+      "template_search_terms": [
+        "Niagara sparks",
+        "embers",
+        "spark burst"
+      ],
+      "authoring_intent": "Use this as the default support-emitter pattern for short-lived spark, ember, and magic particle sprays. Prioritize burst readability, compact spawn region, and cheap secondary motion over hero-level complexity.",
+      "renderer_guidance": {
+        "renderer_type": "sprite",
+        "material_family": [
+          "basic_soft_particle_sprite",
+          "ember_sprite",
+          "spark_streak_sprite",
+          "magic_mote_sprite"
+        ],
+        "alignment": "velocity_aligned",
+        "facing_mode": "face_camera",
+        "sort_mode": "view_distance",
+        "notes": [
+          "Velocity-aligned sprites are preferred before escalating to ribbons.",
+          "Keep the material simple and let Niagara drive spread, timing, and per-particle variation."
+        ]
+      },
+      "emitter_update_modules": [
+        "Emitter State",
+        "Spawn Burst Instantaneous",
+        "Spawn Rate (optional low sustain after burst)"
+      ],
+      "particle_spawn_modules": [
+        "Initialize Particle",
+        "Sphere Location",
+        "Add Velocity in Cone"
+      ],
+      "particle_update_modules": [
+        "Update Age",
+        "Gravity Force",
+        "Drag",
+        "Scale Color",
+        "Solve Forces and Velocity",
+        "Scale Sprite Size by Speed (preferred for sparks)"
+      ],
+      "default_tuning": {
+        "burst_count": "8-30 for general sparks, 4-12 for embers, 12-40 for magical spray accents",
+        "spawn_rate_after_burst": "0-12/sec depending on whether a short residual tail is needed",
+        "particle_lifetime": "0.08-0.45s for sparks, 0.25-1.2s for embers, 0.2-0.8s for magic motes",
+        "initial_size": "1-6 cm for sparks, 2-8 cm for embers, 2-10 cm for magic particles",
+        "velocity": "120-600 cm/s depending on aggressiveness",
+        "cone_angle": "wide for radial spray, narrow for directional release",
+        "drag": "0.08-0.35",
+        "gravity": "0 to -250 for stylized/magic, -150 to -600 for physical sparks"
+      },
+      "spawn_shape_guidance": [
+        "Prefer a small sphere or compact point-like origin.",
+        "Keep the spawn region tight and let velocity create the perceived spread.",
+        "Layering two small sphere-location passes is acceptable when one origin looks too uniform."
+      ],
+      "variant_guidance": {
+        "embers": {
+          "motion": "slower than sparks, more drag, warmer color fade, optional slight gravity",
+          "look": "read as hot fallout rather than impact metal sparks",
+          "preferred_material": "basic_soft_particle_sprite or ember radial gradient"
+        },
+        "sparks": {
+          "motion": "high initial speed, strong directional read, short lifetime, velocity-aligned streak feel",
+          "look": "bright first frame, die quickly, keep local to event",
+          "preferred_material": "basic_soft_particle_sprite with streak-like mask"
+        },
+        "magic_particles": {
+          "motion": "lower gravity, can keep a slight sustain after burst, color fade is more important than realism",
+          "look": "can use softer masks and cleaner edge shaping than embers",
+          "preferred_material": "basic_soft_particle_sprite with optional fresnel filter"
+        }
+      },
+      "material_pattern_links": [
+        "Process/Common/material_pattern_basic_soft_particle_sprite.md"
+      ],
+      "reference_notes": [
+        "A strong reference pattern is NE_spread_spark from the FlameThrowerBreath generic source.",
+        "This archetype is for secondary breakup and accent motion, not for hero silhouettes like flame bodies or plasma shells."
+      ]
+    },
+    "ribbon_trail": {
+      "description": "Trail-based emitter for slashes, electricity streaks, magical ribbons, and motion accents.",
+      "use_when": [
+        "ribbon",
+        "trail",
+        "slash",
+        "lightning"
+      ],
+      "template_search_terms": [
+        "Niagara ribbon",
+        "trail emitter",
+        "electric ribbon"
+      ]
+    },
+    "mesh_debris": {
+      "description": "Mesh-based emitter for rocks, chunks, leaves, and debris fragments.",
+      "use_when": [
+        "mesh_renderer",
+        "debris",
+        "chunks",
+        "physical_fragments"
+      ],
+      "template_search_terms": [
+        "Niagara debris",
+        "mesh emitter",
+        "rock burst"
+      ]
+    }
+  }
+}

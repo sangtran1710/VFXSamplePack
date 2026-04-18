@@ -1,0 +1,119 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+#
+# ForgePilot Codex local/hybrid config template.
+#
+# Merge this into:
+#   C:\Users\ADMIN\.codex\config.toml
+#
+# Do not replace the whole file blindly.
+# Keep all existing MCP blocks, especially:
+#   [mcp_servers.forgepilot]
+#   [mcp_servers.blender]
+#   [mcp_servers.aftereffects]
+#   [mcp_servers.premierebridge]
+#
+# Routing intent:
+# - OpenAI stays the strong default for hard C++/Unreal/visual-debug work.
+# - Ollama/LM Studio handle cheap ForgePilot automation and summaries.
+# - Project .codex/config.toml files can pin a workspace to the cheap local path.
+
+profile = "openai-strong"
+
+model = "gpt-5.4"
+model_provider = "openai"
+model_reasoning_effort = "high"
+model_reasoning_summary = "none"
+model_verbosity = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "cached"
+
+# Optional built-in local provider when Codex is launched with --oss.
+oss_provider = "ollama"
+
+[windows]
+sandbox = "elevated"
+
+[model_providers.lmstudio_local]
+name = "LM Studio Local"
+base_url = "http://localhost:1234/v1"
+# Do not name this table [model_providers.lmstudio] if your Codex build treats
+# "lmstudio" as a reserved built-in provider ID.
+
+# CLI-selectable profiles. Profiles are useful in CLI; Codex Desktop currently
+# works more predictably with top-level defaults plus project overrides.
+# Note:
+# - Profiles are documented as experimental.
+# - They are useful in CLI.
+# - In Codex Desktop, the safer pattern is top-level defaults plus
+#   project-scoped .codex/config.toml overrides.
+
+[profiles.openai-strong]
+model = "gpt-5.4"
+model_provider = "openai"
+model_reasoning_effort = "high"
+model_reasoning_summary = "none"
+model_verbosity = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "cached"
+
+[profiles.local-ollama-cheap]
+# Example Ollama IDs:
+#   gpt-oss:20b
+#   qwen2.5-coder:32b
+#   deepseek-coder-v2:16b
+model = "your-local-model-id"
+model_provider = "ollama"
+model_reasoning_effort = "low"
+model_reasoning_summary = "none"
+model_verbosity = "low"
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+web_search = "disabled"
+model_context_window = 32768
+model_auto_compact_token_limit = 24000
+
+[profiles.local-lmstudio-cheap]
+# Use the exact model identifier shown by LM Studio.
+# Example:
+#   openai/gpt-oss-20b
+model = "openai/gpt-oss-20b"
+model_provider = "lmstudio_local"
+model_reasoning_effort = "low"
+model_reasoning_summary = "none"
+model_verbosity = "low"
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+web_search = "disabled"
+model_context_window = 32768
+model_auto_compact_token_limit = 24000
+
+[profiles.openai-fast-review]
+model = "gpt-5.4-mini"
+model_provider = "openai"
+model_reasoning_effort = "medium"
+model_reasoning_summary = "none"
+model_verbosity = "low"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "cached"
+
+[features]
+multi_agent = true
+
+# Optional project override for cheap ForgePilot automation:
+#
+# Save this as:
+#   <host_project_root>\Plugins\ForgePilot\.codex\config.toml
+#
+# model = "your-local-model-id"
+# model_provider = "ollama"
+# model_reasoning_effort = "low"
+# model_reasoning_summary = "none"
+# model_verbosity = "low"
+# approval_policy = "never"
+# sandbox_mode = "workspace-write"
+# web_search = "disabled"
+# model_context_window = 32768
+# model_auto_compact_token_limit = 24000

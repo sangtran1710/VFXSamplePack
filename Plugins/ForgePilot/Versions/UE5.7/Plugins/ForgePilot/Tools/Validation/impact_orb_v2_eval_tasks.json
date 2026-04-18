@@ -1,0 +1,83 @@
+{
+  "suite_name": "impact_orb_v2_eval",
+  "tasks": [
+    {
+      "id": "impact_pulse_core",
+      "description": "impact pulse core with one dominant burst streak and a tight flash center",
+      "hero_reference": "compact hero burst, smaller support streaks, tight flash core",
+      "negative_references": [
+        "orbit ring shell",
+        "soft ambient glow"
+      ],
+      "expected_archetype": "impact_pulse_core",
+      "expected_absent_failure_labels": [
+        "hero_sweep_missing",
+        "orbit_ring_shell",
+        "soft_ambient_glow"
+      ]
+    },
+    {
+      "id": "impact_flash_orb",
+      "description": "impact flash orb with compact burst streaks and a dense hot center",
+      "hero_reference": "short readable impact burst with strong core flash",
+      "negative_references": [
+        "lingering orb shell",
+        "thin wireframe ribbons"
+      ],
+      "expected_archetype": "impact_pulse_core",
+      "expected_absent_failure_labels": [
+        "lingering_orb_shell",
+        "thin_wireframe_ribbons"
+      ]
+    },
+    {
+      "id": "shock_pulse_core",
+      "description": "shock pulse core with a dominant impact streak burst and debris sparks",
+      "hero_reference": "impact burst plus spark punctuation around a compact core",
+      "negative_references": [
+        "secondary overwhelms hero",
+        "orbit shell"
+      ],
+      "expected_archetype": "impact_pulse_core",
+      "expected_absent_failure_labels": [
+        "secondary_overwhelms_hero",
+        "orbit_ring_shell"
+      ]
+    },
+    {
+      "id": "collision_core_flash",
+      "description": "collision core flash with one dominant impact sweep and a tight binding glow",
+      "hero_reference": "tight impact center and one readable burst arc",
+      "negative_references": [
+        "ambient haze",
+        "wireframe line burst"
+      ],
+      "expected_archetype": "impact_pulse_core",
+      "expected_absent_failure_labels": [
+        "soft_ambient_glow",
+        "thin_wireframe_ribbons"
+      ]
+    },
+    {
+      "id": "burst_center_hit_orb",
+      "description": "burst center hit orb with a dominant impact pulse and compact flash mass",
+      "hero_reference": "brief strong impact pulse with dense center flash",
+      "negative_references": [
+        "lingering shell",
+        "hero missing"
+      ],
+      "expected_archetype": "impact_pulse_core",
+      "expected_absent_failure_labels": [
+        "lingering_orb_shell",
+        "hero_sweep_missing"
+      ]
+    }
+  ],
+  "scoring_rubric": {
+    "motion_family_match": "0-5",
+    "silhouette_family_match": "0-5",
+    "hero_secondary_hierarchy": "0-5",
+    "material_family_read": "0-5",
+    "gameplay_readability": "0-5"
+  }
+}

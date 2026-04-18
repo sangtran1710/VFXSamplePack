@@ -1,0 +1,116 @@
+{
+  "_description": "Real-world scale references for VFX in UE5. 1 Unreal Unit = 1 cm. Agent must use these to ensure effects look correct relative to characters and environments.",
+
+  "reference_sizes": {
+    "human_character": {"height": 180, "unit": "cm", "note": "standard adult human ~180cm"},
+    "human_head": {"diameter": 22, "unit": "cm"},
+    "human_hand": {"length": 19, "unit": "cm"},
+    "sword": {"length": "80-120", "unit": "cm"},
+    "door": {"height": 210, "width": 90, "unit": "cm"},
+    "car": {"length": 450, "width": 180, "height": 150, "unit": "cm"},
+    "tree": {"height": "500-2000", "unit": "cm"}
+  },
+
+  "effect_scale_guidelines": {
+    "hand_fire": {
+      "emitter_radius": "8-15",
+      "particle_size": "5-20",
+      "note": "fire held in or emitted from a character's hand"
+    },
+    "torch_fire": {
+      "emitter_radius": "10-20",
+      "particle_size": "10-35",
+      "flame_height": "30-60",
+      "note": "wall torch or handheld torch"
+    },
+    "campfire": {
+      "emitter_radius": "30-60",
+      "particle_size": "20-50",
+      "flame_height": "50-120",
+      "smoke_height": "200-500"
+    },
+    "bonfire": {
+      "emitter_radius": "80-150",
+      "particle_size": "40-100",
+      "flame_height": "150-400"
+    },
+    "explosion_small": {
+      "radius": "100-200",
+      "note": "grenade, small bomb",
+      "debris_spread": "300-600",
+      "smoke_height": "300-800"
+    },
+    "explosion_large": {
+      "radius": "500-1500",
+      "note": "vehicle explosion, large ordnance",
+      "debris_spread": "1000-3000",
+      "smoke_height": "1000-3000"
+    },
+    "magic_projectile": {
+      "radius": "10-30",
+      "trail_width": "5-15",
+      "note": "fireball, ice shard, energy bolt"
+    },
+    "core_energy_orb": {
+      "radius": "18-45",
+      "filament_width": "2-6",
+      "glow_radius": "35-80",
+      "note": "handheld or character-proximal core energy orb"
+    },
+    "reactor_core": {
+      "radius": "60-180",
+      "filament_width": "4-12",
+      "glow_radius": "120-260",
+      "note": "machine or environmental contained reactor core"
+    },
+    "magic_aoe": {
+      "radius": "200-500",
+      "note": "area of effect spell circle on ground"
+    },
+    "character_aura": {
+      "inner_radius": "50-80",
+      "outer_radius": "100-150",
+      "height": "200-250",
+      "note": "buff/power-up aura around character"
+    },
+    "hit_impact": {
+      "radius": "15-40",
+      "spark_spread": "30-80",
+      "note": "sword hit, bullet impact on surface"
+    },
+    "footstep_dust": {
+      "radius": "10-25",
+      "particle_size": "5-15",
+      "height": "10-30"
+    },
+    "water_splash_small": {
+      "radius": "20-50",
+      "droplet_height": "30-80",
+      "note": "object dropped in water"
+    },
+    "water_splash_large": {
+      "radius": "100-300",
+      "droplet_height": "100-300",
+      "note": "character diving, large object impact"
+    },
+    "rain_particle": {
+      "length": "5-15",
+      "width": "0.5-1.5",
+      "spawn_area": "2000-5000",
+      "note": "individual raindrop streak"
+    },
+    "lightning_bolt": {
+      "width": "5-20",
+      "glow_radius": "50-200",
+      "note": "main bolt thickness, glow extends around it"
+    }
+  },
+
+  "common_mistakes": [
+    "Particles too large relative to character → looks like low-res mobile game",
+    "Spawn radius too small → effect looks like a point source, not volumetric",
+    "Smoke scale not growing enough over lifetime → looks like solid objects floating",
+    "Debris too uniform in size → looks artificial, use 0.5x-2.0x random range",
+    "Effect too centered → real effects are messy and asymmetric, add position randomness"
+  ]
+}

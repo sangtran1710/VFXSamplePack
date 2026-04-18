@@ -1,0 +1,45 @@
+{
+  "basic_viewport_runtime": {
+    "description": "Start PIE in the active viewport, capture a runtime frame, then stop PIE.",
+    "steps": [
+      { "type": "tool", "name": "start_play_in_viewport", "input": {} },
+      { "type": "wait", "ms": 1500 },
+      { "type": "tool", "name": "get_pie_session_state", "input": {} },
+      { "type": "tool", "name": "capture_viewport_screenshot", "input": {}, "capture_label": "runtime_start" },
+      { "type": "tool", "name": "stop_play_session", "input": {} }
+    ]
+  },
+  "basic_viewport_simulate": {
+    "description": "Start Simulate In Editor in the active viewport, capture a frame, then stop.",
+    "steps": [
+      { "type": "tool", "name": "start_play_in_viewport", "input": { "simulate": true } },
+      { "type": "wait", "ms": 1200 },
+      { "type": "tool", "name": "get_pie_session_state", "input": {} },
+      { "type": "tool", "name": "capture_viewport_screenshot", "input": {}, "capture_label": "simulate_start" },
+      { "type": "tool", "name": "stop_play_session", "input": {} }
+    ]
+  },
+  "transformation_baseline": {
+    "description": "Example gameplay probe: tap H, hold B via pressed+released, tap B, then capture several runtime frames.",
+    "steps": [
+      { "type": "tool", "name": "start_play_in_viewport", "input": {} },
+      { "type": "wait", "ms": 1200 },
+      { "type": "tool", "name": "send_pie_key_input", "input": { "key": "H", "event": "tap" } },
+      { "type": "wait", "ms": 150 },
+      { "type": "tool", "name": "send_pie_key_input", "input": { "key": "B", "event": "pressed" } },
+      { "type": "wait", "ms": 2000 },
+      { "type": "tool", "name": "send_pie_key_input", "input": { "key": "B", "event": "released" } },
+      { "type": "wait", "ms": 150 },
+      { "type": "tool", "name": "send_pie_key_input", "input": { "key": "B", "event": "tap" } },
+      { "type": "wait", "ms": 1000 },
+      { "type": "tool", "name": "capture_viewport_screenshot", "input": {}, "capture_label": "t1000" },
+      { "type": "wait", "ms": 1500 },
+      { "type": "tool", "name": "capture_viewport_screenshot", "input": {}, "capture_label": "t2500" },
+      { "type": "wait", "ms": 1500 },
+      { "type": "tool", "name": "capture_viewport_screenshot", "input": {}, "capture_label": "t4000" },
+      { "type": "wait", "ms": 2000 },
+      { "type": "tool", "name": "capture_viewport_screenshot", "input": {}, "capture_label": "t6000" },
+      { "type": "tool", "name": "stop_play_session", "input": {} }
+    ]
+  }
+}

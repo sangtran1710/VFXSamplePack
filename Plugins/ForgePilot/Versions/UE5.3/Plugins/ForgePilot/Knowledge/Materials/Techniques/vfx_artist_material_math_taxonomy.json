@@ -1,0 +1,388 @@
+{
+  "_description": "Math-focused node taxonomy for VFX artists building Unreal materials. Use this when the material problem is mostly about arithmetic, thresholds, oscillation, vector math, channel packing, or procedural remapping rather than only texture sampling.",
+
+  "overview": "Most production VFX materials are built from math before they are built from art textures. These nodes shape masks, remap ranges, drive loops, control procedural timing, and transform vectors between spaces. A senior VFX workflow uses these nodes intentionally to reduce texture dependence, expose cleaner controls, and keep master materials more reusable.",
+
+  "categories": [
+    {
+      "category": "basic_arithmetic",
+      "display_name": "Basic Arithmetic",
+      "why_it_matters": "These are the atomic math nodes behind almost every material graph.",
+      "most_important_nodes": [
+        {
+          "node": "Add and Subtract",
+          "primary_role": "Offset values, shift masks, or combine scalar and vector lanes.",
+          "typical_vfx_usage": [
+            "UV offsets",
+            "threshold offsets",
+            "layered emissive shaping",
+            "distance field ring extraction"
+          ],
+          "agent_rule": "Use Add and Subtract to move values first before adding more expensive shaping logic."
+        },
+        {
+          "node": "Multiply and Divide",
+          "primary_role": "Scale intensity, scale vectors, or normalize against a divisor.",
+          "typical_vfx_usage": [
+            "emissive intensity",
+            "opacity scaling",
+            "UV scale",
+            "vector weighting"
+          ],
+          "agent_rule": "Multiply is one of the most common graph nodes in VFX. Treat Divide with more care and protect against invalid assumptions about the denominator.",
+          "warning": "Dividing by zero or by unstable near-zero values can produce broken output or NaN-like behavior."
+        },
+        {
+          "node": "Power",
+          "primary_role": "Apply exponential shaping to contrast or falloff curves.",
+          "typical_vfx_usage": [
+            "mask contrast",
+            "alpha tightening",
+            "emissive core shaping",
+            "procedural falloff control"
+          ],
+          "agent_rule": "Reach for Power when the curve shape itself matters, especially for emissive and alpha shaping."
+        },
+        {
+          "node": "SquareRoot",
+          "primary_role": "Reduce a value with square-root response instead of linear or power growth.",
+          "typical_vfx_usage": [
+            "softening falloff math",
+            "distance-derived reshaping",
+            "nonlinear response control"
+          ],
+          "agent_rule": "Use SquareRoot when the graph wants a softer contrast response than Power."
+        },
+        {
+          "node": "OneMinus",
+          "primary_role": "Invert a mask or normalized value with 1 - x.",
+          "typical_vfx_usage": [
+            "mask inversion",
+            "inside-out threshold logic",
+            "inverse alpha shaping"
+          ],
+          "agent_rule": "Prefer OneMinus over rebuilding a manual invert chain."
+        },
+        {
+          "node": "Abs",
+          "primary_role": "Convert negative values to positive magnitude while preserving positive values.",
+          "typical_vfx_usage": [
+            "symmetric wave shaping",
+            "distance-from-center without sign",
+            "mirrored pattern logic"
+          ],
+          "agent_rule": "Abs is useful when you care about magnitude but not direction sign."
+        },
+        {
+          "node": "Frac",
+          "primary_role": "Keep only the fractional portion of a value.",
+          "typical_vfx_usage": [
+            "tiling",
+            "manual flipbook stepping",
+            "looped procedural time",
+            "repeating UV logic"
+          ],
+          "agent_rule": "Frac is a core node for looping behavior and custom atlas logic."
+        },
+        {
+          "node": "Fmod",
+          "primary_role": "Return the remainder after division.",
+          "typical_vfx_usage": [
+            "repeating procedural segments",
+            "wrapped timing logic",
+            "modular frame indexing"
+          ],
+          "agent_rule": "Fmod is useful when the wrap interval matters explicitly rather than only the fractional part."
+        },
+        {
+          "node": "Ceil, Floor, Round",
+          "primary_role": "Quantize values upward, downward, or to the nearest integer.",
+          "typical_vfx_usage": [
+            "step animation",
+            "manual frame logic",
+            "quantized masks",
+            "procedural snapping"
+          ],
+          "agent_rule": "Use Floor for stepped frame timing and custom flipbook logic. Use Round only when nearest-value quantization is the real intent."
+        },
+        {
+          "node": "Sign",
+          "primary_role": "Return sign classification: negative, zero, or positive.",
+          "typical_vfx_usage": [
+            "direction tests",
+            "signed procedural fields",
+            "branch-like math without explicit branching"
+          ],
+          "agent_rule": "Use Sign when the graph logic depends on direction polarity more than on the original value magnitude."
+        }
+      ]
+    },
+    {
+      "category": "range_and_logic",
+      "display_name": "Range and Logic",
+      "why_it_matters": "These nodes clamp, remap, threshold, and blend procedural values into artist-friendly control bands.",
+      "most_important_nodes": [
+        {
+          "node": "Clamp",
+          "primary_role": "Limit a value to a chosen range.",
+          "typical_vfx_usage": [
+            "mask safety",
+            "overbright control",
+            "remap safety bounds",
+            "stabilizing procedural outputs"
+          ],
+          "agent_rule": "Use Clamp when graph safety matters more than minimal instruction count."
+        },
+        {
+          "node": "Saturate",
+          "primary_role": "Clamp to the 0-1 range efficiently.",
+          "typical_vfx_usage": [
+            "mask cleanup",
+            "alpha normalization",
+            "cheap range safety for blend factors"
+          ],
+          "agent_rule": "Prefer Saturate over Clamp when the intended range is exactly 0 to 1."
+        },
+        {
+          "node": "Max and Min",
+          "primary_role": "Keep the larger or smaller of two values.",
+          "typical_vfx_usage": [
+            "dominant mask combine",
+            "cheaper layered thresholds",
+            "soft or hard clipping behavior"
+          ],
+          "agent_rule": "Use Max and Min to combine control lanes without branching."
+        },
+        {
+          "node": "Lerp",
+          "primary_role": "Blend between A and B using an alpha value.",
+          "typical_vfx_usage": [
+            "texture blending",
+            "color transitions",
+            "dissolve transitions",
+            "feature toggles driven by masks"
+          ],
+          "agent_rule": "Treat Lerp as one of the core composition nodes in VFX graph design."
+        },
+        {
+          "node": "Step and SmoothStep",
+          "primary_role": "Create hard or soft thresholds.",
+          "typical_vfx_usage": [
+            "dissolve edges",
+            "ring extraction",
+            "procedural cutoff masks",
+            "anti-aliased mask transitions"
+          ],
+          "agent_rule": "Use Step when the edge should be hard. Use SmoothStep when a procedural mask needs controlled softness."
+        },
+        {
+          "node": "If",
+          "primary_role": "Perform explicit branch-style conditional evaluation.",
+          "typical_vfx_usage": [
+            "special-case conditional outputs",
+            "branch-style selection logic",
+            "rare custom threshold logic"
+          ],
+          "agent_rule": "Use If sparingly. In production VFX, math-based blends are often preferred over explicit branching for predictability and shader friendliness."
+        }
+      ]
+    },
+    {
+      "category": "trigonometry_and_periodic_motion",
+      "display_name": "Trigonometry",
+      "why_it_matters": "These nodes create cyclic motion, oscillation, angular math, and rotation-aware effects.",
+      "most_important_nodes": [
+        {
+          "node": "Sine and Cosine",
+          "primary_role": "Generate periodic oscillation over time.",
+          "typical_vfx_usage": [
+            "pulse",
+            "blink",
+            "breathing emissive",
+            "cyclic distortion"
+          ],
+          "agent_rule": "Use Sine or Cosine when rhythm matters and the motion should repeat continuously."
+        },
+        {
+          "node": "Tangent",
+          "primary_role": "Produce a tangent response curve for sharper periodic behavior.",
+          "typical_vfx_usage": [
+            "stylized wave distortions",
+            "aggressive oscillation shaping"
+          ],
+          "agent_rule": "Use Tangent cautiously because it can spike aggressively compared to Sine or Cosine."
+        },
+        {
+          "node": "Arctangent, Arcsine, Arccosine",
+          "primary_role": "Convert values into inverse trigonometric outputs.",
+          "typical_vfx_usage": [
+            "angle reconstruction",
+            "custom radial math",
+            "polar conversion helpers"
+          ],
+          "agent_rule": "Inverse trig is a specialist tool. Use it when the graph truly needs angular reconstruction or normalized directional analysis."
+        },
+        {
+          "node": "Atan2",
+          "primary_role": "Compute an angle from a 2D directional vector with proper quadrant handling.",
+          "typical_vfx_usage": [
+            "radial rotation from position",
+            "direction-based flipbook logic",
+            "custom swirl and angular masks"
+          ],
+          "agent_rule": "Atan2 is usually the best choice when a graph needs stable angle output from XY coordinates."
+        }
+      ]
+    },
+    {
+      "category": "vector_math_and_space",
+      "display_name": "Vector Math",
+      "why_it_matters": "This is where material work shifts from simple scalar shaping into real directional and space-aware logic.",
+      "most_important_nodes": [
+        {
+          "node": "Dot Product",
+          "primary_role": "Measure directional similarity between two vectors.",
+          "typical_vfx_usage": [
+            "Fresnel-like logic",
+            "light alignment tests",
+            "directional fades",
+            "view-based shell masks"
+          ],
+          "agent_rule": "Dot Product is a foundational directional test and should be second nature in VFX graph work."
+        },
+        {
+          "node": "Cross Product",
+          "primary_role": "Generate a perpendicular vector from two inputs.",
+          "typical_vfx_usage": [
+            "tangent frame helpers",
+            "normal generation logic",
+            "directional orthogonal vectors"
+          ],
+          "agent_rule": "Cross Product matters when the graph needs a real perpendicular direction rather than just a scalar similarity test."
+        },
+        {
+          "node": "Normalize",
+          "primary_role": "Convert a vector to unit length while preserving direction.",
+          "typical_vfx_usage": [
+            "safe direction vectors",
+            "reflection or transform prep",
+            "distance-direction decoupling"
+          ],
+          "agent_rule": "Normalize when only direction matters and vector magnitude should not affect the downstream logic."
+        },
+        {
+          "node": "VectorLength and Distance",
+          "primary_role": "Compute vector magnitude or separation between two positions.",
+          "typical_vfx_usage": [
+            "radial masks",
+            "distance fields",
+            "aura widths",
+            "SDF-like procedural effects"
+          ],
+          "agent_rule": "Distance and Length are core procedural tools for radial and proximity-based effects."
+        },
+        {
+          "node": "ReflectionVector",
+          "primary_role": "Compute the reflected view vector.",
+          "typical_vfx_usage": [
+            "water-like reflection behavior",
+            "view-reactive distortion",
+            "stylized reflective shell effects"
+          ],
+          "agent_rule": "Use ReflectionVector when the effect read depends on reflected viewing direction, not just surface angle."
+        },
+        {
+          "node": "Transform and TransformPosition",
+          "primary_role": "Move vectors or positions between tangent, local, world, view, camera, or instance spaces.",
+          "typical_vfx_usage": [
+            "VAT workflows",
+            "local-to-world deformation logic",
+            "camera-relative effects",
+            "space-stable procedural mapping"
+          ],
+          "agent_rule": "When the effect breaks because of coordinate space confusion, Transform or TransformPosition is often the missing correction."
+        }
+      ]
+    },
+    {
+      "category": "component_manipulation",
+      "display_name": "Component Utilities",
+      "why_it_matters": "Packed data workflows depend on extracting, reassembling, and routing channels cleanly.",
+      "most_important_nodes": [
+        {
+          "node": "ComponentMask",
+          "primary_role": "Extract chosen channels from a vector or packed texture.",
+          "typical_vfx_usage": [
+            "packed mask readback",
+            "motion vector extraction",
+            "alpha-only or RG-only sampling"
+          ],
+          "agent_rule": "Use ComponentMask aggressively in packed-texture workflows, but keep channel meaning documented."
+        },
+        {
+          "node": "AppendVector",
+          "primary_role": "Combine smaller values into a larger vector.",
+          "typical_vfx_usage": [
+            "build UV vectors",
+            "recombine packed values",
+            "assemble procedural coordinates"
+          ],
+          "agent_rule": "AppendVector is usually the lowest-friction way to construct UVs or vector parameters from scalar lanes."
+        },
+        {
+          "node": "BreakOutFloat2/3/4 and MakeFloat2/3/4",
+          "primary_role": "Split or assemble vector components through reusable material functions.",
+          "typical_vfx_usage": [
+            "clean graph readability",
+            "channel unpacking",
+            "explicit vector rebuilds"
+          ],
+          "agent_rule": "These are helpful readability functions when a graph becomes too dense with masks and append chains."
+        }
+      ]
+    },
+    {
+      "category": "math_material_functions",
+      "display_name": "Math Material Functions",
+      "why_it_matters": "Engine material functions provide reusable math blocks with clearer artist intent than rebuilding the same subgraph repeatedly.",
+      "most_important_functions": [
+        {
+          "function": "CheapContrast",
+          "primary_role": "Quickly increase or decrease contrast on a mask.",
+          "agent_rule": "Use CheapContrast when the graph only needs a fast contrast push rather than a custom power-shaped response."
+        },
+        {
+          "function": "RemapValueRange",
+          "primary_role": "Map a value from one numeric interval into another.",
+          "agent_rule": "Use RemapValueRange when the graph needs readable artist-facing remap logic instead of nested subtract/divide/multiply chains."
+        },
+        {
+          "function": "InverseLinearInterpolate or InverseLerp",
+          "primary_role": "Convert a value into alpha based on its position between a start and end range.",
+          "agent_rule": "This is a strong helper for procedural gradients, distance ramps, and threshold pre-processing."
+        },
+        {
+          "function": "VectorToRadialValue",
+          "primary_role": "Convert UVs to polar-like radial coordinates.",
+          "agent_rule": "Use this for radial masks, shockwaves, circles, and angle-based flow rather than rebuilding the full polar conversion every time."
+        }
+      ]
+    }
+  ],
+
+  "agent_guardrails": [
+    "Prefer Saturate over Clamp when the intended output range is exactly 0 to 1.",
+    "Avoid explicit If branching unless the material logic truly requires it and a math blend cannot express the same result cleanly.",
+    "Use Floor and Frac together for custom flipbook logic, but prefer ParticleSubUV when the stock workflow already covers the need.",
+    "When a procedural graph becomes hard to read, consider a Material Function before escalating to a Custom HLSL node.",
+    "Coordinate-space bugs often look like UV bugs; verify whether Transform or TransformPosition is the missing step before changing the texture logic."
+  ],
+
+  "cross_reference_playbook": {
+    "foundational_nodes": "Pair with Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json for the simpler node families.",
+    "advanced_environment_work": "Pair with Knowledge/Materials/Techniques/vfx_artist_advanced_node_taxonomy.json for depth-aware, world-aware, and optimization-heavy shader authoring.",
+    "flipbook_work": "Pair with Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json when Floor, Frac, and atlas logic are being used around flipbook materials.",
+    "uv_motion": "Pair with Knowledge/Materials/Techniques/panning_uv.json when the material also depends on scrolling UV flow.",
+    "radial_effects": "Pair with Knowledge/Materials/Techniques/portal_ring.json when VectorToRadialValue and threshold math are central to the effect."
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "_description": "Complete recipe for magic/ability effects. Covers projectile, cast, aura, AOE, beam, and summon variants.",
+
+  "base_architecture": {
+    "system_name_convention": "NS_Magic_{Element}_{Type}",
+    "design_philosophy": "Magic effects are NOT physically accurate. They follow artistic rules, not physics. Color, shape, and timing convey the FEELING of the spell."
+  },
+
+  "element_palettes": {
+    "_note": "Reference Principles/color_palettes.json for full color values",
+    "fire": "orange-yellow core, red outer, warm tones",
+    "ice": "white-blue core, cyan outer, cool tones, crystalline shapes",
+    "lightning": "white-blue core, electric blue branches, purple accents",
+    "holy": "golden-white core, warm gold rays, soft divine glow",
+    "dark": "deep purple core, black tendrils, green accents",
+    "nature": "green-gold core, leaf shapes, organic movement",
+    "water": "blue-teal core, fluid shapes, bubble accents",
+    "arcane": "purple-pink core, geometric patterns, runes"
+  },
+
+  "effect_types": {
+    "projectile": {
+      "description": "Moving spell projectile (fireball, ice shard, energy bolt)",
+      "emitter_layers": [
+        {
+          "name": "Core_Glow",
+          "purpose": "Bright center of projectile",
+          "renderer": "sprite",
+          "material_type": "Additive, radial gradient, strong emissive",
+          "spawn": "1-3 persistent particles attached to system",
+          "size": "10-30 cm radius",
+          "color": "element core color, emissive 15-50",
+          "notes": "Moves with projectile. Slight pulse (sine wave on size/intensity)."
+        },
+        {
+          "name": "Outer_Aura",
+          "purpose": "Soft glow around core",
+          "renderer": "sprite",
+          "material_type": "Additive, very soft gradient, low opacity",
+          "spawn": "1-2 persistent particles",
+          "size": "2-3x core size",
+          "color": "element mid color, emissive 5-15, opacity 0.2-0.5"
+        },
+        {
+          "name": "Trail_Particles",
+          "purpose": "Small particles left behind as projectile moves",
+          "renderer": "sprite",
+          "spawn_rate": "20-50/sec",
+          "particle_lifetime": "0.2-0.5s",
+          "inherit_velocity": "0.0-0.2 (particles mostly stay where spawned)",
+          "size": "3-10 cm, shrink over life",
+          "opacity_over_life": "1→0 fade",
+          "notes": "Creates visible trail showing projectile path"
+        },
+        {
+          "name": "Trail_Ribbon",
+          "purpose": "Smooth continuous trail",
+          "renderer": "ribbon",
+          "material_type": "Additive, panning UV along ribbon (pan direction opposite to travel)",
+          "ribbon_width": "10-30 cm, taper to 0 at tail",
+          "ribbon_lifetime": "0.3-0.8s",
+          "color": "element color, opacity fades along length"
+        },
+        {
+          "name": "Distortion",
+          "purpose": "Heat/energy distortion around projectile",
+          "renderer": "sprite",
+          "material_type": "Refraction material",
+          "size": "1.5-2x core",
+          "opacity": "very subtle, 0.02-0.05 refraction",
+          "notes": "Optional but adds AAA quality"
+        }
+      ]
+    },
+
+    "cast_charge": {
+      "description": "Spell charging at character's hand/staff before release",
+      "emitter_layers": [
+        {
+          "name": "Gathering_Particles",
+          "purpose": "Particles flowing TOWARD the cast point (inward)",
+          "renderer": "sprite or ribbon",
+          "spawn_rate": "10-30/sec, increasing over charge time",
+          "velocity": "Point Attraction Force toward cast point",
+          "initial_position": "Sphere Location radius 50-150 cm",
+          "size": "2-8 cm, shrink as they approach center",
+          "notes": "Key visual: particles converge inward. Sells 'charging up'."
+        },
+        {
+          "name": "Core_Buildup",
+          "purpose": "Growing glow at cast point",
+          "renderer": "sprite",
+          "size_over_life": "start small (5 cm), grow to 20-40 cm over charge duration",
+          "emissive": "increase from 5→30 over charge time",
+          "notes": "Intensity ramps up as charge completes"
+        },
+        {
+          "name": "Ground_Circle",
+          "purpose": "Magic circle/rune on ground below caster",
+          "renderer": "sprite (ground-oriented) or Decal",
+          "material_type": "Additive, rune texture, rotation animation",
+          "size": "100-300 cm",
+          "rotation": "slow spin 20-60 deg/s",
+          "opacity": "fade in over charge time",
+          "notes": "Optional but iconic for magic effects"
+        }
+      ],
+      "timing": {
+        "charge_duration": "0.3-1.5s depending on spell power",
+        "intensity_curve": "slow start, accelerate, peak at release",
+        "release_moment": "burst of particles outward + flash at cast point"
+      }
+    },
+
+    "aura_buff": {
+      "description": "Persistent effect around character (buff, power-up, shield)",
+      "emitter_layers": [
+        {
+          "name": "Aura_Glow",
+          "purpose": "Fresnel-like glow on character mesh",
+          "approach": "Apply fresnel material to character mesh (overlay), OR spawn large soft sprites around character",
+          "color": "element color, emissive 5-15",
+          "animation": "subtle pulse (sine wave, 0.5-2 Hz)"
+        },
+        {
+          "name": "Orbiting_Particles",
+          "purpose": "Particles circling around character",
+          "renderer": "sprite",
+          "spawn_rate": "5-15/sec",
+          "particle_lifetime": "1.0-3.0s",
+          "velocity": "Vortex Velocity around character center",
+          "radius": "60-120 cm from character center",
+          "size": "3-10 cm",
+          "notes": "Rotate Around Point module for orbit"
+        },
+        {
+          "name": "Rising_Particles",
+          "purpose": "Particles drifting upward from character base",
+          "renderer": "sprite",
+          "spawn_rate": "3-8/sec",
+          "spawn_location": "Cylinder at character feet, radius = character width",
+          "velocity": "upward 30-80 cm/s",
+          "particle_lifetime": "1.0-2.0s",
+          "opacity_over_life": "fade in, hold, fade out",
+          "size": "2-6 cm"
+        }
+      ]
+    },
+
+    "aoe_ground": {
+      "description": "Area of effect spell on ground (healing circle, damage zone, trap)",
+      "emitter_layers": [
+        {
+          "name": "Ground_Ring",
+          "purpose": "Visible boundary ring/circle",
+          "renderer": "sprite (ground-oriented) or mesh ring",
+          "material_type": "Additive, ring texture with panning UV for energy flow",
+          "size": "match AOE radius (200-500 cm)",
+          "rotation": "slow spin",
+          "color": "element color, emissive 5-15"
+        },
+        {
+          "name": "Interior_Pattern",
+          "purpose": "Rune/symbol/pattern filling the circle",
+          "renderer": "sprite or decal",
+          "material_type": "magic circle texture, additive",
+          "rotation": "counter-rotate vs ring for complexity"
+        },
+        {
+          "name": "Vertical_Particles",
+          "purpose": "Particles rising from within the circle area",
+          "renderer": "sprite",
+          "spawn_location": "Cylinder matching AOE radius, flat",
+          "velocity": "upward 50-150 cm/s",
+          "spawn_rate": "10-30/sec (proportional to area)"
+        },
+        {
+          "name": "Edge_Energy",
+          "purpose": "Particles flowing along circle edge",
+          "renderer": "sprite or ribbon",
+          "spawn_location": "Torus at circle edge",
+          "velocity": "tangential (around circle edge)",
+          "notes": "Reinforces the boundary visually"
+        }
+      ]
+    },
+
+    "beam": {
+      "description": "Sustained beam between two points (laser, healing beam, link)",
+      "emitter_layers": [
+        {
+          "name": "Beam_Core",
+          "purpose": "Main visible beam line",
+          "renderer": "ribbon or beam (Spawn Beam module)",
+          "material_type": "Additive, panning UV along beam length",
+          "width": "5-20 cm (core)",
+          "color": "element core color, emissive 15-40",
+          "pan_speed": "fast, opposite to beam direction"
+        },
+        {
+          "name": "Beam_Glow",
+          "purpose": "Soft outer glow around beam",
+          "renderer": "ribbon",
+          "width": "3-5x core width",
+          "color": "element mid color, emissive 3-8, low opacity",
+          "material_type": "Additive, soft gradient"
+        },
+        {
+          "name": "Beam_Sparks",
+          "purpose": "Small particles along beam length",
+          "renderer": "sprite",
+          "spawn_location": "along beam line (use beam position data)",
+          "spawn_rate": "10-30/sec",
+          "velocity": "small random, mostly perpendicular to beam",
+          "size": "1-5 cm"
+        },
+        {
+          "name": "Impact_Point",
+          "purpose": "Bright glow + particles where beam hits target",
+          "notes": "Similar to Impact Flash + element-colored sparks"
+        }
+      ]
+    }
+  },
+
+  "key_principles": {
+    "element_consistency": "ALL layers of a magic effect must use the same element color palette. Never mix fire orange with ice blue in the same spell.",
+    "anticipation_is_critical": "Magic effects NEED anticipation (charge-up) before the main action. Instant magic looks cheap.",
+    "glow_and_emissive": "Magic effects rely heavily on emissive bloom. Without it they look flat and non-magical.",
+    "non_physical_motion": "Magic particles can defy gravity, orbit, converge, pulse. Use Point Attraction, Vortex, Curl Noise freely.",
+    "layering": "Minimum 3 layers for any magic effect: core glow + particles + trail/aura. More layers = more polished.",
+    "sound_sync": "Timing of VFX should sync with audio cues. Charge builds with rising audio, release with impact sound."
+  }
+}

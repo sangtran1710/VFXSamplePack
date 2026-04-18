@@ -1,0 +1,346 @@
+{
+  "_description": "Material library recipe extracted from /Game/VFX/EnergyBeam/_GenericSource/Material. Use this when the agent needs to learn how a reusable VFX material library is structured for sprites, beams, ribbons, plasma, cylindrical volumes, decals, and distortion.",
+
+  "overview": "This library is not one hero material. It is a modular generic-source pack. The dominant logic is: keep base sprite materials simple, build beam/ribbon materials around directional flow, build cylindrical/twist materials around local-space volume deformation, and keep decals/distortion as separate utility families rather than mixing all logic into one graph.",
+
+  "source_folder": "/Game/VFX/EnergyBeam/_GenericSource/Material",
+
+  "library_design_rules": [
+    "Use a small set of reusable base materials and create variants for additive, anti-aliased, panning, flipbook, ribbon, cylindrical twist, decal, and distortion use cases.",
+    "Do not put sprite, ribbon, volume shell, and decal logic into one giant benchmark graph.",
+    "Let Niagara drive timing, per-particle color, and motion. Let the material handle shape, flow, edge treatment, and view-dependent polish.",
+    "Prefer unlit translucent or additive for most energy reads; only use default-lit or opaque when the material is intentionally surface-bound or PBR-integrated.",
+    "Treat this folder as a source library to pick from, adapt, or instance, not as a single effect recipe."
+  ],
+
+  "material_families": {
+    "sprite_base": {
+      "purpose": "Generic sprite particles for sparks, embers, motes, glows, and soft accents.",
+      "materials": [
+        "M_Vfx_Basic",
+        "M_Vfx_BasicAdd",
+        "M_Vfx_Basic_AA",
+        "M_Vfx_Basic_Pan",
+        "M_Vfx_Color",
+        "M_Vfx_MathCircleDot",
+        "M_Vfx_ParticleSubUV",
+        "M_Vfx_ParticleSubUVAA",
+        "M_Vfx_FlipBook",
+        "M_Vfx_Fire_Stamp_flame66"
+      ],
+      "dominant_logic": [
+        "ParticleColor-driven tinting",
+        "simple mask texture or radial math shape",
+        "optional UV utility and alpha-channel switching",
+        "optional depth fade or lightweight edge shaping",
+        "SubUV or flipbook support when animated sprite sheets are needed"
+      ],
+      "use_when": [
+        "embers",
+        "sparks",
+        "magic particles",
+        "sprite fallout",
+        "small glows",
+        "flipbook fire accents"
+      ],
+      "selection_rules": [
+        "Use M_Vfx_Basic as the default translucent sprite base.",
+        "Use M_Vfx_BasicAdd when you want hotter additive bloom and can tolerate reduced shape retention.",
+        "Use M_Vfx_Basic_AA when edge cleanliness matters more than raw intensity.",
+        "Use M_Vfx_Basic_Pan when a sprite needs scrolling internal energy instead of a static blob.",
+        "Use M_Vfx_ParticleSubUV or M_Vfx_FlipBook when motion is stored in a sheet rather than Niagara shape logic.",
+        "Use M_Vfx_MathCircleDot or M_Vfx_Color when you need an ultra-cheap procedural dot/glow."
+      ]
+    },
+
+    "beam_and_ribbon": {
+      "purpose": "Directional beam bodies, streaks, arc lines, and ribbon-based energy rays.",
+      "materials": [
+        "M_Vfx_RibbonRay",
+        "M_Vfx_RibbonBeamRay",
+        "M_Vfx_BeamLightning",
+        "M_Vfx_Launch",
+        "M_Vfx_PowerEssence",
+        "M_Vfx_HdrEdge"
+      ],
+      "dominant_logic": [
+        "directional panning along beam or ribbon length",
+        "contained emissive core with controlled opacity",
+        "edge support or HDR shaping for hot streak readability",
+        "radial gradient support for beam centers or launch glows"
+      ],
+      "use_when": [
+        "beam core",
+        "ribbon ray",
+        "launch streak",
+        "electric ray",
+        "energy travel line",
+        "magic ribbon accent"
+      ],
+      "selection_rules": [
+        "Use M_Vfx_RibbonRay for the simpler ribbon streak case.",
+        "Use M_Vfx_RibbonBeamRay when the beam needs more hierarchy than a plain ribbon streak.",
+        "Use M_Vfx_BeamLightning only for very minimal lightning reads or prototyping; it is too simple for hero beams by itself.",
+        "Use M_Vfx_Launch and M_Vfx_PowerEssence as support materials for charge/release moments, not as full beam-body replacements.",
+        "Use M_Vfx_HdrEdge when a beam or pulse needs hotter edge energy and richer internal flow."
+      ]
+    },
+
+    "volume_and_twist": {
+      "purpose": "Local-space cylindrical or plasma volume reads for vortexes, rotating cores, energy columns, and twisting shell-like volumes.",
+      "materials": [
+        "M_Vfx_Plasma",
+        "M_Vfx_CylTwist",
+        "M_Vfx_CylTwistCore",
+        "M_Vfx_CylTwistCore_water",
+        "M_Vfx_CylTwist_waterTornado"
+      ],
+      "dominant_logic": [
+        "local-space or volume-oriented mapping",
+        "cylindrical twist or internal spin",
+        "WorldPositionOffset support for silhouette motion",
+        "opacity and emissive working together to suggest a contained moving volume"
+      ],
+      "use_when": [
+        "plasma body",
+        "twisting energy core",
+        "cylindrical vortex",
+        "vertical energy column",
+        "water tornado style volume"
+      ],
+      "selection_rules": [
+        "Use M_Vfx_Plasma for a relatively light plasma-shell or plasma-core read.",
+        "Use M_Vfx_CylTwistCore when the effect needs a readable inner energetic column rather than a flat sprite.",
+        "Use M_Vfx_CylTwist when silhouette masking and lit/surface interaction matter more than a pure emissive core.",
+        "Use the water variants only when the read should stay fluid rather than electrical or arcane."
+      ]
+    },
+
+    "decal_family": {
+      "purpose": "Surface-bound marks, spell circles, and impact/decal overlays.",
+      "materials": [
+        "M_Vfx_DecalSpellAdd",
+        "M_Vfx_DecalMark",
+        "M_Vfx_DecalMark_PBR"
+      ],
+      "dominant_logic": [
+        "projection or surface-bound alignment",
+        "decal layering separated from particle materials",
+        "optionally lit/PBR-aware response for grounded marks"
+      ],
+      "use_when": [
+        "spell mark",
+        "ground rune",
+        "impact decal",
+        "surface scorch mark",
+        "projected magic symbol"
+      ],
+      "selection_rules": [
+        "Use M_Vfx_DecalSpellAdd when emissive additive projection is the main read.",
+        "Use M_Vfx_DecalMark when a lit translucent mark should sit on geometry with stronger surface integration.",
+        "Use M_Vfx_DecalMark_PBR when the decal must respect more grounded PBR context."
+      ]
+    },
+
+    "distortion_utility": {
+      "purpose": "Heat/energy refraction and normal-driven screen-space breakup.",
+      "materials": [
+        "M_Vfx_DistortionNormalPan"
+      ],
+      "dominant_logic": [
+        "panning normal-based distortion",
+        "very light opacity support",
+        "utility role rather than primary emissive look"
+      ],
+      "use_when": [
+        "heat haze",
+        "energy distortion",
+        "impact refraction",
+        "support shimmer"
+      ],
+      "selection_rules": [
+        "Keep distortion as a separate support layer.",
+        "Do not ask distortion to also carry the hero color or shape read."
+      ]
+    },
+
+    "surface_lit_utility": {
+      "purpose": "Very simple wall or surface utility materials that sit closer to environment/surface reads than VFX particle reads.",
+      "materials": [
+        "M_Vfx_Basic_Wall"
+      ],
+      "dominant_logic": [
+        "simple lit surface color/emissive support",
+        "not intended as a particle default"
+      ],
+      "use_when": [
+        "surface-mounted VFX accents",
+        "test walls",
+        "simple lit benchmarks"
+      ],
+      "selection_rules": [
+        "Do not pick this as the default for sparks, embers, or beams."
+      ]
+    }
+  },
+
+  "reusable_logic_patterns": {
+    "simple_sprite_base": {
+      "logic": [
+        "ParticleColor or tint input",
+        "single mask texture or radial shape",
+        "Opacity and EmissiveColor as primary pins",
+        "optional alpha interpretation or edge shaping"
+      ],
+      "best_examples": [
+        "M_Vfx_Basic",
+        "M_Vfx_BasicAdd",
+        "M_Vfx_MathCircleDot"
+      ]
+    },
+    "subuv_or_flipbook_sprite": {
+      "logic": [
+        "flipbook or subUV texture sheet lookup",
+        "cheap contrast or alpha shaping",
+        "Niagara-driven frame animation / renderer subUV support"
+      ],
+      "best_examples": [
+        "M_Vfx_ParticleSubUV",
+        "M_Vfx_ParticleSubUVAA",
+        "M_Vfx_FlipBook"
+      ]
+    },
+    "directional_flow_beam": {
+      "logic": [
+        "panning along beam or ribbon UV",
+        "controlled emissive core",
+        "opacity shaping to avoid full-screen flood"
+      ],
+      "best_examples": [
+        "M_Vfx_RibbonRay",
+        "M_Vfx_RibbonBeamRay",
+        "M_Vfx_Launch"
+      ]
+    },
+    "hdr_edge_energy": {
+      "logic": [
+        "hot edge shaping",
+        "internal flow or chaos motion",
+        "hue or HDR manipulation for stronger energy accents"
+      ],
+      "best_examples": [
+        "M_Vfx_HdrEdge",
+        "M_Vfx_PowerEssence"
+      ]
+    },
+    "local_space_twist_volume": {
+      "logic": [
+        "local-space mapping",
+        "twist or cylindrical flow",
+        "WPO-assisted volume motion",
+        "masked or translucent volume containment"
+      ],
+      "best_examples": [
+        "M_Vfx_CylTwist",
+        "M_Vfx_CylTwistCore",
+        "M_Vfx_CylTwist_waterTornado"
+      ]
+    },
+    "projection_or_mark": {
+      "logic": [
+        "decal or surface projection",
+        "separate from particle sprite logic",
+        "surface grounding or emissive overlay depending on variant"
+      ],
+      "best_examples": [
+        "M_Vfx_DecalSpellAdd",
+        "M_Vfx_DecalMark"
+      ]
+    }
+  },
+
+  "selection_playbook": {
+    "if_the_effect_needs": [
+      {
+        "need": "generic ember, spark, or magic mote",
+        "pick_family": "sprite_base",
+        "recommended_materials": [
+          "M_Vfx_Basic",
+          "M_Vfx_BasicAdd",
+          "M_Vfx_Basic_AA"
+        ]
+      },
+      {
+        "need": "internal sprite motion without flipbook",
+        "pick_family": "sprite_base",
+        "recommended_materials": [
+          "M_Vfx_Basic_Pan"
+        ]
+      },
+      {
+        "need": "animated particle sheet",
+        "pick_family": "sprite_base",
+        "recommended_materials": [
+          "M_Vfx_ParticleSubUV",
+          "M_Vfx_ParticleSubUVAA",
+          "M_Vfx_FlipBook"
+        ]
+      },
+      {
+        "need": "beam or ribbon streak",
+        "pick_family": "beam_and_ribbon",
+        "recommended_materials": [
+          "M_Vfx_RibbonRay",
+          "M_Vfx_RibbonBeamRay"
+        ]
+      },
+      {
+        "need": "plasma body or cylindrical core",
+        "pick_family": "volume_and_twist",
+        "recommended_materials": [
+          "M_Vfx_Plasma",
+          "M_Vfx_CylTwistCore"
+        ]
+      },
+      {
+        "need": "ground mark or spell decal",
+        "pick_family": "decal_family",
+        "recommended_materials": [
+          "M_Vfx_DecalSpellAdd",
+          "M_Vfx_DecalMark"
+        ]
+      },
+      {
+        "need": "distortion support",
+        "pick_family": "distortion_utility",
+        "recommended_materials": [
+          "M_Vfx_DistortionNormalPan"
+        ]
+      }
+    ]
+  },
+
+  "authoring_guidance_for_forgepilot": [
+    "When a prompt matches sparks, embers, or small magic particles, start from the sprite_base family before authoring a new graph from scratch.",
+    "When a prompt matches beams, rays, or ribbon energy, prefer the beam_and_ribbon family over adapting a sprite material.",
+    "When a prompt needs twisting local-space volume, prefer the volume_and_twist family instead of forcing the look through layered sprites alone.",
+    "Keep distortion separate from the hero color/shading material.",
+    "If the target effect mixes multiple families, split them into separate material assignments per emitter or renderer role."
+  ],
+
+  "common_failure_modes": [
+    "trying to use a base sprite material for a beam body that really needs directional flow",
+    "trying to use a ribbon or cylindrical twist material for generic sparks or embers",
+    "putting distortion into the main hero material instead of a support layer",
+    "treating this generic-source folder as one single benchmark graph instead of a modular toolkit",
+    "collapsing sprite, beam, volume, and decal semantics into one catch-all material"
+  ],
+
+  "agent_recipe": {
+    "step_1": "Classify the requested look into one primary family: sprite_base, beam_and_ribbon, volume_and_twist, decal_family, distortion_utility, or surface_lit_utility.",
+    "step_2": "Choose the closest source material from the family before proposing graph edits.",
+    "step_3": "Only add complexity that matches the family logic already present in the library.",
+    "step_4": "If one effect needs multiple visual roles, assign different materials per emitter/layer instead of forcing one graph to do everything.",
+    "step_5": "Expose artist-facing parameters for color, emissive, flow speed, contrast, and edge control, but keep the base graph readable."
+  }
+}

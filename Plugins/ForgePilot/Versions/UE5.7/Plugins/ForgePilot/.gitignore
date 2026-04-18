@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+Output/
+Saved/
+Intermediate/
+Tools/**/__pycache__/
+Tools/**/*.pyc
+*.log
+*.tmp
+*.bak
+*.old
+/.tmp_*.json
+/tmp_*.json

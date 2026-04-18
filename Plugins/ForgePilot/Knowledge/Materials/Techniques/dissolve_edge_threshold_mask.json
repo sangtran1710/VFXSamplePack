@@ -1,0 +1,118 @@
+{
+  "_description": "Material-function technique extracted from /Game/VFX/NiagaraDissolveEdge/Materials/MaterialFunction/MF_DissolveEdge. Use this as a reusable threshold-mask block for dissolve edges, erosion cutoffs, binary reveal bands, and Niagara/material sync masks.",
+
+  "overview": "This function is intentionally simple. It takes a scalar texture or noise input, clamps it to a safe 0-1 range, compares it against a scalar threshold amount, and returns a binary mask. Its value is not visual richness by itself. Its value is being a clean reusable decision block inside larger dissolve or edge-authoring graphs.",
+
+  "function_identity": {
+    "asset_path": "/Game/VFX/NiagaraDissolveEdge/Materials/MaterialFunction/MF_DissolveEdge.MF_DissolveEdge",
+    "input_count": 2,
+    "output_count": 1,
+    "node_count": 9,
+    "maintainability_score": 99
+  },
+
+  "inputs": [
+    {
+      "name": "Texture",
+      "type": "scalar",
+      "role": "The grayscale source field to threshold. Usually a noise sample, dissolve texture channel, or other scalar mask."
+    },
+    {
+      "name": "Amount",
+      "type": "scalar",
+      "role": "The threshold or dissolve amount. Higher values reveal/keep less of the source depending on how the caller interprets the returned mask."
+    }
+  ],
+
+  "outputs": [
+    {
+      "name": "Mask",
+      "type": "scalar",
+      "role": "A clean binary 0/1 mask derived from the threshold comparison."
+    }
+  ],
+
+  "internal_logic": [
+    "Clamp the incoming scalar texture/mask to the 0-1 range.",
+    "Compare the clamped value against the Amount input using an If node.",
+    "If A > B output 0.",
+    "If A == B output 1.",
+    "If A < B output 1.",
+    "Return the result as the dissolve/reveal mask."
+  ],
+
+  "practical_meaning": {
+    "behavior": "The function returns 1 when the source value is less than or equal to the threshold, and 0 when the source value is above the threshold.",
+    "artist_read": "Think of this as a hard cutoff: everything under the threshold survives, everything over the threshold is removed.",
+    "visual_role": "This is the hard binary stage in a dissolve graph. Edge glow, softness, emissive border, and secondary breakup must be layered outside this function."
+  },
+
+  "best_use_cases": [
+    "basic dissolve cutoff from a grayscale noise texture",
+    "erosion threshold mask before edge-emissive extraction",
+    "binary reveal mask for portal or summoning transitions",
+    "material-side mask that should stay in sync with a Niagara threshold parameter",
+    "simple kill/reveal logic before adding a soft edge band"
+  ],
+
+  "not_for": [
+    "soft smoke opacity by itself",
+    "final portal ring shaping by itself",
+    "full hero dissolve look without extra edge logic",
+    "continuous grayscale fade where a hard threshold is not desired"
+  ],
+
+  "composition_guidance": {
+    "use_before": [
+      "Subtracting a wider and narrower threshold result to isolate an edge band",
+      "Multiplying the mask into opacity or opacity mask",
+      "Driving emissive edge logic with a separate border calculation"
+    ],
+    "pair_with": [
+      "noise texture sampling",
+      "fresnel or radial gradient edge shaping",
+      "depth fade for soft intersection",
+      "a second offset threshold for edge-band extraction",
+      "Niagara user parameter or dynamic parameter for synchronized dissolve progress"
+    ],
+    "avoid": [
+      "using this function as the only dissolve logic in a hero graph",
+      "expecting this function to provide soft falloff by itself",
+      "burying its threshold amount so artists cannot tune it"
+    ]
+  },
+
+  "recommended_parameters_in_calling_material": [
+    "DissolveAmount",
+    "EdgeWidth",
+    "EdgeColor",
+    "EdgeEmissive",
+    "NoiseTexture",
+    "NoiseTiling",
+    "NoisePanSpeed"
+  ],
+
+  "agent_recipe": {
+    "step_1": "Sample or compute a scalar field that represents dissolve/noise intensity.",
+    "step_2": "Feed that scalar field into MF_DissolveEdge as the Texture input.",
+    "step_3": "Feed the reveal threshold or dissolve progress into the Amount input.",
+    "step_4": "Use the returned Mask as the hard binary cutoff for opacity or for further edge extraction logic.",
+    "step_5": "If an emissive edge is needed, generate a second threshold at a nearby amount and subtract the two masks to get a narrow border band.",
+    "step_6": "Expose the threshold-driving amount as an artist-facing or system-driven parameter."
+  },
+
+  "niagara_integration_notes": [
+    "This function is a good match for Niagara-driven dissolve because Niagara can drive the same Amount value used in the material.",
+    "Use the same normalized parameter naming on both sides when possible, such as DissolveAmount or TransformAlpha.",
+    "If particles should emit from the dissolve edge, derive a narrow edge band in the material and mirror the same threshold logic in Niagara spawn logic."
+  ],
+
+  "common_failure_modes": [
+    "Calling material has no secondary edge band, so the dissolve looks too binary and cheap.",
+    "Amount is not exposed, so the function is technically reusable but not artist-friendly.",
+    "The source texture is not normalized or clamped, causing unstable threshold behavior.",
+    "The team expects soft falloff from a function that is intentionally a hard cutoff."
+  ],
+
+  "key_takeaway": "MF_DissolveEdge is valuable because it is small, stable, and clear. ForgePilot should learn it as a threshold-mask building block, not mistake it for a complete dissolve look."
+}

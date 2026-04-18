@@ -1,0 +1,356 @@
+{
+  "default_family": "energy",
+  "foundational_supporting_techniques": [
+    "Knowledge/Materials/Reference/material_node_learning_strategy.json",
+    "Knowledge/Materials/Reference/material_function_usage_strategy.json",
+    "Knowledge/Materials/Reference/material_function_study_workflow.json",
+    "Knowledge/Materials/Reference/material_function_semantic_notes_current.json",
+    "Knowledge/Materials/Reference/material_function_study_index_current.json",
+    "Knowledge/Materials/Reference/material_node_catalog_current.json",
+    "Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json",
+    "Knowledge/Materials/Techniques/vfx_artist_advanced_node_taxonomy.json",
+    "Knowledge/Materials/Techniques/vfx_artist_material_math_taxonomy.json",
+    "Knowledge/Materials/Techniques/panning_uv.json",
+    "Knowledge/Materials/Techniques/fresnel.json",
+    "Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json"
+  ],
+  "material_families": [
+    {
+      "family": "energy",
+      "classification_keywords": [
+        "energy",
+        "magic",
+        "magical",
+        "arcane",
+        "plasma",
+        "plasma shell",
+        "plasma core",
+        "electric",
+        "electricity",
+        "beam",
+        "energy beam",
+        "beam ribbon",
+        "ribbon ray",
+        "energy ribbon",
+        "ray",
+        "aura",
+        "pulse",
+        "energy core",
+        "twist core",
+        "energy column",
+        "launch streak",
+        "sci-fi"
+      ],
+      "recommended_lane_order": [
+        "build_material_fresnel_lane",
+        "build_material_crack_mask_lane",
+        "build_material_shell_core_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_fresnel_lane",
+        "build_material_crack_mask_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "supporting_techniques": [
+        "Knowledge/Materials/Techniques/energy.json",
+        "Knowledge/Materials/Techniques/projectile_material.json",
+        "Knowledge/Materials/Techniques/forcefield.json",
+        "Knowledge/Materials/Techniques/energy_beam_generic_source_library.json",
+        "Knowledge/Materials/Techniques/niagara_dissolve_edge_material_library.json",
+        "Knowledge/Materials/Techniques/portal_ring.json"
+      ],
+      "subfamily_playbook": {
+        "sprite_particles": "Prefer sprite_base guidance from energy_beam_generic_source_library for sparks, embers, motes, and small magic particles.",
+        "beam_and_ribbon": "Prefer beam_and_ribbon guidance from energy_beam_generic_source_library for beams, rays, and ribbon streaks.",
+        "plasma_or_volume": "Prefer volume_and_twist guidance from energy_beam_generic_source_library for plasma bodies, twist cores, and cylindrical energy columns.",
+        "decal_spell": "Prefer decal_family guidance from energy_beam_generic_source_library for spell marks and projected runes.",
+        "distortion_support": "Prefer distortion_utility guidance from energy_beam_generic_source_library for heat/energy refraction layers.",
+        "portal_and_radial_edges": "Prefer radial_energy_edge guidance from niagara_dissolve_edge_material_library and portal_ring for portal rims, ring seals, summon circles, and radial energy gates.",
+        "arc_and_line_energy": "Prefer arc_and_lightning_line guidance from niagara_dissolve_edge_material_library for lightning strips, crackle lines, and unstable magical edge arcs."
+      },
+      "fallback_family": "hologram_forcefield"
+    },
+    {
+      "family": "ice_crystal",
+      "classification_keywords": [
+        "ice",
+        "icy",
+        "frozen",
+        "frost",
+        "crystal",
+        "glacier",
+        "snow"
+      ],
+      "recommended_lane_order": [
+        "build_material_shell_core_lane",
+        "build_material_crack_mask_lane",
+        "build_material_bump_offset_uv_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_shell_core_lane",
+        "build_material_crack_mask_lane",
+        "build_material_bump_offset_uv_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "fallback_family": "frosted_glass"
+    },
+    {
+      "family": "lava_crack",
+      "classification_keywords": [
+        "lava",
+        "magma",
+        "molten",
+        "ember",
+        "volcanic",
+        "igneous",
+        "fissure",
+        "crust",
+        "basalt",
+        "scoria"
+      ],
+      "recommended_lane_order": [
+        "build_material_crack_mask_lane",
+        "build_material_shell_core_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_crack_mask_lane",
+        "build_material_shell_core_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "fallback_family": "energy"
+    },
+    {
+      "family": "frosted_glass",
+      "classification_keywords": [
+        "glass",
+        "frosted",
+        "glassy",
+        "translucent",
+        "transparent",
+        "refraction",
+        "window"
+      ],
+      "recommended_lane_order": [
+        "build_material_depth_mask_lane",
+        "build_material_bump_offset_uv_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_depth_mask_lane",
+        "build_material_bump_offset_uv_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "fallback_family": "ice_crystal"
+    },
+    {
+      "family": "stylized_water_ribbon",
+      "classification_keywords": [
+        "water ribbon",
+        "liquid ribbon",
+        "stylized water",
+        "flowing ribbon",
+        "water trail",
+        "aqua ribbon",
+        "stream ribbon",
+        "flowing water"
+      ],
+      "recommended_lane_order": [
+        "build_material_depth_mask_lane",
+        "build_material_bump_offset_uv_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_depth_mask_lane",
+        "build_material_bump_offset_uv_lane",
+        "build_material_fresnel_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "fallback_family": "frosted_glass"
+    },
+    {
+      "family": "projectile_material",
+      "classification_keywords": [
+        "projectile material",
+        "energy projectile",
+        "magic projectile",
+        "energy bolt",
+        "projectile core",
+        "projectile shell",
+        "bright core projectile",
+        "arcane projectile"
+      ],
+      "recommended_lane_order": [
+        "build_material_shell_core_lane",
+        "build_material_fresnel_lane",
+        "build_material_bump_offset_uv_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_shell_core_lane",
+        "build_material_fresnel_lane",
+        "build_material_bump_offset_uv_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "fallback_family": "energy"
+    },
+    {
+      "family": "dissolve_erosion",
+      "classification_keywords": [
+        "dissolve",
+        "erosion",
+        "burn",
+        "erode",
+        "disintegrate",
+        "ash",
+        "vanish",
+        "fadeout",
+        "appearance dissolve",
+        "character dissolve",
+        "mesh dissolve",
+        "reveal mask",
+        "transform edge"
+      ],
+      "recommended_lane_order": [
+        "build_material_depth_mask_lane",
+        "build_material_crack_mask_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_depth_mask_lane",
+        "build_material_crack_mask_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "supporting_techniques": [
+        "Knowledge/Materials/Techniques/dissolve.json",
+        "Knowledge/Materials/Techniques/dissolve_erosion.json",
+        "Knowledge/Materials/Techniques/dissolve_edge_threshold_mask.json",
+        "Knowledge/Materials/Techniques/niagara_dissolve_edge_material_library.json"
+      ],
+      "subfamily_playbook": {
+        "threshold_mask_block": "Use dissolve_edge_threshold_mask when the material needs a reusable hard cutoff or edge-band source before adding emissive polish.",
+        "radial_portal_dissolve": "Use portal_ring or radial_energy_edge guidance when the dissolve should read as a circular gate, seal, or summon rim instead of a surface erosion.",
+        "character_mesh_erosion": "Use character_appearance_transform family when the dissolve belongs on a character body and needs Appearance-driven reveal semantics."
+      },
+      "fallback_family": "energy"
+    },
+    {
+      "family": "wet_organic",
+      "classification_keywords": [
+        "organic",
+        "flesh",
+        "wet",
+        "meat",
+        "skin",
+        "vein",
+        "bloody",
+        "viscera",
+        "slime"
+      ],
+      "recommended_lane_order": [
+        "build_material_shell_core_lane",
+        "build_material_crack_mask_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_shell_core_lane",
+        "build_material_crack_mask_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "supporting_techniques": [
+        "Knowledge/Materials/Techniques/wet_organic.json",
+        "Knowledge/Materials/Techniques/character_appearance_dissolve_library.json"
+      ],
+      "subfamily_playbook": {
+        "organic_transform": "If the request is a flesh, corruption, skin, or body transformation with staged reveal, inspect character_appearance_dissolve_library before inventing a new graph."
+      },
+      "fallback_family": "energy"
+    },
+    {
+      "family": "hologram_forcefield",
+      "classification_keywords": [
+        "hologram",
+        "shield",
+        "forcefield",
+        "barrier",
+        "scanline",
+        "projection",
+        "bubble shield",
+        "energy wall",
+        "energy shell",
+        "deflector"
+      ],
+      "recommended_lane_order": [
+        "build_material_fresnel_lane",
+        "build_material_depth_mask_lane",
+        "build_material_crack_mask_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_fresnel_lane",
+        "build_material_depth_mask_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "supporting_techniques": [
+        "Knowledge/Materials/Techniques/forcefield.json",
+        "Knowledge/Materials/Techniques/portal_ring.json",
+        "Knowledge/Materials/Techniques/niagara_dissolve_edge_material_library.json"
+      ],
+      "subfamily_playbook": {
+        "portal_gate": "Use portal_ring and radial_energy_edge guidance when the shell is circular, gate-like, or summon-oriented rather than a generic barrier.",
+        "lightning_shell_accents": "Use arc_and_lightning_line guidance when the forcefield needs crackling line accents rather than only fresnel shelling."
+      },
+      "fallback_family": "energy"
+    },
+    {
+      "family": "character_appearance_transform",
+      "classification_keywords": [
+        "character appearance",
+        "appearance dissolve",
+        "appearance transform",
+        "character transform",
+        "character transformation",
+        "character reveal",
+        "summon in",
+        "spawn in",
+        "materialized body",
+        "corruption reveal",
+        "body dissolve",
+        "mesh appearance",
+        "character vanish"
+      ],
+      "recommended_lane_order": [
+        "build_material_depth_mask_lane",
+        "build_material_crack_mask_lane",
+        "build_material_fresnel_lane"
+      ],
+      "required_helper_tools": [
+        "build_material_depth_mask_lane",
+        "build_material_crack_mask_lane",
+        "capture_material_probe_batch",
+        "compare_material_captures"
+      ],
+      "supporting_techniques": [
+        "Knowledge/Materials/Techniques/character_appearance_dissolve_library.json",
+        "Knowledge/Materials/Techniques/dissolve_edge_threshold_mask.json",
+        "Knowledge/Materials/Techniques/dissolve_erosion.json"
+      ],
+      "subfamily_playbook": {
+        "wpo_masked_transform": "Choose this when the body surface should physically peel, distort, or displace during the transition.",
+        "wpo_sphere_reveal": "Choose this when the body appears from a point, sphere, or height-driven wave.",
+        "local_space_dissolve_noise": "Choose this when the body should erode coherently in object space with an emissive edge.",
+        "offset_band_surface_transform": "Choose this when the transform needs layered shells, dual bands, or offset reveal fronts.",
+        "compact_variants": "Choose these when the effect is stylistically simpler or needs a cheaper transform path."
+      },
+      "fallback_family": "dissolve_erosion"
+    }
+  ]
+}

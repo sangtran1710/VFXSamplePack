@@ -1,0 +1,103 @@
+{
+  "overview": "Forcefields and hologram-like materials should read as a thin energy shell with strong view-dependent edges, controlled opacity, and secondary patterning that never turns into an opaque wall.",
+  "visual_reads": [
+    "view-dependent edge emphasis",
+    "thin translucent shell",
+    "controlled emissive accents",
+    "front-view shell retention",
+    "energy patterning secondary to silhouette"
+  ],
+  "lane_order": [
+    "build_material_fresnel_lane",
+    "build_material_depth_mask_lane",
+    "build_material_crack_mask_lane"
+  ],
+  "required_root_pins": [
+    "EmissiveColor",
+    "Opacity",
+    "BaseColor"
+  ],
+  "preferred_nodes": [
+    "Fresnel",
+    "DepthFade",
+    "PixelDepth",
+    "Noise",
+    "Lerp",
+    "Multiply"
+  ],
+  "preferred_parameters": [
+    "EdgeColor",
+    "OpacityFalloff",
+    "EdgePower",
+    "PatternContrast",
+    "InnerTint",
+    "DepthFadeDistance",
+    "OpacityFloor"
+  ],
+  "common_failure_modes": [
+    "opaque center killing the forcefield read",
+    "too much roughness making it feel solid",
+    "front view disappearing completely",
+    "plain glowing sprite with no shell depth",
+    "screen-door crack pattern taking over the shell"
+  ],
+  "capture_review_checklist": [
+    "Front shot keeps a readable shell.",
+    "Three-quarter shot shows patterning without destroying transparency.",
+    "Grazing shot is the strongest edge-read frame.",
+    "The shell never reads as a solid opaque wall in any capture."
+  ],
+  "family_constraints": {
+    "preferred_surface_mode": "translucent_shell",
+    "required_root_pins": [
+      "BaseColor",
+      "Opacity",
+      "EmissiveColor"
+    ],
+    "disallowed_primary_reads": [
+      "opaque wall",
+      "glowing billboard",
+      "fully invisible front view"
+    ]
+  },
+  "pass_strategy": {
+    "build_material_fresnel_lane": {
+      "goal": "Establish the shell silhouette and edge emphasis before adding depth fade or patterning.",
+      "must_read": [
+        "strong grazing edge",
+        "front-view shell still visible"
+      ],
+      "avoid": [
+        "full surface glow",
+        "front view disappearing"
+      ]
+    },
+    "build_material_depth_mask_lane": {
+      "goal": "Introduce shell falloff and controlled depth softness without losing the silhouette.",
+      "must_read": [
+        "thin energy shell",
+        "controlled translucency"
+      ],
+      "avoid": [
+        "opaque center",
+        "ghosted nearly invisible shell"
+      ]
+    },
+    "build_material_crack_mask_lane": {
+      "goal": "Add restrained secondary patterning only after silhouette and opacity are stable.",
+      "must_read": [
+        "subtle accent patterning",
+        "edge and shell still primary"
+      ],
+      "avoid": [
+        "pattern dominating the read",
+        "solid noisy wall"
+      ]
+    }
+  },
+  "branch_restart_triggers": [
+    "opaque center killing the forcefield read",
+    "front view disappearing completely",
+    "plain glowing sprite with no shell depth"
+  ]
+}

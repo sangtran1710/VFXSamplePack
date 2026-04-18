@@ -1,0 +1,130 @@
+{
+  "_description": "Niagara Particle Update module reference. These run every frame per particle. Agent uses this to know what can be updated at runtime.",
+  "_source": "UE5.6 Epic Documentation - Particle Update Group Reference",
+
+  "color": {
+    "Color": {"purpose": "Set Particles.Color directly each frame", "vfx_usage": "Color over life, dynamic color changes"},
+    "Scale Color": {"purpose": "Scale initial color RGB and Alpha separately", "vfx_usage": "Fade out over life, color intensity curves"},
+    "Scale Color by Speed": {"purpose": "Scale color by velocity magnitude", "vfx_usage": "Fast = bright, slow = dim (sparks, tracers)"}
+  },
+
+  "size": {
+    "Scale Sprite Size": {"purpose": "Multiply initial sprite size by curve/value", "vfx_usage": "Grow smoke, shrink sparks, size-over-life"},
+    "Scale Sprite Size by Speed": {"purpose": "Scale size by velocity", "vfx_usage": "Fast = stretched/large, slow = small"},
+    "Scale Mesh Size": {"purpose": "Multiply initial mesh scale", "vfx_usage": "Growing debris, expanding objects"},
+    "Scale Mesh Size by Speed": {"purpose": "Scale mesh by velocity magnitude", "vfx_usage": "Speed-dependent mesh sizing"}
+  },
+
+  "forces": {
+    "_note": "Same modules as Particle Spawn but run every frame. Most forces should be in Update, not Spawn.",
+    "Acceleration Force": {"purpose": "Continuous acceleration", "vfx_usage": "Ongoing push"},
+    "Curl Noise Force": {"purpose": "Organic turbulence every frame", "vfx_usage": "Smoke billowing, fire wavering, magic swirl. MOST IMPORTANT force for organic VFX."},
+    "Drag": {"purpose": "Continuous velocity reduction", "vfx_usage": "Particles slow down realistically"},
+    "Gravity Force": {"purpose": "Continuous gravity", "vfx_usage": "Falling debris, arcing sparks, rain"},
+    "Limit Force": {"purpose": "Cap force each frame", "vfx_usage": "Prevent runaway acceleration"},
+    "Line Attraction Force": {"purpose": "Pull toward line each frame", "vfx_usage": "Beam-following particles"},
+    "Linear Force": {"purpose": "Constant directional push", "vfx_usage": "Wind, directional drift"},
+    "Mesh Rotation Force": {"purpose": "Rotational force per frame", "vfx_usage": "Continuous tumbling"},
+    "Point Attraction Force": {"purpose": "Pull toward point each frame", "vfx_usage": "Gathering, implosion, orbit"},
+    "Point Force": {"purpose": "Radial force from point per frame", "vfx_usage": "Continuous push/pull"},
+    "Vector Noise Force": {"purpose": "Random noise each frame", "vfx_usage": "Turbulence, chaos"},
+    "Vortex Force": {"purpose": "Circular force per frame", "vfx_usage": "Spinning, tornado"},
+    "Wind Force": {"purpose": "Wind with air resistance per frame", "vfx_usage": "Environmental wind on particles"}
+  },
+
+  "velocity": {
+    "Add Velocity": {"purpose": "Add velocity each frame", "vfx_usage": "Continuous thrust"},
+    "Add Velocity from Point": {"purpose": "Add velocity from point each frame", "vfx_usage": "Continuous radial push"},
+    "Add Velocity in Cone": {"purpose": "Cone-shaped velocity each frame", "vfx_usage": "Directed spray"},
+    "Align Velocity to Random Axis": {"purpose": "Randomize velocity direction on interval", "vfx_usage": "Erratic movement, lightning branch changes"},
+    "Inherit Velocity": {"purpose": "Inherit source velocity continuously", "vfx_usage": "Moving emitter momentum transfer"},
+    "Scale Velocity": {"purpose": "Multiply velocity by vector", "vfx_usage": "Deceleration curves, axis-specific dampening"},
+    "Static Mesh Velocity": {"purpose": "Velocity from mesh normals", "vfx_usage": "Continuous surface emission"},
+    "Vortex Velocity": {"purpose": "Angular velocity around axis", "vfx_usage": "Sustained rotation"}
+  },
+
+  "collision": {
+    "Collision": {
+      "purpose": "Detect collision with world (CPU=raycast, GPU=depth/distance field)",
+      "placement": "Immediately BEFORE Solve Forces and Velocity",
+      "vfx_usage": "Debris bouncing, sparks hitting ground, rain splashing"
+    },
+    "Align Particles with Collision Plane": {
+      "purpose": "Align sprite to collision surface over time",
+      "vfx_usage": "Blood splats, decals settling on surfaces"
+    }
+  },
+
+  "constraints": {
+    "Maintain a Set Distance Between Two Points": {"purpose": "Project point at fixed distance between two positions", "vfx_usage": "Tethered particles, chain links"},
+    "Pendulum Setup": {"purpose": "Set up pendulum constraint (requires Pendulum Constraint after)", "vfx_usage": "Hanging particles, chains, ropes"},
+    "Pendulum Constraint": {"purpose": "Apply pendulum swing with gravity/drag", "vfx_usage": "Swinging objects, pendulum motion"}
+  },
+
+  "orientation": {
+    "Sprite Rotation Rate": {"purpose": "Rotate sprite over time (degrees)", "vfx_usage": "Spinning particles, rolling smoke"},
+    "Update Mesh Orientation": {"purpose": "Rotate mesh orientation over time", "vfx_usage": "Tumbling debris, spinning objects"},
+    "Align Sprite to Mesh Orientation": {"purpose": "Match sprite rotation to mesh", "vfx_usage": "Sprite follows mesh rotation"},
+    "Orient Mesh to Vector": {"purpose": "Align mesh to vector each frame", "vfx_usage": "Velocity-aligned debris, arrows"}
+  },
+
+  "lifetime": {
+    "Particle State": {
+      "purpose": "Kill particle when lifetime elapsed",
+      "placement": "Usually near bottom of Update stack",
+      "vfx_usage": "REQUIRED in most emitters to remove dead particles"
+    }
+  },
+
+  "kill": {
+    "Kill Particles": {"purpose": "Conditional kill switch", "vfx_usage": "Dynamic removal based on conditions"},
+    "Kill Particles in Volume": {"purpose": "Kill in analytical shape", "vfx_usage": "Boundary culling. Must use with Interpolated Spawn or particles flash for 1 frame."}
+  },
+
+  "solver": {
+    "_note": "Solve modules MUST be present for forces to take effect",
+    "Solve Forces and Velocity": {
+      "purpose": "Convert accumulated Physics.Force into velocity and position changes",
+      "placement": "AFTER all force modules",
+      "vfx_usage": "REQUIRED if any force module is used"
+    },
+    "Solve Rotational Forces and Velocity": {
+      "purpose": "Convert rotational forces into rotation",
+      "vfx_usage": "REQUIRED if rotational forces are used"
+    }
+  },
+
+  "events": {
+    "Generate Collision Event": {"purpose": "Emit event on collision", "vfx_usage": "Spawn sparks/dust on impact"},
+    "Generate Death Event": {"purpose": "Emit event on particle death", "vfx_usage": "Spawn sub-effects when particles die"},
+    "Generate Location Event": {"purpose": "Emit location event each frame", "vfx_usage": "Trail particles, position tracking"}
+  },
+
+  "beam": {
+    "Update Beam": {"purpose": "Recalculate beam spline each frame (dynamic endpoints)", "vfx_usage": "Dynamic beams, lightning between moving objects"},
+    "Beam Width Scale": {"purpose": "Scale beam width over time", "vfx_usage": "Pulsing beams, fading beams"}
+  },
+
+  "ribbon": {
+    "Scale Ribbon Width": {"purpose": "Scale ribbon width over time", "vfx_usage": "Tapered trails, fading ribbons"}
+  },
+
+  "utility": {
+    "Do Once": {"purpose": "Execute only on first true trigger", "vfx_usage": "One-time initialization in update"},
+    "Increment Over Time": {"purpose": "Increase value each frame", "vfx_usage": "Counters, progressive effects"},
+    "Time Based State Machine": {"purpose": "On/Off state toggling", "vfx_usage": "Blinking, pulsing, intermittent effects"},
+    "Generate Grid Ribbon IDs": {"purpose": "Create 2D/3D grid with ribbons", "vfx_usage": "Grid mesh effects, fabric simulation"}
+  },
+
+  "critical_module_order": [
+    "1. Location modules (if repositioning)",
+    "2. Force modules (Curl Noise, Gravity, Drag, Wind, etc.)",
+    "3. Solve Forces and Velocity (MUST come after forces)",
+    "4. Collision (immediately before or after solver depending on setup)",
+    "5. Color / Scale Color (visual updates)",
+    "6. Scale Sprite Size / Scale Mesh Size",
+    "7. Sprite Rotation Rate",
+    "8. SubUVAnimation",
+    "9. Particle State (kill when lifetime elapsed — near bottom)"
+  ]
+}

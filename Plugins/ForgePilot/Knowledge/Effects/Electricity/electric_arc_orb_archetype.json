@@ -1,0 +1,220 @@
+{
+  "archetype_name": "electric_arc_orb",
+  "scope": "V2 sidecar workflow for electric arc orb reads.",
+  "resolved_effect_type": "Electricity",
+  "required_layers": [
+    {
+      "id": "A",
+      "name": "HeroElectricArc",
+      "responsibility": "Dominant electric arc sweep that bends or gathers crackling energy into a hot electric core.",
+      "semantic_op_family": "hero_electric_arc_layer",
+      "required_renderer_family": "sprite_or_stretched_sprite",
+      "forbidden_renderer_family": "wire_arc_cage",
+      "default_material_family": "electric_hero_streak_material"
+    },
+    {
+      "id": "B",
+      "name": "SecondaryElectricFilaments",
+      "responsibility": "Thinner supporting electric filaments that reinforce the arc read without closing the orb silhouette.",
+      "semantic_op_family": "secondary_electric_filament_layer",
+      "required_renderer_family": "sprite_or_stretched_sprite",
+      "default_material_family": "electric_hero_streak_material"
+    },
+    {
+      "id": "C",
+      "name": "CoreElectricMass",
+      "responsibility": "Dense crackling electric core mass with readable white-blue energy concentration.",
+      "semantic_op_family": "core_electric_mass_layer",
+      "required_renderer_family": "sprite",
+      "default_material_family": "electric_core_mass_material"
+    },
+    {
+      "id": "D",
+      "name": "SparkBursts",
+      "responsibility": "Small electric spark bursts that add punctuation and charge noise.",
+      "semantic_op_family": "spark_bursts_layer",
+      "required_renderer_family": "sprite",
+      "default_material_family": "electric_hero_streak_material"
+    },
+    {
+      "id": "E",
+      "name": "BindGlow",
+      "responsibility": "Compact electrical glow that binds the hero arc and electric core without becoming a flat halo.",
+      "semantic_op_family": "bind_glow_layer",
+      "required_renderer_family": "sprite",
+      "default_material_family": "electric_core_mass_material"
+    }
+  ],
+  "forbidden_grammar": [
+    "closed_ring_orb",
+    "wire_arc_cage",
+    "thick_flame_body",
+    "soft_smoke_haze"
+  ],
+  "default_motion_rules": [
+    "Hero layer should read as one dominant electric arc with smaller support filaments.",
+    "Motion should stay crackling and energetic without closing into a ring shell.",
+    "Core should read as a charged electric mass, not a smoky haze or flame blob."
+  ],
+  "default_layer_hierarchy": [
+    "HeroElectricArc",
+    "SecondaryElectricFilaments",
+    "CoreElectricMass",
+    "SparkBursts",
+    "BindGlow"
+  ],
+  "default_semantic_ops_plan": [
+    "build_hero_streak_material",
+    "build_core_merge_glow_material",
+    "build_main_attraction_layer",
+    "build_secondary_filament_layer",
+    "build_core_turbulence_layer",
+    "build_sparks_layer",
+    "build_shock_glow_layer",
+    "review_effect_failure_taxonomy_v2"
+  ],
+  "visual_contract": {
+    "strategy": "prefer_user_parameter_tweak",
+    "allow_legacy_stack_fallback": true,
+    "auto_create_missing_parameters": true,
+    "op_bindings": {
+      "build_main_attraction_layer": {
+        "layer": "A",
+        "bindings": [
+          { "param_name": "User.VFX.HeroSpawnRate", "param_type": "float", "value": 38.0 },
+          { "param_name": "User.VFX.HeroLifetimeMin", "param_type": "float", "value": 0.55 },
+          { "param_name": "User.VFX.HeroLifetimeMax", "param_type": "float", "value": 0.8 },
+          { "param_name": "User.VFX.HeroSphereRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.HeroAttractionRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.HeroDrag", "param_type": "float", "value": 1.75 },
+          { "param_name": "User.VFX.HeroCurlNoise", "param_type": "float", "value": 0.1 },
+          { "param_name": "User.VFX.HeroMaterial", "param_type": "MaterialInterface", "value": "{{material_path}}", "skip_if_empty": true }
+        ]
+      },
+      "rebuild_main_attraction_layer": {
+        "layer": "A",
+        "bindings": [
+          { "param_name": "User.VFX.HeroSpawnRate", "param_type": "float", "value": 38.0 },
+          { "param_name": "User.VFX.HeroLifetimeMin", "param_type": "float", "value": 0.55 },
+          { "param_name": "User.VFX.HeroLifetimeMax", "param_type": "float", "value": 0.8 },
+          { "param_name": "User.VFX.HeroSphereRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.HeroAttractionRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.HeroDrag", "param_type": "float", "value": 1.75 },
+          { "param_name": "User.VFX.HeroCurlNoise", "param_type": "float", "value": 0.1 },
+          { "param_name": "User.VFX.HeroMaterial", "param_type": "MaterialInterface", "value": "{{material_path}}", "skip_if_empty": true }
+        ]
+      },
+      "retune_motion_family": {
+        "layer": "A",
+        "bindings": [
+          { "param_name": "User.VFX.HeroSpawnRate", "param_type": "float", "value": 38.0 },
+          { "param_name": "User.VFX.HeroDrag", "param_type": "float", "value": 1.75 },
+          { "param_name": "User.VFX.HeroCurlNoise", "param_type": "float", "value": 0.1 }
+        ]
+      },
+      "build_secondary_filament_layer": {
+        "layer": "B",
+        "bindings": [
+          { "param_name": "User.VFX.SecondarySpawnRate", "param_type": "float", "value": 16.0 },
+          { "param_name": "User.VFX.SecondaryLifetimeMin", "param_type": "float", "value": 0.35 },
+          { "param_name": "User.VFX.SecondaryLifetimeMax", "param_type": "float", "value": 0.7 },
+          { "param_name": "User.VFX.SecondarySphereRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.SecondaryAttractionRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.SecondaryDrag", "param_type": "float", "value": 1.45 },
+          { "param_name": "User.VFX.SecondaryCurlNoise", "param_type": "float", "value": 0.18 },
+          { "param_name": "User.VFX.SecondaryMaterial", "param_type": "MaterialInterface", "value": "{{material_path}}", "skip_if_empty": true }
+        ]
+      },
+      "build_core_turbulence_layer": {
+        "layer": "C",
+        "bindings": [
+          { "param_name": "User.VFX.CoreSpawnRate", "param_type": "float", "value": 16.0 },
+          { "param_name": "User.VFX.CoreLifetimeMin", "param_type": "float", "value": 0.45 },
+          { "param_name": "User.VFX.CoreLifetimeMax", "param_type": "float", "value": 0.9 },
+          { "param_name": "User.VFX.CoreDrag", "param_type": "float", "value": 0.9 },
+          { "param_name": "User.VFX.CoreCurlNoise", "param_type": "float", "value": 0.4 },
+          { "param_name": "User.VFX.CoreMaterial", "param_type": "MaterialInterface", "value": "{{material_path}}", "skip_if_empty": true }
+        ]
+      },
+      "build_sparks_layer": {
+        "layer": "D",
+        "bindings": [
+          { "param_name": "User.VFX.SparksSpawnRate", "param_type": "float", "value": 120.0 },
+          { "param_name": "User.VFX.SparksLifetimeMin", "param_type": "float", "value": 0.2 },
+          { "param_name": "User.VFX.SparksLifetimeMax", "param_type": "float", "value": 0.5 },
+          { "param_name": "User.VFX.SparksSphereRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.SparksAttractionRadius", "param_type": "float", "value": 60.0 },
+          { "param_name": "User.VFX.SparksDrag", "param_type": "float", "value": 1.1 },
+          { "param_name": "User.VFX.SparksMaterial", "param_type": "MaterialInterface", "value": "{{material_path}}", "skip_if_empty": true }
+        ]
+      },
+      "build_shock_glow_layer": {
+        "layer": "E",
+        "bindings": [
+          { "param_name": "User.VFX.GlowSpawnRate", "param_type": "float", "value": 4.0 },
+          { "param_name": "User.VFX.GlowLifetimeMin", "param_type": "float", "value": 0.8 },
+          { "param_name": "User.VFX.GlowLifetimeMax", "param_type": "float", "value": 1.4 },
+          { "param_name": "User.VFX.GlowMaterial", "param_type": "MaterialInterface", "value": "{{material_path}}", "skip_if_empty": true }
+        ]
+      }
+    }
+  },
+  "stop_conditions": {
+    "required_absent_failures": [
+      "hero_sweep_missing",
+      "wire_arc_cage",
+      "closed_ring_orb",
+      "soft_smoke_haze"
+    ],
+    "max_scalar_only_repairs_before_rebuild": 1,
+    "rebuild_layer_a_after_consecutive_motion_failures": 2
+  },
+  "repair_policy": {
+    "hard_rebuild_gate": {
+      "layer_a_failure_labels": [
+        "hero_sweep_missing",
+        "no_outside_to_core_read",
+        "wire_arc_cage",
+        "closed_ring_orb"
+      ],
+      "consecutive_iterations_before_rebuild": 2,
+      "block_scalar_only_layer_a_polish": true,
+      "scheduled_op": "rebuild_hero_electric_arc_layer",
+      "preserve_layers": [
+        "CoreElectricMass",
+        "SparkBursts",
+        "BindGlow"
+      ]
+    },
+    "soft_repair_mappings": {
+      "closed_ring_orb": [
+        "build_secondary_filament_layer"
+      ],
+      "secondary_overwhelms_hero": [
+        "build_secondary_filament_layer"
+      ],
+      "wire_arc_cage": [
+        "simplify_hero_ribbon_material",
+        "rebuild_hero_electric_arc_layer"
+      ],
+      "thick_flame_body": [
+        "simplify_hero_ribbon_material"
+      ],
+      "soft_smoke_haze": [
+        "build_core_merge_glow_material",
+        "build_core_turbulence_layer"
+      ]
+    }
+  },
+  "eval_profile": {
+    "suite_name": "electric_orb_v2_eval",
+    "scoring_axes": [
+      "motion_family_match",
+      "silhouette_family_match",
+      "hero_secondary_hierarchy",
+      "material_family_read",
+      "gameplay_readability"
+    ],
+    "passing_threshold": 18
+  }
+}

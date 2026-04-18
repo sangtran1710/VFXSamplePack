@@ -1,0 +1,95 @@
+{
+  "_description": "VFX color palettes and color behavior rules. Agent uses these as default color setups before user customization.",
+
+  "core_rules": {
+    "hottest_brightest": "In energy-based effects, the hottest/most intense area is brightest and closest to white. Color shifts outward from white → yellow → orange → red → dark.",
+    "emissive_values": "VFX colors in UE5 often use values > 1.0 for emissive bloom. Typical range: 2.0-20.0 for glow, 50-500 for bright flashes.",
+    "color_over_life": "Most effects shift color over particle lifetime. Generally: bright/saturated → desaturated/dark.",
+    "complementary_accents": "Use small amounts of complementary color for visual interest. Fire (orange) benefits from tiny blue at base. Magic can mix warm/cool.",
+    "alpha_is_king": "Color without proper alpha curves looks flat. Always pair color palette with opacity curves."
+  },
+
+  "palettes": {
+    "fire_natural": {
+      "core": {"r": 1.0, "g": 0.9, "b": 0.7, "note": "near-white hot center"},
+      "mid": {"r": 1.0, "g": 0.45, "b": 0.05, "note": "deep orange"},
+      "outer": {"r": 0.6, "g": 0.1, "b": 0.02, "note": "dark red-brown"},
+      "emissive_multiplier": "5.0-15.0",
+      "embers": {"r": 1.0, "g": 0.3, "b": 0.05, "note": "bright orange sparks"}
+    },
+    "fire_blue": {
+      "core": {"r": 0.7, "g": 0.9, "b": 1.0, "note": "white-blue center"},
+      "mid": {"r": 0.1, "g": 0.4, "b": 1.0, "note": "electric blue"},
+      "outer": {"r": 0.05, "g": 0.1, "b": 0.5, "note": "deep blue"},
+      "emissive_multiplier": "8.0-20.0"
+    },
+    "fire_green": {
+      "core": {"r": 0.8, "g": 1.0, "b": 0.7, "note": "white-green center"},
+      "mid": {"r": 0.1, "g": 0.8, "b": 0.1, "note": "vivid green"},
+      "outer": {"r": 0.02, "g": 0.3, "b": 0.05, "note": "dark green"},
+      "emissive_multiplier": "5.0-15.0"
+    },
+    "smoke_dark": {
+      "start": {"r": 0.15, "g": 0.13, "b": 0.12, "note": "warm dark gray"},
+      "end": {"r": 0.05, "g": 0.05, "b": 0.06, "note": "near black, slightly cool"},
+      "opacity_range": "0.1-0.4 (never fully opaque for realism)"
+    },
+    "smoke_light": {
+      "start": {"r": 0.7, "g": 0.68, "b": 0.65, "note": "warm light gray"},
+      "end": {"r": 0.4, "g": 0.4, "b": 0.42, "note": "medium gray"},
+      "opacity_range": "0.05-0.25 (very translucent)"
+    },
+    "explosion": {
+      "flash": {"r": 1.0, "g": 1.0, "b": 0.95, "emissive": "50-200", "note": "near-white instant flash"},
+      "fireball": {"r": 1.0, "g": 0.5, "b": 0.05, "emissive": "10-30", "note": "intense orange"},
+      "smoke_hot": {"r": 0.3, "g": 0.15, "b": 0.05, "note": "brown-orange, emissive 1-3"},
+      "smoke_cool": {"r": 0.1, "g": 0.1, "b": 0.1, "note": "dark gray, no emissive"}
+    },
+    "electricity": {
+      "core": {"r": 0.8, "g": 0.9, "b": 1.0, "emissive": "20-80", "note": "white-blue bright"},
+      "branch": {"r": 0.4, "g": 0.6, "b": 1.0, "emissive": "10-30", "note": "electric blue"},
+      "glow": {"r": 0.2, "g": 0.3, "b": 0.8, "emissive": "3-8", "note": "blue ambient glow"},
+      "secondary": {"r": 0.6, "g": 0.5, "b": 1.0, "note": "purple tint for variation"}
+    },
+    "core_energy": {
+      "core": {"r": 1.0, "g": 0.96, "b": 0.82, "emissive": "25-80", "note": "white-hot contained center"},
+      "filament": {"r": 1.0, "g": 0.65, "b": 0.12, "emissive": "15-40", "note": "bright filament arcs"},
+      "body": {"r": 1.0, "g": 0.42, "b": 0.06, "emissive": "6-18", "note": "warm plasma shell"},
+      "rim": {"r": 0.82, "g": 0.2, "b": 0.04, "emissive": "4-12", "note": "controlled edge accent"},
+      "spark": {"r": 1.0, "g": 0.78, "b": 0.2, "emissive": "12-35", "note": "short accent sparks"}
+    },
+    "water": {
+      "deep": {"r": 0.02, "g": 0.1, "b": 0.2, "note": "dark blue-green"},
+      "mid": {"r": 0.1, "g": 0.3, "b": 0.35, "note": "teal"},
+      "surface": {"r": 0.4, "g": 0.6, "b": 0.65, "note": "light blue-gray"},
+      "foam": {"r": 0.85, "g": 0.9, "b": 0.92, "note": "near white"},
+      "mist": {"r": 0.7, "g": 0.75, "b": 0.8, "opacity": "0.02-0.1"}
+    },
+    "magic_holy": {
+      "core": {"r": 1.0, "g": 0.95, "b": 0.7, "emissive": "15-40", "note": "warm golden white"},
+      "rays": {"r": 1.0, "g": 0.85, "b": 0.4, "emissive": "8-20", "note": "golden"},
+      "particles": {"r": 1.0, "g": 0.9, "b": 0.6, "emissive": "5-10"},
+      "ambient": {"r": 0.8, "g": 0.7, "b": 0.3, "emissive": "2-5"}
+    },
+    "magic_dark": {
+      "core": {"r": 0.3, "g": 0.0, "b": 0.5, "emissive": "10-30", "note": "deep purple"},
+      "tendrils": {"r": 0.5, "g": 0.0, "b": 0.8, "emissive": "5-15"},
+      "particles": {"r": 0.2, "g": 0.0, "b": 0.3, "emissive": "3-8"},
+      "accent": {"r": 0.0, "g": 0.8, "b": 0.5, "emissive": "5-10", "note": "green accent for contrast"}
+    },
+    "magic_ice": {
+      "core": {"r": 0.85, "g": 0.95, "b": 1.0, "emissive": "10-25"},
+      "crystals": {"r": 0.5, "g": 0.8, "b": 1.0, "emissive": "5-12"},
+      "mist": {"r": 0.7, "g": 0.85, "b": 0.95, "opacity": "0.05-0.15"},
+      "frost": {"r": 0.9, "g": 0.95, "b": 1.0, "note": "near white, slight blue"}
+    }
+  },
+
+  "color_over_life_patterns": {
+    "fire": "white-yellow (0%) → orange (30%) → red-brown (70%) → dark transparent (100%)",
+    "smoke": "light warm gray (0%) → darker cooler gray (100%), opacity: ramp up 0-15%, hold, fade 60-100%",
+    "spark": "bright color (0%) → same color dimmer (100%), linear fade",
+    "magic_pulse": "bright (0%) → peak color (20%) → fade with color shift (100%)",
+    "explosion_debris": "bright hot (0%) → dark cool (100%)"
+  }
+}

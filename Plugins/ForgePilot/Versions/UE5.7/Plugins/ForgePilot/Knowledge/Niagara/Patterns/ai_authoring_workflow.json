@@ -1,0 +1,63 @@
+{
+  "_description": "Core workflow doctrine for the AI Niagara Artist system. This defines how the agent should bootstrap, author, validate, and iterate on Niagara effects.",
+  "system_name": "AI Niagara Artist",
+  "foundational_supporting_references": [
+    "Knowledge/Materials/Reference/material_node_learning_strategy.json",
+    "Knowledge/Materials/Reference/material_function_usage_strategy.json",
+    "Knowledge/Materials/Reference/material_function_study_workflow.json",
+    "Knowledge/Materials/Reference/material_function_semantic_notes_current.json",
+    "Knowledge/Materials/Reference/material_function_study_index_current.json",
+    "Knowledge/Materials/Reference/material_node_catalog_current.json",
+    "Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json",
+    "Knowledge/Materials/Techniques/vfx_artist_advanced_node_taxonomy.json",
+    "Knowledge/Materials/Techniques/vfx_artist_material_math_taxonomy.json",
+    "Knowledge/Materials/Techniques/panning_uv.json",
+    "Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json"
+  ],
+  "preferred_bootstrap": "empty_system_then_template_emitters",
+  "bootstrap_sequence": [
+    "Create a clean empty Niagara System instead of duplicating a full effect by default.",
+    "Search for reusable Niagara template systems and pick emitters that match the intended layer role.",
+    "Add template emitters into the clean system one layer at a time.",
+    "Fallback to empty emitters only when no suitable template emitter exists."
+  ],
+  "authoring_loop": [
+    "Inspect the emitter stack and module inputs before applying edits.",
+    "Adjust artist-facing controls in a stable order: quantity, lifetime, size, color, opacity, velocity, forces, renderer, material.",
+    "Compile and save after each meaningful batch of stack edits.",
+    "Review the assembled system and spawn a preview actor for visual verification."
+  ],
+  "verification_loop": [
+    "Review stack/module structure for missing required layers or modules.",
+    "Compile Niagara deterministically and inspect diagnostics.",
+    "Spawn the system in the level and capture screenshots or probes for visual iteration."
+  ],
+  "guardrails": [
+    "Do not author complex stacks from zero when a template emitter can provide a stable foundation.",
+    "Prefer artist-facing high-level controls before low-level module-input surgery.",
+    "Keep emitter roles separate: core body, volume/fill, accents, smoke, sparks, distortion.",
+    "Treat renderer/material setup and compile verification as required completion steps, not optional polish."
+  ],
+  "artist_control_order": [
+    "spawn_rate_or_burst",
+    "lifetime",
+    "sprite_size_or_mesh_scale",
+    "color_over_life",
+    "opacity_over_life",
+    "velocity",
+    "drag",
+    "gravity",
+    "curl_noise",
+    "local_space",
+    "renderer_material"
+  ],
+  "advanced_capabilities": [
+    "dynamic_inputs",
+    "user_parameters",
+    "events",
+    "ribbon_and_beam_emitters",
+    "mesh_emitters",
+    "scratch_pad_and_script_wrappers",
+    "optimization_and_scalability"
+  ]
+}

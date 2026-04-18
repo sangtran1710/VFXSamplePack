@@ -1,0 +1,262 @@
+{
+  "_description": "Material library recipe extracted from /Game/Character_Appearance_Dissolve. Use this to teach ForgePilot how character appearance / dissolve / transformation materials are structured as parent wrappers over reusable Material Functions plus color/intensity instances.",
+
+  "source_roots": {
+    "materials_standard": "/Game/Character_Appearance_Dissolve/Materials/Standart",
+    "material_functions_standard": "/Game/Character_Appearance_Dissolve/MaterailFunctions/Standart",
+    "material_functions_mobile": "/Game/Character_Appearance_Dissolve/MaterailFunctions/Mobile"
+  },
+
+  "overview": "This library is a character-transformation material system, not a set of unrelated one-off shaders. The core pattern is: a parent material supplies a small number of artist-facing parameters and drives a reusable MF_Appearance_* function with a normalized animated Appearance input. Most visual intelligence lives in the material functions. Most parent materials are thin wrappers. Most material instances are just color and emissive variants.",
+
+  "core_library_rules": [
+    "Inspect the Material Function before judging the parent material. The parent material is usually only a parameter wrapper.",
+    "Treat the Appearance input as the main transition driver. It is the dissolve / reveal / transform progress.",
+    "Treat Color and Emissive_Mult as style parameters layered on top of a stable transition logic.",
+    "Most variants share one of a few structural patterns. Do not think there are 20 fully unique techniques here.",
+    "Standard is the authoring/reference source. Mobile is the reduced compatibility branch."
+  ],
+
+  "parent_material_pattern": {
+    "common_structure": [
+      "Time multiplied by a phase speed",
+      "Sine_Remapped used to create an animated 0-1 Appearance driver in some parents",
+      "VectorParameter Color",
+      "ScalarParameter Emissive_Mult",
+      "MaterialFunctionCall to MF_Appearance_X",
+      "Outputs wired into BaseColor / EmissiveColor / OpacityMask / optional WorldPositionOffset"
+    ],
+    "key_takeaway": "ForgePilot should not clone these parents node-for-node. It should understand them as wrappers around reusable transform-function logic."
+  },
+
+  "function_taxonomy": {
+    "wpo_masked_transform": {
+      "representatives": [
+        "MF_Appearance_1"
+      ],
+      "characteristics": [
+        "Outputs WPO, Emissive, and Opacity_Mask",
+        "Uses texture-driven motion and rotation",
+        "Uses bounding-box or object-space driven mapping",
+        "Good for transforms that physically peel, swirl, or distort the surface while disappearing"
+      ],
+      "best_for": [
+        "hero transformation start/end",
+        "surface peel or magical skin displacement",
+        "animated appearance with visible shape motion"
+      ]
+    },
+
+    "wpo_sphere_reveal": {
+      "representatives": [
+        "MF_Appearance_2",
+        "MF_Appearance_3",
+        "MF_Appearance_4"
+      ],
+      "characteristics": [
+        "Outputs WPO and Emissive, no opacity mask output",
+        "Uses SphereMask and world/object position logic",
+        "Accepts PointHeight input",
+        "Looks suited for reveal waves, point-origin appearance, or vertical/height-driven transform sweeps"
+      ],
+      "best_for": [
+        "spawn-in effect from a point or height",
+        "energy reveal wave across body",
+        "non-destructive appearance effect where geometry remains but energy travels"
+      ]
+    },
+
+    "local_space_dissolve_noise": {
+      "representatives": [
+        "MF_Appearance_5",
+        "MF_Appearance_6",
+        "MF_Appearance_7",
+        "MF_Appearance_8",
+        "MF_Appearance_9"
+      ],
+      "characteristics": [
+        "Outputs Opacity_Mask and Emissive",
+        "Uses object local bounds / local-space transforms",
+        "Uses texture samples and panners",
+        "Uses ceil / saturate / one-minus style threshold shaping",
+        "Good for object-space dissolve that respects the mesh volume rather than only UVs"
+      ],
+      "best_for": [
+        "character dissolving away",
+        "energy erosion from mesh volume",
+        "localized body transform with emissive border"
+      ]
+    },
+
+    "offset_band_surface_transform": {
+      "representatives": [
+        "MF_Appearance_10",
+        "MF_Appearance_11"
+      ],
+      "characteristics": [
+        "Accepts Offset_1 and Offset_2 inputs",
+        "Outputs Emissive and Opacity_Mask, and in at least one case Base_Color",
+        "Uses sphere or shell-like masking plus offset controls",
+        "Good for layered bands, transform shells, or dual-zone appearance transitions"
+      ],
+      "best_for": [
+        "multi-band transformation",
+        "inner and outer transform shell offsets",
+        "controllable edge-width appearance effects"
+      ]
+    },
+
+    "compact_dissolve_variants": {
+      "representatives": [
+        "MF_Appearance_12",
+        "MF_Appearance_13",
+        "MF_Appearance_14"
+      ],
+      "characteristics": [
+        "Simpler node counts",
+        "Outputs Opacity_Mask and Emissive",
+        "Likely intended as cheaper variants with less support logic"
+      ],
+      "best_for": [
+        "lighter transform variants",
+        "secondary enemies or cheaper effect tiers",
+        "when full hero-function complexity is unnecessary"
+      ]
+    },
+
+    "compact_panned_edge_variants": {
+      "representatives": [
+        "MF_Appearance_15",
+        "MF_Appearance_16",
+        "MF_Appearance_17",
+        "MF_Appearance_18",
+        "MF_Appearance_19",
+        "MF_Appearance_20"
+      ],
+      "characteristics": [
+        "Smallest node counts in the set",
+        "Outputs Emissive and Opacity_Mask",
+        "Uses panned texture plus bounding-box-based UVW or local-space positioning",
+        "Good for cleaner, more graphic edge dissolves and stylized reveal bands"
+      ],
+      "best_for": [
+        "stylized edge reveal",
+        "cleaner appearance pulses",
+        "lower-cost transformation variants"
+      ]
+    }
+  },
+
+  "shared_visual_logic": [
+    "Appearance is the normalized transition amount and should be the primary animation/control input.",
+    "Color is a style layer, not the transition logic itself.",
+    "Emissive_Mult scales the visual intensity of the reveal edge or energy body.",
+    "Object-space or bounding-box-based mapping appears repeatedly because it keeps the dissolve coherent on character forms.",
+    "Opacity_Mask is the preferred control for hard reveal/cut transitions in most variants.",
+    "WorldPositionOffset is used only in the variants where the transformation needs visible surface displacement or wave motion."
+  ],
+
+  "why_this_library_is_valuable": [
+    "It demonstrates a good separation between reusable material functions and thin parent/instance wrappers.",
+    "It treats character transformation as a controlled parameterized system rather than a one-off graph.",
+    "It shows several levels of complexity, from hero WPO-driven transforms to compact cheaper dissolve variants.",
+    "It is directly relevant to character appearance, corruption, vanish, transform, summon-in, and reveal effects."
+  ],
+
+  "recommended_agent_workflow": {
+    "step_1": "Classify whether the requested effect needs WPO, masked dissolve, point/height reveal, shell offset bands, or a compact stylized edge variant.",
+    "step_2": "Choose the closest MF_Appearance_* family, not the closest parent thumbnail.",
+    "step_3": "Expose Appearance as the main driving parameter. Treat it as the effect progress value.",
+    "step_4": "Use Color and Emissive_Mult as material-instance style controls.",
+    "step_5": "Only add Time/Sine_Remapped auto-animation if the effect is ambient or looping. For gameplay-driven transforms, Appearance should usually come from an external parameter.",
+    "step_6": "Use material instances for palette variants instead of duplicating the parent graph."
+  },
+
+  "parameter_mapping_guidance": {
+    "Appearance": "Primary reveal/transform progress. Map from gameplay or sequencer for deterministic character transformation.",
+    "Color": "Edge or transform energy color. Good candidate for per-variant or per-faction style changes.",
+    "Emissive_Mult": "Controls strength of the transform edge/glow. Keep this instance-tunable.",
+    "PointHeight": "Use for vertical sweep or point-origin reveal variants.",
+    "Offset_1_and_Offset_2": "Use for layered shell widths, dual transform fronts, or inner/outer reveal bands."
+  },
+
+  "selection_playbook": {
+    "if_the_effect_needs": [
+      {
+        "need": "surface motion and actual geometric transform feel",
+        "pick_family": "wpo_masked_transform",
+        "recommended_functions": [
+          "MF_Appearance_1"
+        ]
+      },
+      {
+        "need": "reveal from a point or height wave",
+        "pick_family": "wpo_sphere_reveal",
+        "recommended_functions": [
+          "MF_Appearance_2",
+          "MF_Appearance_3",
+          "MF_Appearance_4"
+        ]
+      },
+      {
+        "need": "character dissolve with mesh-coherent object-space breakup",
+        "pick_family": "local_space_dissolve_noise",
+        "recommended_functions": [
+          "MF_Appearance_5",
+          "MF_Appearance_6",
+          "MF_Appearance_7",
+          "MF_Appearance_8",
+          "MF_Appearance_9"
+        ]
+      },
+      {
+        "need": "dual-band or shell-offset transformation edge",
+        "pick_family": "offset_band_surface_transform",
+        "recommended_functions": [
+          "MF_Appearance_10",
+          "MF_Appearance_11"
+        ]
+      },
+      {
+        "need": "simpler or cheaper stylized reveal",
+        "pick_family": "compact_dissolve_variants",
+        "recommended_functions": [
+          "MF_Appearance_12",
+          "MF_Appearance_13",
+          "MF_Appearance_14"
+        ]
+      },
+      {
+        "need": "clean compact panned edge reveal",
+        "pick_family": "compact_panned_edge_variants",
+        "recommended_functions": [
+          "MF_Appearance_15",
+          "MF_Appearance_16",
+          "MF_Appearance_17",
+          "MF_Appearance_18",
+          "MF_Appearance_19",
+          "MF_Appearance_20"
+        ]
+      }
+    ]
+  },
+
+  "common_failure_modes": [
+    "Learning from the parent material only and missing the actual logic inside MF_Appearance_*.",
+    "Using Time/Sine_Remapped for a gameplay-critical transform that should instead be externally driven.",
+    "Duplicating parent materials for color variations instead of using material instances.",
+    "Using WPO variants when a simple masked reveal would be clearer and cheaper.",
+    "Using a compact stylized variant for a hero transformation that needs volumetric surface motion."
+  ],
+
+  "mobile_variant_note": "The Mobile folder mirrors the same appearance families in simplified form. Use Standard as the source logic and Mobile only when authoring a mobile-targeted fallback.",
+
+  "agent_recipe": {
+    "step_1": "Resolve the requested character transform into one of the appearance families in this recipe.",
+    "step_2": "Use the chosen MF_Appearance_* family as the logic source, not the material instance.",
+    "step_3": "Drive Appearance from an external normalized parameter when the transform must sync with gameplay, animation, or sequencer.",
+    "step_4": "Keep parent materials thin: BaseColor support, function call, Color, Emissive_Mult, optional WPO and OpacityMask wiring.",
+    "step_5": "Spawn Niagara support from the same transform progress if edge particles, sparks, or portal haze are needed.",
+    "step_6": "Create style variants through material instances rather than cloning the logic graph."
+  }
+}

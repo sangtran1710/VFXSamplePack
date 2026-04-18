@@ -1,0 +1,238 @@
+{
+  "_description": "Detailed shared recipe for fire and smoke flipbooks that use ParticleSubUV in Niagara sprite materials. This remains a low-risk baseline carried forward from the UE 5.3 workflow. Use this when the sheet itself carries the frame animation and Niagara only needs to drive playback, tint, fade, and collision-friendly soft intersections.",
+
+  "overview": "ParticleSubUV flipbooks should read from the atlas first, then receive tint, emissive shaping, and fade shaping in a controlled order. The material should not fight Niagara. Niagara owns timing, sprite size, frame playback, and per-particle color/alpha. The material owns sheet lookup, artist-safe contrast shaping, and soft camera/world intersection fades. Do not promote FlipBook_MotionVectors to the baseline path unless the request explicitly needs motion-vector interpolation and the authoring workflow can afford extra validation.",
+
+  "use_when": [
+    "looping fire body",
+    "fire wall",
+    "torch flame sheet",
+    "smoke billow sheet",
+    "smoke puff sheet",
+    "explosion support smoke that is still sprite-sheet driven"
+  ],
+
+  "do_not_use_when": [
+    "you need physically lit smoke volume and can afford a dedicated lit smoke material",
+    "the texture is a static radial mask rather than a frame sheet",
+    "motion should come from UV panning or flow maps rather than frame playback",
+    "you are building a distortion-only pass"
+  ],
+
+  "shared_material_contract": {
+    "renderer_requirement": "Niagara sprite renderer with SubUV enabled and SubImageSize matching the atlas grid",
+    "material_properties": {
+      "fire_primary": {
+        "blend_mode": "Translucent",
+        "shading_model": "Unlit",
+        "two_sided": true,
+        "why": "Translucent gives controllable fade. Unlit keeps the flipbook look stable. Two-sided avoids card popping when the sprite rotates."
+      },
+      "smoke_primary": {
+        "blend_mode": "Translucent",
+        "shading_model": "DefaultLit or Unlit fallback",
+        "two_sided": true,
+        "why": "Translucent is required for soft smoke fade. Lit is preferred for production smoke if the project budget allows it. If using the exact shared SubUV graph below, use Unlit and keep emissive very low."
+      },
+      "accent_only_exception": "Additive is acceptable only for small accent flames, sparks, and bright hero streaks where fade precision matters less than punch."
+    },
+    "mandatory_nodes": [
+      "ParticleSubUV",
+      "ParticleColor",
+      "Multiply",
+      "DepthFade"
+    ],
+    "preferred_minimal_nodes": [
+      "ParticleSubUV",
+      "ParticleColor",
+      "Multiply",
+      "DepthFade",
+      "ScalarParameter for emissive control",
+      "Preview fallback branch only when artist-side MI preview is required"
+    ],
+    "optional_support_textures": [
+      "motion vector atlas for UV warp",
+      "normal atlas for a separate distortion pass"
+    ],
+    "normal_usage_rule": "Do not wire a normal atlas into the main unlit flame card and expect lighting response. Use the normal atlas in a separate distortion/refraction material or in a lit smoke material."
+  },
+
+  "dynamic_parameter_standard": {
+    "status": "optional_only",
+    "recommendation": "Do not use DynamicParameter in the default fire/smoke baseline unless the user explicitly asks for material-side controls that Niagara cannot own cleanly.",
+    "parameter_index": 0,
+    "channel_names": [
+      "PowerEmissive",
+      "FadeDistance",
+      "CameraDpthFade",
+      "Power"
+    ],
+    "default_value": {
+      "R": 1.0,
+      "G": 1.0,
+      "B": 1.0,
+      "A": 2.0
+    },
+    "rules": [
+      "Keep the shared channel names exactly as listed above so Niagara-side Dynamic Material Parameters stay predictable across SubUV fire and smoke materials.",
+      "Default R, G, and B stay at 1.0 so the material is neutral when Niagara does not override them.",
+      "Default A stays at 2.0 so alpha shaping has a slightly softer powered falloff by default.",
+      "Do not repurpose G or B for unrelated controls if the material is expected to share the same Niagara emitter workflow."
+    ],
+    "channel_meaning": {
+      "PowerEmissive": "Exponent for emissive shaping. Keep near 1 for neutral, push above 1 for tighter bright core emphasis.",
+      "FadeDistance": "DepthFade distance for world intersection softening.",
+      "CameraDpthFade": "CameraDepthFade length for near-camera soft fade.",
+      "Power": "Exponent for alpha shaping from the flipbook alpha."
+    }
+  },
+
+  "fire_graph_recipe": {
+    "goal": "Readable flame body that fades correctly, preserves the atlas motion, and softens against the camera and world geometry.",
+    "default_baseline_without_dynamic_parameters": [
+      "ParticleSubUV RGB * ParticleColor RGB -> Multiply",
+      "Multiply * EmissiveIntensity -> Multiply -> EmissiveColor",
+      "ParticleSubUV alpha-or-luminance mask * ParticleColor A -> Multiply",
+      "DepthFade(Opacity = previous result, FadeDistance = DepthFadeDistance) -> Opacity"
+    ],
+    "graph_order": [
+      "ParticleSubUV RGB * ParticleColor RGB -> Multiply",
+      "Multiply -> Power(Base), DynamicParameter.R -> Power(Exponent)",
+      "Power result -> EmissiveColor",
+      "ParticleSubUV A -> Power(Base), DynamicParameter.A -> Power(Exponent)",
+      "Power result * ParticleColor A -> Multiply",
+      "CameraDepthFade(Fade Length = DynamicParameter.B) -> Multiply with previous opacity result",
+      "DepthFade(Opacity = previous result, FadeDistance = DynamicParameter.G) -> Opacity"
+    ],
+    "important_rules": [
+      "Start with the minimal translucent unlit graph first. Only add CameraDepthFade, Power shaping, or DynamicParameter after the baseline visibly works in both Material preview and Niagara preview.",
+      "If the atlas alpha is weak or unexpectedly empty, validate whether opacity should derive from the texture alpha or from a luma/desaturated RGB branch. Do not assume the alpha channel is production-ready.",
+      "Do not rely on Opacity alone to fade a flame if the blend mode is Additive. Prefer this translucent recipe for primary flame cards.",
+      "Keep emissive fed from the powered RGB branch, not from a separate unrestricted multiply that ignores alpha shaping.",
+      "If the fire needs extra punch, raise DynamicParameter.R or Niagara color intensity before switching back to Additive.",
+      "If the flipbook carries a strong baked white core, keep ParticleColor RGB under control so the fire does not clip into bloom too early."
+    ],
+    "recommended_ranges": {
+      "PowerEmissive": "1.0-4.0",
+      "FadeDistance": "16-128 depending on scene scale",
+      "CameraDpthFade": "8-96 depending on how aggressively the effect should soften near camera",
+      "Power": "1.5-3.0"
+    }
+  },
+
+  "smoke_graph_recipe": {
+    "goal": "Soft translucent smoke that keeps sheet detail, fades cleanly, and does not look like a bright flame card.",
+    "graph_order": [
+      "ParticleSubUV A -> Power(Base), DynamicParameter.A -> Power(Exponent)",
+      "Power result * ParticleColor A -> Multiply",
+      "CameraDepthFade(Fade Length = DynamicParameter.B) -> Multiply with previous opacity result",
+      "DepthFade(Opacity = previous result, FadeDistance = DynamicParameter.G) -> Opacity",
+      "For unlit fallback: ParticleSubUV RGB * ParticleColor RGB -> very low emissive multiplier",
+      "For lit smoke variant: drive BaseColor from ParticleSubUV RGB * ParticleColor RGB and keep emissive disconnected or extremely low"
+    ],
+    "important_rules": [
+      "Smoke should not inherit the same emissive intensity as fire. Keep emissive off or extremely restrained.",
+      "If using the shared unlit fallback, never let smoke become a bright emissive blob. The opacity silhouette is the hero read.",
+      "DepthFade is more important on smoke than on flames because broad cards intersect world geometry more often.",
+      "If the smoke sheet is soft and low contrast, keep alpha power closer to 1.5-2.0 rather than crushing it."
+    ],
+    "recommended_ranges": {
+      "FadeDistance": "32-192",
+      "CameraDpthFade": "16-128",
+      "Power": "1.2-2.2",
+      "UnlitSmokeEmissiveMultiplier": "0.02-0.2"
+    }
+  },
+
+  "niagara_recipe": {
+    "renderer_setup": [
+      "Assign the material to a Niagara sprite renderer.",
+      "Set SubUV grid on the renderer to match the atlas exactly.",
+      "Enable SubUV blending when the sheet benefits from frame interpolation."
+    ],
+    "required_modules": [
+      "Initialize Particle",
+      "Sub UVAnimation",
+      "Scale Color",
+      "Scale Sprite Size",
+      "Solve Forces and Velocity",
+      "Particle State"
+    ],
+    "recommended_modules_fire": [
+      "Add Velocity",
+      "Curl Noise Force",
+      "Drag",
+      "Sprite Rotation Rate"
+    ],
+    "recommended_modules_smoke": [
+      "Add Velocity",
+      "Curl Noise Force",
+      "Drag",
+      "Wind Force",
+      "Sprite Rotation Rate"
+    ],
+    "dynamic_material_parameter_mapping": {
+      "R": "PowerEmissive",
+      "G": "FadeDistance",
+      "B": "CameraDpthFade",
+      "A": "Power"
+    },
+    "authoring_rule": "Keep Scale Color driving both RGB and Alpha. ParticleColor must remain part of the material graph so Niagara can tint and fade the sheet.",
+    "minimal_baseline_values": {
+      "spawn_rate": "20-45 for a single local preview emitter",
+      "lifetime_seconds": "0.45-0.75",
+      "sprite_size_xy": "45-120 depending on preview distance",
+      "velocity_z": "120-220",
+      "drag": "0.8-1.5",
+      "curl_noise_force": "10-25"
+    }
+  },
+
+  "subuv_playback_rules": {
+    "grid_authoring": [
+      "Read atlas dimensions first. Do not guess the grid if the texture clearly shows a different frame count.",
+      "Use Sub UVAnimation or explicit SubImageIndex logic; do not fake flipbook playback with UV panners."
+    ],
+    "frame_rate_guidance": {
+      "fire": "15-30 FPS equivalent playback depending on style and frame count",
+      "smoke": "8-20 FPS equivalent playback depending on softness and atlas density"
+    },
+    "timing_rule": "Looping fire should feel alive and slightly quicker than smoke. Smoke should usually read broader and slower."
+  },
+
+  "anti_patterns": [
+    "Using FlipBook_MotionVectors as the first-pass baseline for a simple fire card",
+    "Building a preview fallback that changes only color and alpha while the sample path still depends on ParticleSubUV",
+    "Assuming connect_material_nodes mutates the asset without explicitly setting apply_changes=true",
+    "Declaring the material done after topology checks only; always use compile_material_and_get_diagnostics for the real shader result",
+    "Additive primary fire card that expects Opacity-only fade to solve everything",
+    "Using the main flame material as the distortion pass just because a normal atlas exists",
+    "Renaming DynamicParameter channels differently on every material",
+    "Using ParticleSubUV for RGB but a different unrelated alpha source that breaks frame coherence",
+    "Ignoring renderer SubUV grid size and assuming the material alone controls frame layout",
+    "Driving smoke with strong emissive values so it reads like fire"
+  ],
+
+  "agent_recipe": {
+    "step_1": "Inspect the atlas and confirm it is a true flipbook sheet before material authoring.",
+    "step_2": "Author a translucent two-sided unlit material and use ParticleSubUV as the runtime sheet lookup.",
+    "step_3": "Insert ParticleColor so Niagara keeps control over tint and fade.",
+    "step_4": "Build the minimal baseline first: RGB branch into EmissiveColor and alpha-or-luma branch into Opacity with DepthFade.",
+    "step_5": "Run compile_material_and_get_diagnostics before doing any visual reasoning. Fix type-width issues with explicit ComponentMask nodes if needed.",
+    "step_6": "If artists need MI preview outside Niagara, add a preview fallback that changes both the sample path and the control values. A color-only fallback is insufficient.",
+    "step_7": "Set the Niagara sprite renderer SubUV grid to the atlas dimensions and enable SubUV blend when appropriate.",
+    "step_8": "Add Sub UVAnimation in Niagara and let Niagara own playback via NormalizedAge.",
+    "step_9": "Drive RGB and Alpha through Scale Color in Niagara instead of expecting the material to fade by itself.",
+    "step_10": "Reserve motion-vector and normal atlases for follow-up warp/distortion passes unless the request explicitly needs them in the main graph."
+  },
+
+  "debug_and_validation_rules": {
+    "material_compile_gate": "Use compile_material_and_get_diagnostics after any meaningful graph mutation. Do not trust topology-only review.",
+    "preview_probe_rule": "If Material or MI preview is black, verify whether the preview mesh is None and whether the sample path still depends on ParticleSubUV.",
+    "niagara_probe_rule": "If Niagara compiles but looks invisible, inspect SpriteSize, Scale Color alpha, renderer material binding, and SubUV renderer setup before changing the master material again.",
+    "authoring_guardrails": [
+      "Always pass apply_changes=true when using connect_material_nodes or spawn_niagara_at_location for real mutations.",
+      "Prefer a small validation harness over ad-hoc one-off commands when iterating on the same fire baseline repeatedly."
+    ]
+  }
+}

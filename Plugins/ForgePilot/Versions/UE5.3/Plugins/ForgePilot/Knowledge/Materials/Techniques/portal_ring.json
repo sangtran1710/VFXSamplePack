@@ -1,0 +1,188 @@
+{
+  "_description": "Material technique extracted from /Game/VFX/NiagaraDissolveEdge/Materials/M_Portal. Use this for portal rims, magical ring shells, dissolving circular edges, and radial energy gates.",
+
+  "overview": "This pattern is a translucent unlit two-sided ring material built from radial space, layered scrolling noise, and thresholded radial bands. The key read is not a filled disc. It is a bright noisy circular edge with controlled thickness and soft scene intersection fade.",
+
+  "visual_reads": [
+    "readable circular rim before internal noise detail",
+    "ring thickness controlled by inner and outer radial thresholds",
+    "noise flow moving around or through the ring rather than across flat UVs",
+    "emissive edge stronger than interior fill",
+    "soft intersection with nearby geometry through depth fade"
+  ],
+
+  "lane_order": [
+    "build_material_radial_space_lane",
+    "build_material_noise_flow_lane",
+    "build_material_ring_band_lane",
+    "build_material_emissive_lane",
+    "build_material_depth_mask_lane"
+  ],
+
+  "required_root_pins": [
+    "EmissiveColor",
+    "Opacity"
+  ],
+
+  "preferred_nodes": [
+    "VectorToRadialValue",
+    "RadialGradientExponential",
+    "Panner",
+    "Blend_Screen",
+    "Step",
+    "Subtract",
+    "DepthFade",
+    "Multiply",
+    "Add"
+  ],
+
+  "preferred_material_properties": {
+    "blend_mode": "Translucent",
+    "shading_model": "Unlit",
+    "two_sided": true
+  },
+
+  "pattern_blocks": {
+    "radial_space_lane": {
+      "goal": "Convert UV space into radial coordinates so the material behaves like a circular portal rather than a flat scrolling texture.",
+      "observed_logic": [
+        "VectorToRadialValue provides radial coordinates",
+        "radial coordinates are scaled before panning",
+        "two separate radial-coordinate lanes are used"
+      ],
+      "key_takeaway": "Portal materials should prefer radial-space motion over plain linear UV panning."
+    },
+    "noise_flow_lane": {
+      "goal": "Create animated breakup that feels circular and alive instead of static.",
+      "observed_logic": [
+        "two panners with mirrored X speed and shared downward Y speed",
+        "one large tiling noise texture",
+        "one compact offset/noise texture",
+        "Blend_Screen combines the two noise reads"
+      ],
+      "key_takeaway": "Use two flow sources moving against each other or with mirrored direction to avoid a cheap single-scroll look."
+    },
+    "ring_band_lane": {
+      "goal": "Extract a ring band by comparing two radial thresholds instead of filling the whole circle.",
+      "observed_logic": [
+        "one radial gradient defines the inner threshold",
+        "a second slightly larger radial gradient defines the outer threshold",
+        "Step compares the noise field against each threshold",
+        "Subtract of outer and inner steps isolates a ring band"
+      ],
+      "key_takeaway": "A strong portal edge is often just the difference between two noisy radial thresholds."
+    },
+    "emissive_lane": {
+      "goal": "Color only the isolated ring band, not the entire radial field.",
+      "observed_logic": [
+        "hard-coded emissive color multiplies the band mask",
+        "the emissive is driven by ring extraction, not by full-disc opacity"
+      ],
+      "key_takeaway": "Portal emissive should be tied to the ring mask first. Color comes after the ring is readable."
+    },
+    "depth_fade_lane": {
+      "goal": "Soften portal intersection with world geometry and avoid hard clipping.",
+      "observed_logic": [
+        "DepthFade is applied to the composed opacity result",
+        "Opacity receives both the primary ring and a softer supporting contribution"
+      ],
+      "key_takeaway": "Depth fade should be the last softening pass, not the primary shape generator."
+    }
+  },
+
+  "observed_reference_signals": {
+    "reference_material": "/Game/VFX/NiagaraDissolveEdge/Materials/M_Portal.M_Portal",
+    "expression_count": 25,
+    "texture_count": 2,
+    "panner_count": 2,
+    "function_calls": [
+      "VectorToRadialValue",
+      "RadialGradientExponential",
+      "Blend_Screen"
+    ],
+    "key_textures": [
+      "/Engine/MapTemplates/TilingNoise05.TilingNoise05",
+      "/Engine/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/OffsetNoiseDistanceFields_ForNormals.OffsetNoiseDistanceFields_ForNormals"
+    ],
+    "notable_constants": [
+      "base ring radius around 0.5",
+      "secondary ring offset around +0.08",
+      "hard-coded emissive color"
+    ]
+  },
+
+  "authoring_guidance": {
+    "do_this_first": [
+      "Get the ring silhouette readable with radial thresholds before adding more noise complexity.",
+      "Keep the inner radius and outer radius separately tunable.",
+      "Make the noise flow radial-aware instead of panning in flat Cartesian UV only."
+    ],
+    "do_this_after": [
+      "Expose ring radius, ring thickness, emissive color, emissive intensity, and flow speed as parameters.",
+      "Convert direct texture samples to TextureSampleParameter2D if the look is expected to vary across effects.",
+      "Optionally add a soft center haze only after the edge read is stable."
+    ],
+    "avoid": [
+      "turning the portal into a full opaque glowing disc",
+      "using only one noise scroll direction",
+      "burying ring thickness inside one multiply chain with no separate control",
+      "letting noise detail overpower the circular silhouette"
+    ]
+  },
+
+  "recommended_parameters": [
+    "RingRadius",
+    "RingThickness",
+    "RingSoftness",
+    "NoiseScaleA",
+    "NoiseScaleB",
+    "FlowSpeedA",
+    "FlowSpeedB",
+    "EmissiveColor",
+    "EmissiveIntensity",
+    "DepthFadeDistance"
+  ],
+
+  "use_when": [
+    "portal ring",
+    "magic gate rim",
+    "circular dissolve edge",
+    "spawn circle edge",
+    "summoning ring",
+    "radial energy seal"
+  ],
+
+  "not_for": [
+    "beam cores",
+    "generic sparks",
+    "full plasma shell spheres",
+    "broad smoke volumes"
+  ],
+
+  "common_failure_modes": [
+    "noise is visible but the ring silhouette is weak",
+    "portal reads like a filled disc instead of an edge-defined gate",
+    "hard geometry clipping at intersections",
+    "single-direction panning makes the motion look cheap",
+    "hard-coded color and radius make the graph non-reusable"
+  ],
+
+  "capture_review_checklist": [
+    "Front shot still reads as a ring, not a glowing blob.",
+    "Three-quarter shot shows circular edge breakup without losing silhouette.",
+    "The ring thickness stays readable as noise animates.",
+    "Geometry intersections soften cleanly through depth fade.",
+    "The portal edge remains the hero read; noise stays secondary."
+  ],
+
+  "agent_recipe": {
+    "step_1": "Start from a translucent unlit two-sided material.",
+    "step_2": "Build a radial-coordinate lane using VectorToRadialValue.",
+    "step_3": "Create two radial-gradient thresholds for inner and outer ring boundaries.",
+    "step_4": "Build two mirrored or complementary panned noise lanes and combine them with a blend function such as Screen.",
+    "step_5": "Use Step against the noisy radial field for each boundary, then subtract the two results to isolate the ring band.",
+    "step_6": "Multiply the resulting band by emissive color and intensity.",
+    "step_7": "Build opacity from the ring mask plus a softer support contribution, then pass it through DepthFade.",
+    "step_8": "Expose artist-facing radius, thickness, flow, and emissive controls through parameters or a material instance."
+  }
+}

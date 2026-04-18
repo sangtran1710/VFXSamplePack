@@ -1,0 +1,202 @@
+{
+  "taxonomy_name": "suction_core_failure_taxonomy",
+  "scope": "Rules-based V2 critic for suction core energy only.",
+  "labels": {
+    "orbit_dominant": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "MainAttractionStreaks uses angular/vortex motion without a native inward attraction module.",
+        "MainAttractionStreaks relies on ribbon orbit silhouette instead of outside-to-core pull."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family",
+        "rebuild_main_attraction_layer"
+      ],
+      "escalation_rule": "If seen for two consecutive Layer A reviews, trigger rebuild_main_attraction_layer and block scalar-only Layer A polish."
+    },
+    "no_outside_to_core_read": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "MainAttractionStreaks is missing Point Attraction Force or equivalent inward pull.",
+        "MainAttractionStreaks spawns at or near the core instead of an outer zone."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family",
+        "rebuild_main_attraction_layer"
+      ],
+      "escalation_rule": "Two consecutive hits force Layer A rebuild."
+    },
+    "overshoot_through_core": {
+      "category": "motion",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "MainAttractionStreaks lifetime or force balance implies particles will fly through the core without merging or fading."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family"
+      ],
+      "escalation_rule": "Escalate to rebuild only if still present after one retune and a fresh capture."
+    },
+    "angular_motion_too_high": {
+      "category": "motion",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Vortex-oriented modules dominate Layer A/B more strongly than inward attraction."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family"
+      ],
+      "escalation_rule": "Reduce angular motion before touching layer count or brightness."
+    },
+    "hero_sweep_missing": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "MainAttractionStreaks emitter is missing or under-authored.",
+        "Hero layer is not visually distinct from secondary support layers."
+      ],
+      "allowed_repair_ops": [
+        "build_main_attraction_layer",
+        "rebuild_main_attraction_layer"
+      ],
+      "escalation_rule": "Two consecutive hits force Layer A rebuild."
+    },
+    "cage_silhouette_risk": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "MainAttractionStreaks is authored primarily as a ribbon cage or ring shell.",
+        "Deterministic ribbons dominate the orb silhouette instead of reading as pulled-in energy mass."
+      ],
+      "allowed_repair_ops": [
+        "rebuild_main_attraction_layer",
+        "build_secondary_filament_layer"
+      ],
+      "escalation_rule": "Two consecutive hits force Layer A rebuild and preserve Layers C-E."
+    },
+    "hero_layer_missing": {
+      "category": "shape_layering",
+      "severity": "high",
+      "hard_gate": false,
+      "detection_rules": [
+        "No hero attraction layer or hero material family is present."
+      ],
+      "allowed_repair_ops": [
+        "build_main_attraction_layer"
+      ],
+      "escalation_rule": "Escalate to hero_sweep_missing if unresolved after one authoring pass."
+    },
+    "secondary_overwhelms_hero": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "SecondaryFilaments density, width, or motion competes with MainAttractionStreaks."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer"
+      ],
+      "escalation_rule": "Reduce secondary support before modifying hero sweep."
+    },
+    "support_fill_missing": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "CoreTurbulence, Sparks, or ShockGlow are missing and the orb lacks internal support mass."
+      ],
+      "allowed_repair_ops": [
+        "build_core_turbulence_layer",
+        "build_sparks_layer",
+        "build_shock_glow_layer"
+      ],
+      "escalation_rule": "Fill missing support layers before polishing Layer A."
+    },
+    "shell_ring_dominant": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "SecondaryFilaments or shell support uses torus/ring topology that dominates the orb read."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer"
+      ],
+      "escalation_rule": "Retune support distribution before touching hero intensity."
+    },
+    "silhouette_too_closed": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Layer overlap creates a closed ring/cage silhouette around the core.",
+        "Secondary ribbon support spawns from a sphere shell and is driven mostly by vortex motion without inward pull."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer",
+        "retune_motion_family"
+      ],
+      "escalation_rule": "Prefer support-layer spacing changes over adding brightness."
+    },
+    "linework_not_flame_body": {
+      "category": "material",
+      "severity": "high",
+      "hard_gate": false,
+      "detection_rules": [
+        "Hero streak material reads as graphic linework or wireframe instead of flame/plasma mass.",
+        "Main attraction layer is rendered with ribbon-first line bodies.",
+        "Secondary filament ribbons still contain Custom-HLSL or other non-native authoring residue that reinforces graphic line reads."
+      ],
+      "allowed_repair_ops": [
+        "simplify_hero_ribbon_material",
+        "retune_longitudinal_flow"
+      ],
+      "escalation_rule": "Run simplify_hero_ribbon_material before any extra noise or bloom."
+    },
+    "opacity_noise_dominates": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Opacity breakup dominates silhouette readability over the energy body mass."
+      ],
+      "allowed_repair_ops": [
+        "reduce_opacity_noise_preserve_body"
+      ],
+      "escalation_rule": "Reduce opacity noise amplitude before adding extra layers."
+    },
+    "inner_hot_core_missing": {
+      "category": "material",
+      "severity": "high",
+      "hard_gate": false,
+      "detection_rules": [
+        "CoreTurbulence or ShockGlow lacks a readable hot inner core."
+      ],
+      "allowed_repair_ops": [
+        "build_core_merge_glow_material",
+        "build_core_turbulence_layer"
+      ],
+      "escalation_rule": "Repair core merge glow before changing outer streaks."
+    },
+    "glow_bloom_dominates_detail": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Core or shell emissive overwhelms internal detail and silhouette read."
+      ],
+      "allowed_repair_ops": [
+        "build_core_merge_glow_material"
+      ],
+      "escalation_rule": "Lower bloom dominance only after confirming the inner hot core still reads."
+    }
+  }
+}

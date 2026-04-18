@@ -1,0 +1,140 @@
+{
+  "_description": "Hand-authored semantic notes for high-value UE 5.3 Material Functions. These notes complement the generated study index, which stores pins and node counts but not always human-readable formulas.",
+
+  "source_docs": [
+    "Knowledge/Materials/Reference/material_function_study_index_ue53.json",
+    "Docs/MaterialFunctions/UE53/README.md"
+  ],
+
+  "usage_rule": "When explaining or using a Material Function, read generated metadata first, then check this file for function-specific formulas, caveats, and VFX usage notes.",
+
+  "functions": [
+    {
+      "function_name": "FuzzyShading",
+      "package_path": "/Engine/Functions/Engine_MaterialFunctions01/Shading/FuzzyShading.FuzzyShading",
+      "category_hint": "Engine_MaterialFunctions01/Shading",
+      "purpose": "Fake velvet, moss, fuzz, or soft rim shading by darkening the facing core and brightening grazing angles.",
+      "inputs": {
+        "Normal": "Tangent-space normal input. Internally multiplied by float3(1, 1, TwoSidedSign) so two-sided/backface shading flips correctly.",
+        "CoreDarkness": "Scalar controlling how much the camera-facing core darkens.",
+        "EdgeBrightness": "Scalar controlling how bright the grazing/fuzzy edge becomes.",
+        "BaseColor": "Vector3 color multiplied by the combined fuzzy shading factor.",
+        "Power": "Scalar exponent controlling edge falloff sharpness. Higher values tighten the fuzzy rim."
+      },
+      "outputs": {
+        "Result": "BaseColor multiplied by the fuzzy shading factor."
+      },
+      "formula": [
+        "TwoSidedNormalTS = Normal * float3(1, 1, TwoSidedSign)",
+        "NormalWS = TransformVector(Tangent, World, TwoSidedNormalTS)",
+        "Facing = clamp(dot(CameraVectorWS, NormalWS), 0, 1)",
+        "CoreTerm = 1 - (Facing * CoreDarkness)",
+        "EdgeTerm = pow(1 - Facing, Power) * EdgeBrightness",
+        "Result = BaseColor * (CoreTerm + EdgeTerm)"
+      ],
+      "vfx_usage": [
+        "Good for moss, velvet, fungus, fuzzy organic surfaces, cloth-like VFX meshes, and soft stylized rim shading.",
+        "For unlit/additive VFX, use Result as an emissive color or mask rather than expecting physically lit surface behavior.",
+        "For sprite flipbook fire/smoke, prefer ParticleSubUV, ParticleColor, DepthFade, and Fresnel first; use FuzzyShading only for mesh/surface looks."
+      ],
+      "caveats": [
+        "The generated docs list pins and node counts only; this formula is hand-traced from get_material_function_info connections.",
+        "Do not simplify away TwoSidedSign when describing or rebuilding the function because it changes backface behavior."
+      ]
+    },
+    {
+      "function_name": "Gravity_WPO",
+      "package_path": "/Engine/Functions/Engine_MaterialFunctions02/WorldPositionOffset/Gravity_WPO.Gravity_WPO",
+      "category_hint": "Engine_MaterialFunctions02/WorldPositionOffset",
+      "purpose": "Compute falling-object World Position Offset and instantaneous velocity from current time, fall start time, and gravity acceleration.",
+      "inputs": {
+        "Current Time": "Scalar current time. Usually Time, particle age, or a material parameter.",
+        "Fall Start Time": "Scalar time when the fall begins.",
+        "Gravitational Acceleration": "Vector3 acceleration, typically cm/s^2. Earth-like UE gravity is usually float3(0, 0, -980)."
+      },
+      "outputs": {
+        "Offset From Start Position": "Vector3 displacement, commonly connected to World Position Offset.",
+        "Instantaneous Velocity": "Vector3 velocity at the current elapsed time."
+      },
+      "formula": [
+        "Elapsed = clamp(Current Time - Fall Start Time, 0, 1)",
+        "Offset From Start Position = 0.5 * Gravitational Acceleration * Elapsed * Elapsed",
+        "Instantaneous Velocity = Gravitational Acceleration * Elapsed"
+      ],
+      "vfx_usage": [
+        "Good for shader-driven falling mesh pieces, fake debris sheets, leaves, cloth cards, or simple vertex animation.",
+        "For actual Niagara particles, prefer Niagara Gravity Force unless you specifically need material-side WPO."
+      ],
+      "caveats": [
+        "The internal Clamp node defaults to 0..1, so elapsed fall duration is capped unless the function is edited.",
+        "Use cm/s^2 conventions when matching UE/Niagara gravity values."
+      ]
+    },
+    {
+      "function_name": "SphereGradient-2D",
+      "package_path": "/Engine/Functions/Engine_MaterialFunctions01/Gradient/SphereGradient-2D.SphereGradient-2D",
+      "category_hint": "Engine_MaterialFunctions01/Gradient",
+      "purpose": "Generate a circular 2D spherical-height gradient in UV space. This is useful as a soft round mask, blob, decal falloff, impact center, shockwave core, or radial VFX mask.",
+      "inputs": {
+        "UVs": "Vector2 sample position in UV space. Defaults to TexCoord[0].",
+        "CenterPosition": "Vector2 center of the sphere/circle in UV space.",
+        "Radius": "Scalar radius in UV-space units."
+      },
+      "outputs": {
+        "Result 0-1": "Normalized spherical height, 1 at the center and 0 at the radius edge.",
+        "Result Diameter": "Unnormalized sphere thickness across the diameter at the sampled UV.",
+        "Result Radius": "Unnormalized one-sided spherical height/radius at the sampled UV."
+      },
+      "formula": [
+        "DistanceFromCenter = distance(UVs, CenterPosition)",
+        "ClampedDistance = clamp(DistanceFromCenter, 0, Radius)",
+        "SphereHeight = sqrt(max(Radius * Radius - ClampedDistance * ClampedDistance, 0))",
+        "Result 0-1 = clamp(SphereHeight / Radius, 0, 1)",
+        "Result Diameter = SphereHeight * 2",
+        "Result Radius = Result 0-1 * Radius"
+      ],
+      "vfx_usage": [
+        "Use Result 0-1 as an alpha mask for circular decals, soft impact spots, muzzle flash cores, portals, puddles, magic circles, or dissolve reveal centers.",
+        "Use Result Diameter or Result Radius when a material needs pseudo-volume thickness rather than just normalized alpha.",
+        "For simple linear radial masks, Distance/SmoothStep may be cheaper and more direct; use SphereGradient-2D when the spherical falloff shape matters."
+      ],
+      "caveats": [
+        "The falloff is spherical/hemisphere-like, not linear. It stays fuller near the center and rolls off toward the edge.",
+        "If Radius is zero or extremely small, division can become unstable. Keep Radius above a small positive value."
+      ]
+    },
+    {
+      "function_name": "AxisAlignedFresnel",
+      "package_path": "/Engine/Functions/Engine_MaterialFunctions01/Shading/AxisAlignedFresnel.AxisAlignedFresnel",
+      "category_hint": "Engine_MaterialFunctions01/Shading",
+      "purpose": "Generate a fresnel-like side falloff aligned to a chosen axis, especially useful for cylinders, beams, columns, and tube-like VFX where regular Fresnel is not the desired view response.",
+      "inputs": {
+        "Axis": "Vector3 axis to align against. Defaults to the mesh local Z axis transformed to world space. Keep it normalized for predictable results.",
+        "Normal": "World-space normal used for the side/rim comparison. Defaults to VertexNormalWS.",
+        "Exponent": "Scalar power applied to the fresnel result. Higher values make the rim tighter."
+      },
+      "outputs": {
+        "Fresnel": "Axis-aligned fresnel mask with power applied.",
+        "Cylinder Thickness": "Approximate ray travel distance through the side of an infinite cylinder; 1 means one cylinder diameter. It ignores cylinder end caps."
+      },
+      "formula": [
+        "ViewDir = normalize(AbsoluteWorldPosition - CameraPositionWS)",
+        "SideTangent = normalize(cross(ViewDir, Axis))",
+        "AxisPerpendicularView = normalize(cross(SideTangent, Axis))",
+        "SideFacing = dot(AxisPerpendicularView, Normal)",
+        "Fresnel = pow(max(TwoSidedSign * SideFacing, 0), Exponent)",
+        "Cylinder Thickness = SideFacing / dot(AxisPerpendicularView, ViewDir)"
+      ],
+      "vfx_usage": [
+        "Use Fresnel for cylinder side rims, energy columns, beams, shields, tube glows, vertical auras, and cylindrical forcefields.",
+        "Use Cylinder Thickness to fake volumetric density through a cylinder side, such as denser center and thinner edges for smoke, magic columns, or energy tubes.",
+        "This is stronger than normal Fresnel for cylinder materials because the response is constrained around a chosen axis."
+      ],
+      "caveats": [
+        "This function does not handle cylinder caps; it is designed for the side surface.",
+        "If Axis is parallel or nearly parallel to the view direction, cross products can become unstable. The function is still useful, but extreme views may need clamping or art tuning.",
+        "Wire by target_input_name because Axis, Normal, and Exponent are easy to swap accidentally."
+      ]
+    }
+  ]
+}

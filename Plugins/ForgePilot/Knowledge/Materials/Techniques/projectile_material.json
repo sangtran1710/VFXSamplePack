@@ -1,0 +1,101 @@
+{
+  "overview": "Projectile materials should read as a contained energetic body with a bright focal core, controlled edge support, and directional flow that reinforces forward travel without turning into a billboard glow.",
+  "visual_reads": [
+    "bright focal core",
+    "contained edge support",
+    "directional energy flow",
+    "controlled emissive hierarchy",
+    "projectile body reads before accents"
+  ],
+  "lane_order": [
+    "build_material_shell_core_lane",
+    "build_material_fresnel_lane",
+    "build_material_bump_offset_uv_lane"
+  ],
+  "required_root_pins": [
+    "BaseColor",
+    "EmissiveColor"
+  ],
+  "preferred_nodes": [
+    "Lerp",
+    "Fresnel",
+    "BumpOffset",
+    "Panner",
+    "Noise",
+    "Multiply"
+  ],
+  "preferred_parameters": [
+    "CoreColor",
+    "ShellColor",
+    "EdgeColor",
+    "EmissiveIntensity",
+    "FlowSpeed",
+    "FlowStrength"
+  ],
+  "common_failure_modes": [
+    "flat glowing sphere with no focal hierarchy",
+    "full-surface emissive flooding instead of a contained core",
+    "forcefield shell read instead of projectile body read",
+    "no directional energy motion cue",
+    "neutral benchmark look with no projectile semantics"
+  ],
+  "capture_review_checklist": [
+    "Front shot keeps a clear bright core or focal center.",
+    "Three-quarter shot shows a readable body plus controlled edge support.",
+    "Grazing shot strengthens edge shape without overwhelming the core.",
+    "The material never collapses into a flat billboard glow."
+  ],
+  "family_constraints": {
+    "preferred_surface_mode": "contained_emissive_projectile",
+    "required_visual_order": [
+      "core or body hierarchy first",
+      "edge support second",
+      "directional flow third"
+    ],
+    "disallowed_primary_reads": [
+      "neutral benchmark surface",
+      "forcefield shell",
+      "full-surface white glow"
+    ]
+  },
+  "pass_strategy": {
+    "build_material_shell_core_lane": {
+      "goal": "Establish a readable projectile body with a brighter focal core before edge polish or flow are added.",
+      "must_read": [
+        "clear focal center",
+        "contained body hierarchy"
+      ],
+      "avoid": [
+        "flat glowing ball",
+        "uniform emissive flood"
+      ]
+    },
+    "build_material_fresnel_lane": {
+      "goal": "Add controlled edge support that sharpens the projectile silhouette without replacing the core.",
+      "must_read": [
+        "contained edge highlight",
+        "core still primary"
+      ],
+      "avoid": [
+        "billboard edge flood",
+        "forcefield shell read"
+      ]
+    },
+    "build_material_bump_offset_uv_lane": {
+      "goal": "Introduce directional surface motion after the projectile hierarchy is already readable.",
+      "must_read": [
+        "directional energy flow",
+        "motion supporting the body read"
+      ],
+      "avoid": [
+        "random noise flood",
+        "static body with no travel cue"
+      ]
+    }
+  },
+  "branch_restart_triggers": [
+    "flat glowing sphere with no focal hierarchy",
+    "full-surface emissive flooding instead of a contained core",
+    "neutral benchmark look with no projectile semantics"
+  ]
+}

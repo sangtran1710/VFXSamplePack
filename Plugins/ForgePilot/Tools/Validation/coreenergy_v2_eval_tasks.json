@@ -1,0 +1,83 @@
+{
+  "suite_name": "coreenergy_v2_eval",
+  "tasks": [
+    {
+      "id": "suction_energy_into_core",
+      "description": "fire energy suction orb pulling streaks from all directions into a bright hot core",
+      "hero_reference": "fire core suction orb with one dominant attraction sweep, secondary filaments, dense hot core, and embers",
+      "negative_references": [
+        "orbiting ring shell",
+        "wireframe ribbon cage"
+      ],
+      "expected_archetype": "suction_core_energy",
+      "expected_absent_failure_labels": [
+        "orbit_dominant",
+        "hero_sweep_missing",
+        "cage_silhouette_risk"
+      ]
+    },
+    {
+      "id": "infernal_hand_pull_orb",
+      "description": "infernal hand pulling fiery energy inward into a glowing core orb",
+      "hero_reference": "infernal magical pull gathered into a hot center near the hand",
+      "negative_references": [
+        "flamethrower jet",
+        "static spiral graphic"
+      ],
+      "expected_archetype": "suction_core_energy",
+      "expected_absent_failure_labels": [
+        "no_outside_to_core_read",
+        "linework_not_flame_body"
+      ]
+    },
+    {
+      "id": "plasma_pull_orb",
+      "description": "plasma gather effect drawn into a hot glowing center orb",
+      "hero_reference": "plasma attraction to a hot center with readable hero-secondary hierarchy",
+      "negative_references": [
+        "closed ring orb",
+        "beam impact burst"
+      ],
+      "expected_archetype": "suction_core_energy",
+      "expected_absent_failure_labels": [
+        "shell_ring_dominant",
+        "silhouette_too_closed"
+      ]
+    },
+    {
+      "id": "unstable_charging_suction_core",
+      "description": "unstable charging fire core drawing chaotic energy inward",
+      "hero_reference": "charging implosive core with strong center turbulence and sparks",
+      "negative_references": [
+        "outward explosion",
+        "even spiral cage"
+      ],
+      "expected_archetype": "suction_core_energy",
+      "expected_absent_failure_labels": [
+        "support_fill_missing",
+        "inner_hot_core_missing"
+      ]
+    },
+    {
+      "id": "attraction_center_mass",
+      "description": "contained energy orb drawing outer plasma toward a bright center mass",
+      "hero_reference": "pull-to-core motion with a readable hero-secondary hierarchy",
+      "negative_references": [
+        "flat ribbon lines",
+        "directional smoke plume"
+      ],
+      "expected_archetype": "suction_core_energy",
+      "expected_absent_failure_labels": [
+        "secondary_overwhelms_hero",
+        "glow_bloom_dominates_detail"
+      ]
+    }
+  ],
+  "scoring_rubric": {
+    "motion_family_match": "0-5",
+    "silhouette_family_match": "0-5",
+    "hero_secondary_hierarchy": "0-5",
+    "material_family_read": "0-5",
+    "gameplay_readability": "0-5"
+  }
+}

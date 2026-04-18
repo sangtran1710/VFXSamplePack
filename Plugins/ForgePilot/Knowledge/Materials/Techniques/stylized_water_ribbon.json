@@ -1,0 +1,102 @@
+{
+  "overview": "Stylized water ribbon materials should read as a flowing translucent band with a controlled body, readable edge polish, and directional breakup that suggests motion without turning into forcefield glass.",
+  "visual_reads": [
+    "translucent ribbon body",
+    "directional flowing breakup",
+    "controlled bright edge highlight",
+    "liquid layered body",
+    "stylized motion-led readability"
+  ],
+  "lane_order": [
+    "build_material_depth_mask_lane",
+    "build_material_bump_offset_uv_lane",
+    "build_material_fresnel_lane"
+  ],
+  "required_root_pins": [
+    "BaseColor",
+    "Opacity",
+    "EmissiveColor"
+  ],
+  "preferred_nodes": [
+    "DepthFade",
+    "BumpOffset",
+    "Panner",
+    "Fresnel",
+    "Noise",
+    "Lerp"
+  ],
+  "preferred_parameters": [
+    "RibbonTint",
+    "EdgeColor",
+    "OpacityFloor",
+    "DepthFadeDistance",
+    "FlowSpeed",
+    "FlowStrength"
+  ],
+  "common_failure_modes": [
+    "opaque plastic strip instead of translucent water ribbon",
+    "static glassy read with no directional flow",
+    "full-surface emissive flooding overpowering the body",
+    "forcefield-like shell read replacing liquid motion",
+    "noisy crack patterning that fights the ribbon silhouette"
+  ],
+  "capture_review_checklist": [
+    "Front shot keeps a readable translucent body, not a solid strip.",
+    "Three-quarter shot suggests directional flow without becoming noisy.",
+    "Grazing shot strengthens edge polish while keeping the body readable.",
+    "The brightest accents stay controlled along the edge and do not flood the whole ribbon."
+  ],
+  "family_constraints": {
+    "preferred_surface_mode": "translucent_flowing_ribbon",
+    "required_visual_order": [
+      "body transparency first",
+      "flow breakup second",
+      "edge polish last"
+    ],
+    "disallowed_primary_reads": [
+      "opaque ribbon slab",
+      "forcefield shell",
+      "frosted static glass"
+    ]
+  },
+  "pass_strategy": {
+    "build_material_depth_mask_lane": {
+      "goal": "Establish a readable translucent ribbon body before directional breakup or edge polish is layered on.",
+      "must_read": [
+        "controlled translucency",
+        "body still visible from front view"
+      ],
+      "avoid": [
+        "opaque slab",
+        "nearly invisible shell"
+      ]
+    },
+    "build_material_bump_offset_uv_lane": {
+      "goal": "Introduce directional liquid breakup so the ribbon stops reading as static glass.",
+      "must_read": [
+        "flowing layered body",
+        "directional surface motion cue"
+      ],
+      "avoid": [
+        "checker-like distortion",
+        "random noisy breakup"
+      ]
+    },
+    "build_material_fresnel_lane": {
+      "goal": "Add restrained edge polish that supports the liquid silhouette instead of replacing it.",
+      "must_read": [
+        "controlled edge highlight",
+        "body still primary"
+      ],
+      "avoid": [
+        "forcefield edge shell",
+        "full-surface glow"
+      ]
+    }
+  },
+  "branch_restart_triggers": [
+    "opaque ribbon slab",
+    "static glassy read with no directional flow",
+    "full-surface emissive flooding overpowering the body"
+  ]
+}

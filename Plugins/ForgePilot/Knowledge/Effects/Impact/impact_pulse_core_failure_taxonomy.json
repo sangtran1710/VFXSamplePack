@@ -1,0 +1,97 @@
+{
+  "taxonomy_name": "impact_pulse_core_failure_taxonomy",
+  "scope": "Rules-based V2 critic for impact pulse core reads.",
+  "labels": {
+    "hero_sweep_missing": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroImpactBurst emitter is missing or under-authored.",
+        "Impact burst is not visually distinct from support layers."
+      ],
+      "allowed_repair_ops": [
+        "build_main_attraction_layer",
+        "rebuild_hero_impact_burst_layer"
+      ],
+      "escalation_rule": "Two consecutive hero-layer failures force a rebuild."
+    },
+    "no_outside_to_core_read": {
+      "category": "motion",
+      "severity": "medium",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroImpactBurst does not establish a readable burst path around the impact core."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family",
+        "rebuild_hero_impact_burst_layer"
+      ],
+      "escalation_rule": "Two consecutive failures force a rebuild."
+    },
+    "orbit_ring_shell": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": true,
+      "detection_rules": [
+        "Hero or support layers read as an orbiting ring shell around the impact core."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer",
+        "rebuild_hero_impact_burst_layer"
+      ],
+      "escalation_rule": "Repeated ring-shell reads force a hero rebuild."
+    },
+    "thin_wireframe_ribbons": {
+      "category": "shape_layering",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroImpactBurst is rendered as thin ribbon lines instead of a readable impact streak mass."
+      ],
+      "allowed_repair_ops": [
+        "simplify_hero_ribbon_material",
+        "rebuild_hero_impact_burst_layer"
+      ],
+      "escalation_rule": "Two consecutive hits force a hero rebuild."
+    },
+    "secondary_overwhelms_hero": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "SecondaryImpactStreaks compete with HeroImpactBurst."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer"
+      ],
+      "escalation_rule": "Reduce support streaks before touching the hero burst."
+    },
+    "lingering_orb_shell": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "The overall effect lingers as an orb shell instead of reading as a tight impact pulse."
+      ],
+      "allowed_repair_ops": [
+        "build_shock_glow_layer",
+        "retune_motion_family"
+      ],
+      "escalation_rule": "Tighten the pulse and glow before increasing brightness."
+    },
+    "soft_ambient_glow": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "CoreImpactFlash or BindGlow reads as soft ambient glow instead of a compact impact center."
+      ],
+      "allowed_repair_ops": [
+        "build_core_merge_glow_material",
+        "build_shock_glow_layer"
+      ],
+      "escalation_rule": "Reduce ambient haze before polishing support sparks."
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "suite_name": "explosion_orb_v2_eval",
+  "tasks": [
+    {
+      "id": "explosion_flash_core",
+      "description": "explosion orb with a white hot flash core and outward blast streaks",
+      "hero_reference": "one dominant outward blast sweep, secondary burst punctuation, white-hot flash center",
+      "negative_references": [
+        "smoke plume silhouette",
+        "thin wireframe ribbons"
+      ],
+      "expected_archetype": "explosion_flash_core",
+      "expected_absent_failure_labels": [
+        "hero_sweep_missing",
+        "smoke_plume_silhouette",
+        "thin_wireframe_ribbons"
+      ]
+    },
+    {
+      "id": "grenade_flash_orb",
+      "description": "grenade flash orb with a compact detonation center and sharp outward blast streaks",
+      "hero_reference": "short violent burst with a bright flash core and compact bind glow",
+      "negative_references": [
+        "orbit ring shell",
+        "soft ambient glow"
+      ],
+      "expected_archetype": "explosion_flash_core",
+      "expected_absent_failure_labels": [
+        "orbit_ring_shell",
+        "soft_ambient_glow"
+      ]
+    },
+    {
+      "id": "detonation_core_burst",
+      "description": "detonation core burst with a dominant outward explosion sweep and debris sparks",
+      "hero_reference": "dominant burst read, debris punctuation, dense hot center",
+      "negative_references": [
+        "secondary overwhelms hero",
+        "flat halo shell"
+      ],
+      "expected_archetype": "explosion_flash_core",
+      "expected_absent_failure_labels": [
+        "secondary_overwhelms_hero",
+        "flat_halo_shell"
+      ]
+    },
+    {
+      "id": "blast_core_shock_glow",
+      "description": "blast core shock glow with a bright flash center and layered outward streaks",
+      "hero_reference": "bright core flash with strong hero burst and compact shock glow",
+      "negative_references": [
+        "thin wireframe ribbons",
+        "orbit shell"
+      ],
+      "expected_archetype": "explosion_flash_core",
+      "expected_absent_failure_labels": [
+        "thin_wireframe_ribbons",
+        "orbit_ring_shell"
+      ]
+    },
+    {
+      "id": "fireball_flash_center",
+      "description": "fireball flash center with a white hot detonation core and explosive outward sweep",
+      "hero_reference": "white-hot center, one dominant explosion burst, smaller support streaks",
+      "negative_references": [
+        "soft ambient haze",
+        "hero missing"
+      ],
+      "expected_archetype": "explosion_flash_core",
+      "expected_absent_failure_labels": [
+        "soft_ambient_glow",
+        "hero_sweep_missing"
+      ]
+    }
+  ],
+  "scoring_rubric": {
+    "motion_family_match": "0-5",
+    "silhouette_family_match": "0-5",
+    "hero_secondary_hierarchy": "0-5",
+    "material_family_read": "0-5",
+    "gameplay_readability": "0-5"
+  }
+}

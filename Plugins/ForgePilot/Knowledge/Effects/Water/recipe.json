@@ -1,0 +1,211 @@
+{
+  "_description": "Complete recipe for water effects. Covers splash, rain, waterfall, ripple, and underwater variants.",
+
+  "base_architecture": {
+    "system_name_convention": "NS_Water_{Variant}",
+    "design_philosophy": "Water is transparent, refractive, and gravity-driven. Key traits: arc trajectories, surface tension (droplets), foam/mist at high energy areas, ripples on surface."
+  },
+
+  "effect_types": {
+    "splash": {
+      "description": "Object or character hitting water surface",
+      "emitter_layers": [
+        {
+          "name": "Crown_Splash",
+          "purpose": "Ring of water rising then falling around impact point",
+          "renderer": "mesh (ring/crown mesh) or sprites in ring pattern",
+          "material_type": "Translucent, water material with refraction, slight blue tint",
+          "spawn": "burst: 1 mesh or 8-15 sprites in ring",
+          "particle_lifetime": "0.3-0.8s",
+          "initial_size": "match object size",
+          "size_over_life": "expand ring outward, height rises then falls (parabolic)",
+          "velocity": "outward + upward initially, then gravity takes over",
+          "sort_order": 2
+        },
+        {
+          "name": "Droplets",
+          "purpose": "Individual water droplets arcing outward",
+          "renderer": "sprite (small, round) or mesh (sphere/teardrop)",
+          "material_type": "Translucent or additive highlights, water-like",
+          "spawn": "burst: 15-40",
+          "particle_lifetime": "0.3-0.8s",
+          "initial_size": "1-5 cm (random range)",
+          "velocity": "radial outward 200-600 cm/s + upward 100-400 cm/s",
+          "gravity": "-980 cm/s² (full gravity, parabolic arcs)",
+          "drag": "0.05-0.1 (minimal, ballistic)",
+          "color": "water palette, slight specular highlight",
+          "sort_order": 3,
+          "notes": "Size variety essential. Some large drops, many small. Velocity-aligned stretch for fast droplets."
+        },
+        {
+          "name": "Mist_Spray",
+          "purpose": "Fine water mist around splash",
+          "renderer": "sprite",
+          "material_type": "Translucent, soft, white-blue tint",
+          "spawn": "burst: 5-10",
+          "particle_lifetime": "0.3-1.0s",
+          "initial_size": "10-30 cm",
+          "size_over_life": "grow 2-3x",
+          "opacity": "very low (0.05-0.15), fade out",
+          "velocity": "outward, slower than droplets",
+          "sort_order": 0,
+          "notes": "Adds atmosphere. Most visible in backlight/sunlight."
+        },
+        {
+          "name": "Ripples",
+          "purpose": "Concentric expanding rings on water surface",
+          "renderer": "sprite (ground-oriented rings) or mesh decal",
+          "material_type": "Translucent, normal map distortion, or opacity ring texture",
+          "spawn": "1-3 ripples, staggered timing (0s, 0.1s, 0.2s)",
+          "particle_lifetime": "1.0-2.0s",
+          "size_over_life": "expand from 0 to 200-500 cm",
+          "opacity_over_life": "start visible, fade to 0",
+          "orientation": "flat on water surface plane",
+          "sort_order": -1,
+          "notes": "Multiple rings at different delays creates concentric ripple effect"
+        },
+        {
+          "name": "Foam_Ring",
+          "purpose": "White foam circle at splash base",
+          "renderer": "sprite (surface-oriented)",
+          "material_type": "white, soft, translucent",
+          "spawn": "1 particle",
+          "particle_lifetime": "0.5-1.5s",
+          "size_over_life": "expand then fade",
+          "color": "white, opacity 0.2-0.4",
+          "sort_order": 1
+        }
+      ]
+    },
+
+    "rain": {
+      "description": "Environmental rain effect",
+      "emitter_layers": [
+        {
+          "name": "Raindrops",
+          "purpose": "Falling rain streaks",
+          "renderer": "sprite (velocity-stretched)",
+          "material_type": "Additive or translucent, thin vertical line/streak",
+          "spawn_rate": "100-500/sec (density depends on rain intensity)",
+          "spawn_location": "Large box above camera, 2000-5000 cm wide, following player",
+          "particle_lifetime": "0.3-0.8s (time to fall through visible area)",
+          "size": "length 5-15 cm, width 0.5-1.5 cm (velocity stretch handles this)",
+          "velocity": "downward -800 to -1500 cm/s + slight horizontal for wind",
+          "color": "white-light blue, low opacity (0.1-0.3), slight emissive for visibility",
+          "alignment": "velocity-aligned",
+          "sort_order": 2,
+          "notes": "Spawn above and behind camera frustum. Kill when below ground plane."
+        },
+        {
+          "name": "Ground_Splashes",
+          "purpose": "Small splashes where rain hits ground",
+          "renderer": "sprite",
+          "material_type": "Additive, small splash sprite or flipbook",
+          "spawn_rate": "proportional to raindrop rate, but spawn on ground plane",
+          "spawn_location": "Random positions on ground plane around player",
+          "particle_lifetime": "0.1-0.2s",
+          "size": "3-10 cm",
+          "sort_order": 0
+        },
+        {
+          "name": "Puddle_Ripples",
+          "purpose": "Ripple rings in puddle areas",
+          "renderer": "sprite (ground-oriented)",
+          "spawn_rate": "5-20/sec in puddle zones",
+          "particle_lifetime": "0.3-0.8s",
+          "size_over_life": "expand from 2 cm to 15-30 cm",
+          "opacity_over_life": "fade out",
+          "sort_order": -1
+        },
+        {
+          "name": "Mist_Layer",
+          "purpose": "Ground-level mist/fog during heavy rain",
+          "renderer": "sprite",
+          "material_type": "Translucent, soft, gray",
+          "spawn_location": "ground plane, large area",
+          "particle_lifetime": "3-8s",
+          "size": "large (200-500 cm), low opacity (0.02-0.06)",
+          "sort_order": -2,
+          "notes": "Only for heavy rain. Creates atmosphere."
+        }
+      ]
+    },
+
+    "waterfall": {
+      "description": "Flowing water falling over edge",
+      "emitter_layers": [
+        {
+          "name": "Water_Sheet",
+          "purpose": "Main falling water body",
+          "renderer": "ribbon or sprites",
+          "material_type": "Translucent, panning UV downward, water normal map, refraction",
+          "spawn_rate": "high (50-100/sec) along top edge",
+          "spawn_location": "Line or box along waterfall top edge",
+          "velocity": "forward (off edge) 50-150 cm/s + gravity pulls down",
+          "gravity": "-980 cm/s²",
+          "particle_lifetime": "0.5-2.0s (time to reach bottom)",
+          "notes": "Ribbon renderer creates smooth sheet. Sprite approach needs many overlapping particles."
+        },
+        {
+          "name": "Impact_Foam",
+          "purpose": "White churning foam where water hits pool",
+          "renderer": "sprite",
+          "material_type": "Translucent or additive, white foam texture",
+          "spawn_rate": "20-40/sec at impact area",
+          "particle_lifetime": "0.3-1.0s",
+          "color": "white, opacity 0.3-0.6",
+          "velocity": "outward from impact point, slow"
+        },
+        {
+          "name": "Mist_Cloud",
+          "purpose": "Mist rising from waterfall base",
+          "renderer": "sprite",
+          "material_type": "Translucent, soft, white/light blue",
+          "spawn_rate": "5-15/sec",
+          "velocity": "upward 30-100 cm/s + horizontal drift",
+          "size": "large (50-200 cm), grow over life",
+          "opacity": "very low (0.03-0.1)"
+        }
+      ]
+    }
+  },
+
+  "material_techniques": {
+    "water_refraction": {
+      "description": "Refractive material for water particles/surfaces",
+      "blend_mode": "Translucent",
+      "refraction": "0.02-0.05 (subtle, not glass-like)",
+      "normal_map": "panning dual-layer normal for surface ripple",
+      "base_color": "very slight blue-green tint, mostly transparent"
+    },
+    "caustics": {
+      "description": "Light patterns cast by water surface",
+      "technique": "Dual-layer panning noise textures multiplied together → caustic pattern",
+      "application": "Project onto surfaces below water as light cookie or decal"
+    }
+  },
+
+  "key_principles": {
+    "gravity_drives_everything": "Water is physical. All droplets, streams, waterfalls obey gravity. No floating water.",
+    "transparency_and_refraction": "Water is mostly transparent. Use refraction, not solid colored sprites.",
+    "surface_tension": "Small drops are round (surface tension). Large volumes are irregular. Size determines shape.",
+    "foam_at_energy": "Where water has high energy (impact, rapids) → white foam. Calm water → clear/transparent.",
+    "mist_sells_scale": "Mist/spray around waterfalls and large splashes sells the scale and energy.",
+    "ripples_ground_the_effect": "Ripples on water surface connect the 3D particles to the water plane."
+  },
+
+  "niagara_modules_needed": [
+    "Initialize Particle (or Initialize Ribbon for streams/waterfalls)",
+    "Spawn Rate / Spawn Burst",
+    "Shape Location (sphere/cone/line depending on variant)",
+    "Add Velocity (outward for splash, downward for rain/waterfall)",
+    "Gravity Force (-980 cm/s² for all physical water)",
+    "Drag (minimal, 0.02-0.1 — water has low air resistance)",
+    "Collision (for ground splash detection in rain)",
+    "Scale Sprite Size (size over life curves)",
+    "Color (opacity over life)",
+    "Solve Forces and Velocity",
+    "Sprite Facing Mode (velocity-aligned for droplets/rain)",
+    "Particle State"
+  ]
+}

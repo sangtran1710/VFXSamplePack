@@ -1,0 +1,195 @@
+{
+  "_description": "Complete recipe for creating fire effects in Niagara. Covers campfire, torch, hand fire, and fire burst variants.",
+
+  "shared_references": [
+    "Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json",
+    "Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json",
+    "Knowledge/Materials/Techniques/vfx_artist_advanced_node_taxonomy.json"
+  ],
+
+  "subuv_flipbook_material_recipe": {
+    "when_to_use": "Use this shared playbook whenever the main fire body is driven by a flipbook atlas and the renderer uses ParticleSubUV.",
+    "preferred_material_family": "Translucent, Unlit, Two-Sided ParticleSubUV fire material with CameraDepthFade plus DepthFade for opacity control.",
+    "dynamic_parameter_standard": {
+      "parameter_index": 0,
+      "channel_names": [
+        "PowerEmissive",
+        "FadeDistance",
+        "CameraDpthFade",
+        "Power"
+      ],
+      "default_value": {
+        "R": 1.0,
+        "G": 1.0,
+        "B": 1.0,
+        "A": 2.0
+      }
+    },
+    "graph_summary": [
+      "ParticleSubUV RGB * ParticleColor RGB -> Power with DynamicParameter.R -> EmissiveColor",
+      "ParticleSubUV A -> Power with DynamicParameter.A -> * ParticleColor A -> * CameraDepthFade(DynamicParameter.B) -> DepthFade(DynamicParameter.G) -> Opacity"
+    ],
+    "authoring_rule": "For the primary fire body, prefer this translucent recipe over additive when the request specifically needs controllable fade out."
+  },
+
+  "base_architecture": {
+    "system_name_convention": "NS_{Context}Fire_{Variant}",
+    "emitter_layers": [
+      {
+        "name": "Flames_Core",
+        "purpose": "Main visible fire body",
+        "priority": "required",
+        "renderer": "sprite",
+        "material_type": "M_Fire_Core (SubUV, additive blend)",
+        "sprite_sheet": "4x4 or 8x8 flipbook of fire frames",
+        "spawn_rate": "30-60/sec (campfire), 10-20 (torch)",
+        "particle_lifetime": "0.3-0.6s",
+        "initial_size": "15-40 cm (scale to effect size)",
+        "size_over_life": "grow 1.3-1.8x, slight shrink at end",
+        "velocity": "upward 80-200 cm/s + randomness ±30%",
+        "color_over_life": "reference Principles/color_palettes.json → fire_natural",
+        "opacity_over_life": "0→1 (0-10%), 1 (10-50%), 1→0 (50-100%)",
+        "rotation": "random initial + slow spin 20-60 deg/s",
+        "sort_order": 2,
+        "notes": "SubUV animation rate: 15-25 FPS for natural flickering"
+      },
+      {
+        "name": "Flames_Outer",
+        "purpose": "Softer, larger outer flames for volume",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "M_Fire_Soft (soft additive, more transparent)",
+        "spawn_rate": "50% of core rate",
+        "particle_lifetime": "0.4-0.8s (slightly longer than core)",
+        "initial_size": "1.5-2x core size",
+        "opacity_over_life": "lower peak opacity (0.3-0.6)",
+        "color": "shifted more toward orange/red vs core",
+        "sort_order": 1,
+        "notes": "Creates depth and volume around core flames"
+      },
+      {
+        "name": "Embers",
+        "purpose": "Small bright particles rising from fire",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "M_Ember (simple radial gradient, additive)",
+        "spawn_rate": "5-15/sec",
+        "particle_lifetime": "1.0-3.0s",
+        "initial_size": "1-4 cm",
+        "velocity": "upward 100-300 cm/s + horizontal wander",
+        "color": "bright orange, constant",
+        "opacity_over_life": "1→0 linear fade",
+        "size_over_life": "slight shrink to 0.5x",
+        "sort_order": 4,
+        "notes": "Add curl noise or wind force for natural drift"
+      },
+      {
+        "name": "Smoke",
+        "purpose": "Smoke rising from fire top",
+        "priority": "optional (adds realism)",
+        "renderer": "sprite",
+        "material_type": "M_Smoke (lit or unlit, translucent)",
+        "spawn_rate": "3-8/sec",
+        "particle_lifetime": "2.0-5.0s",
+        "initial_size": "20-40 cm",
+        "size_over_life": "grow 2-3x",
+        "velocity": "upward 50-150 cm/s",
+        "color": "reference Principles/color_palettes.json → smoke_dark",
+        "opacity_over_life": "ramp 0-15%, hold 0.15-0.3, fade 50-100%",
+        "sort_order": 0,
+        "notes": "Spawn position offset slightly above flame tips"
+      },
+      {
+        "name": "Heat_Distortion",
+        "purpose": "Refraction distortion above fire",
+        "priority": "optional (AAA quality)",
+        "renderer": "sprite",
+        "material_type": "M_HeatDistortion (refraction, normal-based offset)",
+        "spawn_rate": "2-5/sec",
+        "particle_lifetime": "0.5-1.5s",
+        "initial_size": "30-80 cm",
+        "size_over_life": "grow 1.5-2x",
+        "velocity": "upward 100-200 cm/s",
+        "opacity_over_life": "low intensity, 0.02-0.08 refraction strength",
+        "sort_order": 5,
+        "notes": "Barely visible but adds significant realism. Spawn above flame center."
+      },
+      {
+        "name": "Ground_Glow",
+        "purpose": "Light pool on ground beneath fire",
+        "priority": "optional",
+        "renderer": "sprite",
+        "material_type": "M_GroundGlow (additive, soft radial gradient)",
+        "spawn_rate": "1 persistent particle",
+        "particle_lifetime": "continuous",
+        "initial_size": "100-300 cm (covers fire base area)",
+        "color": "warm orange, emissive 2-5",
+        "opacity": "0.1-0.3, with subtle flicker (noise-driven)",
+        "sort_order": -1,
+        "notes": "Oriented flat on ground plane. Simulates light without actual light source."
+      }
+    ]
+  },
+
+  "variants": {
+    "torch": {
+      "description": "Wall or handheld torch",
+      "modifications": {
+        "scale_factor": 0.5,
+        "spawn_rates": "reduce all by 40%",
+        "emitter_shape": "narrow cone, tight radius",
+        "wind_influence": "moderate, fire leans with wind",
+        "skip_layers": ["Ground_Glow"]
+      }
+    },
+    "hand_fire": {
+      "description": "Magical fire in character's hand",
+      "modifications": {
+        "scale_factor": 0.3,
+        "emitter_shape": "sphere, radius 8-12cm",
+        "color_override": "can use magic palettes (blue, green, purple)",
+        "skip_layers": ["Smoke", "Ground_Glow"],
+        "add_layers": ["Magic_Glow (point glow around hand)"]
+      }
+    },
+    "fire_burst": {
+      "description": "One-shot fire explosion/burst",
+      "modifications": {
+        "spawn_pattern": "burst (all particles at once)",
+        "burst_count": "20-50 core, 10-20 outer",
+        "velocity": "radial outward 200-500 cm/s",
+        "lifetime": "0.5-1.5s total effect",
+        "add_layers": ["Shockwave (fast expanding ring)"]
+      }
+    },
+    "campfire": {
+      "description": "Standard campfire, default recipe",
+      "modifications": "none — base recipe IS campfire"
+    },
+    "wall_of_fire": {
+      "description": "Linear fire wall, magical or environmental",
+      "modifications": {
+        "emitter_shape": "line source instead of point",
+        "line_length": "200-1000cm depending on wall size",
+        "spawn_rate": "multiply by (line_length / 100)",
+        "add_layers": ["Base_Flames along full length"]
+      }
+    }
+  },
+
+  "niagara_modules_needed": [
+    "Initialize Particle",
+    "Spawn Rate (or Spawn Burst Instantaneous)",
+    "Shape Location (cylinder/sphere/box)",
+    "Add Velocity (upward + randomness)",
+    "Gravity Force (very slight, -20 to counteract too much rise, or 0)",
+    "Curl Noise Force (organic movement)",
+    "Scale Sprite Size (size over life curve)",
+    "Color (color over life curve from palette)",
+    "Sub UVAnimation (for flipbook materials)",
+    "Drag (0.1-0.3 to slow particles over time)",
+    "Solve Forces and Velocity",
+    "Sprite Rotation Rate",
+    "Kill Particles When Lifetime Has Elapsed"
+  ]
+}

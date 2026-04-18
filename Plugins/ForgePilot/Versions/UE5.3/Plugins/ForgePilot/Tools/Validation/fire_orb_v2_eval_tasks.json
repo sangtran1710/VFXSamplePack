@@ -1,0 +1,83 @@
+{
+  "suite_name": "fire_orb_v2_eval",
+  "tasks": [
+    {
+      "id": "hero_fire_orb_sweep",
+      "description": "fire orb with one dominant sweeping flame stroke around a dense burning core",
+      "hero_reference": "one large fire sweep, smaller support filaments, dense flame core, embers, compact bind glow",
+      "negative_references": [
+        "smoke plume",
+        "wireframe ribbon orb"
+      ],
+      "expected_archetype": "hero_fire_orb_sweep",
+      "expected_absent_failure_labels": [
+        "hero_sweep_missing",
+        "thin_wireframe_ribbons",
+        "smoke_plume_silhouette"
+      ]
+    },
+    {
+      "id": "infernal_orb_bind",
+      "description": "infernal orb with a broad flame sweep and compact burning center",
+      "hero_reference": "fiery hero sweep wrapping a burning orb center",
+      "negative_references": [
+        "orbit ring shell",
+        "flat halo shell"
+      ],
+      "expected_archetype": "hero_fire_orb_sweep",
+      "expected_absent_failure_labels": [
+        "orbit_ring_shell",
+        "flat_halo_shell"
+      ]
+    },
+    {
+      "id": "burning_core_sweep",
+      "description": "burning orb core with thick flame streaks and ember support",
+      "hero_reference": "hero flame sweep with ember punctuation",
+      "negative_references": [
+        "thin line ribbons",
+        "empty hollow core"
+      ],
+      "expected_archetype": "hero_fire_orb_sweep",
+      "expected_absent_failure_labels": [
+        "linework_not_flame_body",
+        "support_fill_missing"
+      ]
+    },
+    {
+      "id": "heated_orb_shell",
+      "description": "heated fire orb with dominant flame sweep and soft bind glow",
+      "hero_reference": "dominant sweep, readable core, support glow",
+      "negative_references": [
+        "closed ring orb",
+        "secondary overwhelms hero"
+      ],
+      "expected_archetype": "hero_fire_orb_sweep",
+      "expected_absent_failure_labels": [
+        "secondary_overwhelms_hero",
+        "orbit_ring_shell"
+      ]
+    },
+    {
+      "id": "ember_lit_flame_orb",
+      "description": "ember lit flame orb with one hero sweep and dense hot flame mass",
+      "hero_reference": "strong hero-secondary hierarchy and readable burning core",
+      "negative_references": [
+        "smoke jet",
+        "flat halo"
+      ],
+      "expected_archetype": "hero_fire_orb_sweep",
+      "expected_absent_failure_labels": [
+        "smoke_plume_silhouette",
+        "flat_halo_shell"
+      ]
+    }
+  ],
+  "scoring_rubric": {
+    "motion_family_match": "0-5",
+    "silhouette_family_match": "0-5",
+    "hero_secondary_hierarchy": "0-5",
+    "material_family_read": "0-5",
+    "gameplay_readability": "0-5"
+  }
+}

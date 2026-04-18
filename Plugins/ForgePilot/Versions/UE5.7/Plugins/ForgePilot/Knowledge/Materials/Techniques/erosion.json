@@ -1,0 +1,135 @@
+{
+  "_description": "Material technique: Erosion effect. Progressive wear/damage revealing layers underneath. Used for destruction, aging, terrain blending, and stylized dissolve variants.",
+
+  "overview": "Erosion is a variant of dissolve but with directional, layered, or physically-motivated progression. Instead of random noise-based disappearance, erosion simulates wear patterns — edges erode first, thin areas break before thick, and underlying layers are revealed progressively.",
+
+  "material_setup": {
+    "blend_mode": "Masked or Opaque (with World Position Offset for vertex displacement)",
+    "shading_model": "Default Lit",
+    "key_parameters": {
+      "ErosionAmount": {
+        "type": "Scalar",
+        "range": "0.0-1.0",
+        "note": "0 = pristine, 1 = fully eroded"
+      },
+      "ErosionEdgeWidth": {
+        "type": "Scalar",
+        "range": "0.02-0.2",
+        "note": "Width of the transition/glowing edge"
+      },
+      "ErosionDirection": {
+        "type": "Vector",
+        "note": "Optional: direction of erosion progression (e.g., bottom-up, inside-out)"
+      },
+      "ErosionNoiseScale": {
+        "type": "Scalar",
+        "range": "0.5-8.0"
+      },
+      "ErosionDetailScale": {
+        "type": "Scalar",
+        "range": "3.0-20.0",
+        "note": "Fine grain detail noise layered on top"
+      }
+    }
+  },
+
+  "node_graph": {
+    "steps": [
+      {
+        "step": 1,
+        "action": "Create base erosion mask",
+        "nodes": "Texture Sample (noise) at ErosionNoiseScale UV",
+        "note": "Use Perlin or Worley/Voronoi noise for natural wear patterns"
+      },
+      {
+        "step": 2,
+        "action": "Add detail noise layer",
+        "nodes": "Second noise at ErosionDetailScale, multiply with base noise (0.3 weight)",
+        "note": "Creates micro-detail crumbling at erosion edges"
+      },
+      {
+        "step": 3,
+        "action": "Add directional bias (optional)",
+        "nodes": "Dot(VertexNormalWS, ErosionDirection) → remap 0-1 → blend with noise mask",
+        "note": "Makes erosion start from a direction (e.g., wind-facing side erodes first)"
+      },
+      {
+        "step": 4,
+        "action": "Create curvature/edge bias (optional)",
+        "nodes": "Use AmbientOcclusion or curvature map to make edges/thin parts erode faster",
+        "note": "Multiply AO into erosion mask — dark AO areas (crevices, edges) erode first"
+      },
+      {
+        "step": 5,
+        "action": "Apply erosion threshold",
+        "nodes": "ErosionMask - ErosionAmount → Saturate → OpacityMask",
+        "note": "Same principle as dissolve but with richer input mask"
+      },
+      {
+        "step": 6,
+        "action": "Create edge effect",
+        "nodes": "Smoothstep(0, ErosionEdgeWidth, MaskDiff) → invert → EdgeMask",
+        "note": "Can use this for: emissive glow, color shift, or reveal underlayer"
+      },
+      {
+        "step": 7,
+        "action": "Reveal underlayer at edge (optional)",
+        "nodes": "Lerp(TopMaterial, BottomMaterial, EdgeMask)",
+        "note": "e.g., metal surface erodes to reveal rust, wood reveals charcoal, stone reveals magma"
+      }
+    ]
+  },
+
+  "erosion_types": {
+    "burn_erosion": {
+      "description": "Fire consuming a surface",
+      "edge_color": "orange → red → black char",
+      "underlayer": "black charcoal texture",
+      "edge_emissive": "10-30",
+      "noise_type": "Perlin, medium frequency"
+    },
+    "acid_erosion": {
+      "description": "Chemical/acid eating through surface",
+      "edge_color": "green-yellow glow",
+      "underlayer": "bubbling, pitted surface texture",
+      "edge_emissive": "5-15",
+      "noise_type": "Voronoi (cellular pattern = acid holes)"
+    },
+    "frost_erosion": {
+      "description": "Frost/ice spreading and cracking surface",
+      "edge_color": "white-blue crystalline",
+      "underlayer": "ice/frost texture with normal map",
+      "edge_emissive": "3-8",
+      "noise_type": "Voronoi + cracks texture",
+      "direction": "typically bottom-up or from contact point"
+    },
+    "age_wear": {
+      "description": "Natural aging, paint peeling, rust",
+      "edge_color": "minimal glow, color transition only",
+      "underlayer": "rust, bare metal, or primer",
+      "edge_emissive": "0 (no glow for realism)",
+      "noise_type": "Perlin + AO-biased (edges and corners wear first)"
+    },
+    "magic_corruption": {
+      "description": "Dark magic consuming/corrupting a surface",
+      "edge_color": "purple-black with bright purple edge",
+      "underlayer": "dark veined texture, glowing cracks",
+      "edge_emissive": "8-25",
+      "noise_type": "Fractal noise with tendrils (distorted UV)"
+    }
+  },
+
+  "performance_notes": {
+    "texture_reads": "2-3 noise samples is acceptable. Avoid >4 for mobile/VR.",
+    "instruction_count": "Adds 25-40 instructions to base material",
+    "optimization": "Can bake direction + curvature + noise into single RGBA texture to reduce samples"
+  },
+
+  "common_mistakes": [
+    "Using only one noise frequency → erosion looks too uniform and CG",
+    "Erosion edges too sharp without any softness → looks like z-fighting, not wear",
+    "Not revealing underlying layer → just disappears, misses storytelling opportunity",
+    "Direction uniform across whole mesh → real erosion varies by exposure/geometry",
+    "Forgetting to add slight vertex displacement at edge → eroded surface looks 2D flat"
+  ]
+}

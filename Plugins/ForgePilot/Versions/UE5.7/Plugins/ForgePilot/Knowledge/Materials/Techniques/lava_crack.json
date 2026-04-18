@@ -1,0 +1,104 @@
+{
+  "overview": "Lava materials should read as cooled basalt-like crust plus a hot fissure network. The family should stay opaque-first, with emissive constrained inside cracks rather than flooding the full surface.",
+  "visual_reads": [
+    "cooled dark crust",
+    "hot crack network",
+    "localized emissive fissures",
+    "crust darker than magma",
+    "high contrast crack readability"
+  ],
+  "lane_order": [
+    "build_material_crack_mask_lane",
+    "build_material_shell_core_lane",
+    "build_material_fresnel_lane"
+  ],
+  "required_root_pins": [
+    "BaseColor",
+    "Roughness",
+    "EmissiveColor"
+  ],
+  "preferred_nodes": [
+    "Noise",
+    "Power",
+    "Saturate",
+    "Lerp",
+    "Multiply",
+    "Fresnel"
+  ],
+  "preferred_parameters": [
+    "CrackContrast",
+    "CrackScale",
+    "CrustColor",
+    "MagmaColor",
+    "EdgeBoost",
+    "EmissiveIntensity",
+    "CrustRoughness",
+    "CrackSharpness"
+  ],
+  "common_failure_modes": [
+    "whole surface glowing evenly",
+    "orange tint with no crust separation",
+    "cracks too soft to read in a single frame",
+    "dark rock with no hot fissures",
+    "specular hotspots killing crack readability",
+    "translucent or glass-like read"
+  ],
+  "capture_review_checklist": [
+    "Front shot shows crust versus fissure separation.",
+    "Three-quarter shot keeps cracks readable through specular hotspots.",
+    "Grazing shot still reads the emissive network without flooding the frame.",
+    "The shell remains darker than the fissures in all three benchmark angles."
+  ],
+  "family_constraints": {
+    "preferred_surface_mode": "opaque",
+    "disallowed_root_pins": [
+      "Opacity",
+      "Refraction"
+    ],
+    "required_visual_order": [
+      "crack mask first",
+      "shell or crust separation second",
+      "edge polish last"
+    ]
+  },
+  "pass_strategy": {
+    "build_material_crack_mask_lane": {
+      "goal": "Establish a readable fissure mask before any shell tint or edge polish is added.",
+      "must_read": [
+        "isolated crack network",
+        "no full-surface emissive flood"
+      ],
+      "avoid": [
+        "soft cloudy breakup",
+        "uniform orange coverage"
+      ]
+    },
+    "build_material_shell_core_lane": {
+      "goal": "Turn the fissure mask into cooled crust versus hot internal separation.",
+      "must_read": [
+        "dark crust",
+        "hot inner fissures"
+      ],
+      "avoid": [
+        "flat orange rock",
+        "full surface brightening"
+      ]
+    },
+    "build_material_fresnel_lane": {
+      "goal": "Add restrained edge polish only after crust and fissure readability are stable.",
+      "must_read": [
+        "subtle rim support",
+        "crack network still dominant"
+      ],
+      "avoid": [
+        "energy shield edge",
+        "rim becoming the primary read"
+      ]
+    }
+  },
+  "branch_restart_triggers": [
+    "whole surface glowing evenly",
+    "orange tint with no crust separation",
+    "translucent or glass-like read"
+  ]
+}

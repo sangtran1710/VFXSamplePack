@@ -1,0 +1,118 @@
+{
+  "_description": "Material technique: Dissolve/Disintegration effect. Used for death effects, teleportation, materialization.",
+
+  "overview": "Dissolve reveals or hides a mesh by eroding it based on a noise texture and a threshold parameter. Pixels where noise < threshold get clipped (OpacityMask) or faded (Translucent).",
+
+  "material_setup": {
+    "blend_mode": "Masked (sharp edge) or Translucent (soft edge)",
+    "shading_model": "Default Lit or Unlit depending on use case",
+    "two_sided": true,
+    "key_parameters": {
+      "DissolveAmount": {
+        "type": "Scalar",
+        "range": "0.0 (fully visible) to 1.0 (fully dissolved)",
+        "note": "This is the main parameter animated over time"
+      },
+      "EdgeWidth": {
+        "type": "Scalar",
+        "range": "0.01-0.15",
+        "note": "Width of the glowing dissolve edge"
+      },
+      "EdgeColor": {
+        "type": "Vector (RGB)",
+        "default": "orange-yellow emissive",
+        "note": "Color of the burning/glowing edge"
+      },
+      "EdgeEmissiveIntensity": {
+        "type": "Scalar",
+        "range": "5.0-50.0",
+        "note": "How bright the edge glows"
+      },
+      "NoiseScale": {
+        "type": "Scalar",
+        "range": "1.0-10.0",
+        "note": "UV scale of the dissolve noise texture"
+      }
+    }
+  },
+
+  "node_graph": {
+    "description": "Step-by-step node setup for dissolve material",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Add Texture Sample node",
+        "texture": "Noise texture (T_Perlin_Noise, T_Voronoi, or any grayscale noise)",
+        "uv": "TexCoord[0] * NoiseScale parameter",
+        "output": "R channel → called 'NoiseMask'"
+      },
+      {
+        "step": 2,
+        "action": "Create dissolve threshold comparison",
+        "nodes": "Subtract: NoiseMask - DissolveAmount → result is 'DissolveDiff'",
+        "note": "Where DissolveDiff < 0, the pixel is dissolved"
+      },
+      {
+        "step": 3,
+        "action": "Create opacity mask (for Masked blend mode)",
+        "nodes": "Step or Ceil(Saturate(DissolveDiff)) → Opacity Mask pin",
+        "note": "Binary: 0 = clipped, 1 = visible"
+      },
+      {
+        "step": 4,
+        "action": "Create edge detection",
+        "nodes": "Smoothstep(0, EdgeWidth, DissolveDiff) → invert (1-x) → 'EdgeMask'",
+        "note": "EdgeMask = 1.0 at dissolve boundary, 0.0 elsewhere"
+      },
+      {
+        "step": 5,
+        "action": "Apply edge color to emissive",
+        "nodes": "EdgeMask * EdgeColor * EdgeEmissiveIntensity → add to Emissive Color",
+        "note": "This creates the glowing edge effect"
+      },
+      {
+        "step": 6,
+        "action": "Connect base material",
+        "nodes": "Original BaseColor, Normal, Roughness, Metallic stay connected as normal",
+        "note": "Dissolve is additive — it adds edge glow on top of existing material"
+      }
+    ]
+  },
+
+  "advanced_variations": {
+    "directional_dissolve": {
+      "description": "Dissolve sweeps in a direction (bottom to top, left to right)",
+      "modification": "Replace noise texture with: WorldPosition.Z (or local Z) normalized to 0-1 range, then ADD noise on top for rough edges",
+      "extra_nodes": "ObjectPosition, Transform to local space, normalize to mesh bounds, add noise * 0.2"
+    },
+    "edge_particles": {
+      "description": "Spawn Niagara particles along dissolve edge",
+      "approach": "Use same DissolveAmount parameter in Niagara. Sample mesh surface, check noise at that position, emit particles where noise ≈ threshold"
+    },
+    "multi_color_edge": {
+      "description": "Edge transitions through multiple colors (white → yellow → orange → red → black)",
+      "modification": "Use DissolveDiff as input to a Curve Atlas or Gradient texture lookup instead of single EdgeColor"
+    },
+    "erosion_detail": {
+      "description": "Adds fine detail erosion on top of main dissolve",
+      "modification": "Layer a second noise texture at 5-10x UV scale, blend with main noise using multiply or min",
+      "note": "Creates crumbly, detailed dissolution edges"
+    }
+  },
+
+  "common_mistakes": [
+    "EdgeWidth too large → looks like toon shader, not dissolve",
+    "EdgeWidth too small → edge barely visible, effect looks like simple alpha clip",
+    "NoiseScale too uniform → dissolve looks artificial and flat",
+    "Not using emissive on edge → dissolve lacks energy and looks dead",
+    "Forgetting two-sided → backfaces disappear and you see inside the mesh",
+    "Using Translucent when Masked works → unnecessary performance cost",
+    "DissolveAmount not clamped 0-1 → visual artifacts at extremes"
+  ],
+
+  "performance_notes": {
+    "masked_vs_translucent": "Masked is cheaper. Use Masked unless you need soft edges.",
+    "noise_texture_size": "256x256 or 512x512 is sufficient for most cases",
+    "instruction_count": "Dissolve adds ~15-25 instructions to base material"
+  }
+}

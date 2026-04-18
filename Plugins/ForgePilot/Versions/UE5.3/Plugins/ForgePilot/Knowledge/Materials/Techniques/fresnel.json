@@ -1,0 +1,138 @@
+{
+  "_description": "Material technique: Fresnel (rim lighting, edge glow, shield effects). Essential for magic auras, shields, hologram edges, character highlights.",
+
+  "overview": "Fresnel effect makes surfaces brighter at glancing angles (edges) and darker at direct-facing angles (center). In UE5, the Fresnel node outputs 0 at surface center, 1 at edges.",
+
+  "material_setup": {
+    "blend_mode": "Translucent or Additive (most common for VFX)",
+    "shading_model": "Unlit (for pure emissive VFX) or Default Lit",
+    "key_parameters": {
+      "FresnelExponent": {
+        "type": "Scalar",
+        "range": "1.0-8.0",
+        "default": 3.0,
+        "note": "Higher = thinner edge, Lower = wider glow. 2-4 is sweet spot for most VFX."
+      },
+      "FresnelColor": {
+        "type": "Vector (RGB)",
+        "note": "Color of the edge glow"
+      },
+      "FresnelIntensity": {
+        "type": "Scalar",
+        "range": "1.0-50.0",
+        "note": "Emissive multiplier for bloom"
+      },
+      "FresnelOpacity": {
+        "type": "Scalar",
+        "range": "0.0-1.0",
+        "note": "Overall opacity control"
+      }
+    }
+  },
+
+  "node_graph": {
+    "basic_fresnel": {
+      "steps": [
+        {
+          "step": 1,
+          "action": "Add Fresnel node",
+          "inputs": {"ExponentIn": "FresnelExponent parameter", "BaseReflectFractionIn": 0.0},
+          "output": "FresnelResult (0 at center, 1 at edges)"
+        },
+        {
+          "step": 2,
+          "action": "Apply color and intensity",
+          "nodes": "FresnelResult * FresnelColor * FresnelIntensity → Emissive Color"
+        },
+        {
+          "step": 3,
+          "action": "Apply to opacity",
+          "nodes": "FresnelResult * FresnelOpacity → Opacity pin"
+        }
+      ]
+    },
+    "custom_fresnel_manual": {
+      "description": "Build fresnel manually for more control (recommended for advanced VFX)",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Get view-dependent dot product",
+          "nodes": "Dot(VertexNormalWS, CameraDirectionWS) → result is 1 at center, 0 at edges"
+        },
+        {
+          "step": 2,
+          "action": "Invert and power",
+          "nodes": "1 - DotResult → Power(x, Exponent) → gives you 0 at center, 1 at edges with controllable falloff"
+        },
+        {
+          "step": 3,
+          "action": "Apply color/intensity same as basic"
+        }
+      ],
+      "advantage": "Can manipulate the dot product (offset, remap) for unique looks"
+    }
+  },
+
+  "common_use_cases": {
+    "shield_bubble": {
+      "exponent": "2.0-3.0",
+      "color": "cyan/blue, emissive 10-30",
+      "opacity": "0.05-0.2 center, fresnel-driven edges",
+      "extra": "Add panning hex pattern texture multiplied with fresnel for tech shield look",
+      "blend": "Additive"
+    },
+    "character_aura": {
+      "exponent": "2.5-4.0",
+      "color": "match ability color (fire=orange, ice=blue, holy=gold)",
+      "opacity": "fresnel-driven, 0 center for see-through",
+      "extra": "Animate intensity with sine wave for pulse effect",
+      "blend": "Translucent or Additive"
+    },
+    "hologram": {
+      "exponent": "1.5-2.5 (wider edge)",
+      "color": "cyan/blue-white, emissive 5-15",
+      "extra": "Add scanlines (WorldPosition.Z * frequency → frac → step) multiplied with fresnel",
+      "blend": "Additive"
+    },
+    "ghost_character": {
+      "exponent": "3.0-5.0",
+      "color": "pale blue-white or green",
+      "opacity": "very low base (0.02-0.1) + fresnel edges",
+      "extra": "Distortion on center to see through, solid at edges",
+      "blend": "Translucent"
+    },
+    "hit_flash": {
+      "exponent": "1.0-2.0 (wide, covers most of surface)",
+      "color": "white, emissive 20-50",
+      "duration": "0.05-0.15s, animated via parameter",
+      "note": "Applied as overlay to character material on hit"
+    }
+  },
+
+  "advanced_techniques": {
+    "fresnel_with_noise": {
+      "description": "Break up the clean fresnel edge with noise for organic look",
+      "method": "Multiply fresnel result with noise texture before applying color. Creates flickering, unstable edge."
+    },
+    "dual_fresnel": {
+      "description": "Two fresnel layers at different exponents for inner/outer glow",
+      "method": "Fresnel(exp=2) * OuterColor + Fresnel(exp=5) * InnerColor (brighter, thinner)"
+    },
+    "animated_fresnel": {
+      "description": "Pulse, breathe, or flicker the fresnel edge",
+      "method": "Multiply intensity by: Sine(Time * Speed) * 0.5 + 0.5 for pulse, or noise for flicker"
+    },
+    "world_position_mask": {
+      "description": "Fresnel only on certain parts of mesh (e.g., top half only)",
+      "method": "Lerp(0, FresnelResult, WorldPositionMask) where mask is based on Z height or custom vertex color"
+    }
+  },
+
+  "common_mistakes": [
+    "Exponent too high (>6) → edge almost invisible, wasted effect",
+    "Exponent too low (<1.5) → entire surface glows, loses rim-light quality",
+    "Not using emissive → fresnel without glow looks flat and unimpressive",
+    "Applying to opaque material → you see the color but not the rim-light shape, must use translucent/additive",
+    "Forgetting to disable depth test for inner surfaces → z-fighting artifacts"
+  ]
+}

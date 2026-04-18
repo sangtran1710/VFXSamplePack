@@ -1,0 +1,83 @@
+{
+  "suite_name": "magic_orb_v2_eval",
+  "tasks": [
+    {
+      "id": "arcane_pull_orb",
+      "description": "arcane orb pulling magical wisps into a bright runic core",
+      "hero_reference": "dominant arcane sweep, thin magical filaments, dense magical core, motes, bind glow",
+      "negative_references": [
+        "electrical zigzag burst",
+        "closed ring orb"
+      ],
+      "expected_archetype": "arcane_pull_orb",
+      "expected_absent_failure_labels": [
+        "hero_sweep_missing",
+        "electrical_zigzag_dominance",
+        "closed_ring_orb"
+      ]
+    },
+    {
+      "id": "runic_gather_orb",
+      "description": "runic energy orb gathering wisps toward a bright magical center",
+      "hero_reference": "magical pull, readable core detail, compact glow",
+      "negative_references": [
+        "fire plume",
+        "glyph haze bloom"
+      ],
+      "expected_archetype": "arcane_pull_orb",
+      "expected_absent_failure_labels": [
+        "no_outside_to_core_read",
+        "over_bloomed_glyph_haze"
+      ]
+    },
+    {
+      "id": "mystic_core_bind",
+      "description": "mystic orb with one arcane sweep and soft magical bind glow",
+      "hero_reference": "one hero sweep with controlled glow and detailed core",
+      "negative_references": [
+        "ring shell",
+        "line-heavy graphic ribbons"
+      ],
+      "expected_archetype": "arcane_pull_orb",
+      "expected_absent_failure_labels": [
+        "closed_ring_orb",
+        "linework_not_flame_body"
+      ]
+    },
+    {
+      "id": "eldritch_pull_center",
+      "description": "eldritch magical energy pulled inward to a bright orb center",
+      "hero_reference": "readable magical pull and support motes",
+      "negative_references": [
+        "zigzag electricity",
+        "secondary overwhelms hero"
+      ],
+      "expected_archetype": "arcane_pull_orb",
+      "expected_absent_failure_labels": [
+        "electrical_zigzag_dominance",
+        "secondary_overwhelms_hero"
+      ]
+    },
+    {
+      "id": "arcane_motes_core",
+      "description": "arcane core orb with dominant magical sweep and sparkling motes",
+      "hero_reference": "hero-secondary hierarchy with detailed arcane core mass",
+      "negative_references": [
+        "empty hollow glow",
+        "closed halo ring"
+      ],
+      "expected_archetype": "arcane_pull_orb",
+      "expected_absent_failure_labels": [
+        "support_fill_missing",
+        "closed_ring_orb"
+      ]
+    }
+  ],
+  "scoring_rubric": {
+    "motion_family_match": "0-5",
+    "silhouette_family_match": "0-5",
+    "hero_secondary_hierarchy": "0-5",
+    "material_family_read": "0-5",
+    "gameplay_readability": "0-5"
+  }
+}

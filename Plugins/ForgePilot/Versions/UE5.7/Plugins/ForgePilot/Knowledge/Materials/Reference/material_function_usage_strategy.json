@@ -1,0 +1,121 @@
+{
+  "_description": "How ForgePilot should decide when to use native Material Expressions versus Material Functions in current Unreal Engine material graphs.",
+
+  "core_model": {
+    "material_expression": "A primitive graph node such as Add, Multiply, DepthFade, ParticleSubUV, ComponentMask, or DynamicParameter. Use expressions for small, direct operations where the artist needs visible control.",
+    "material_function": "A reusable packaged graph made from expressions. Use MaterialFunctionCall when the logic is reusable, has many internal nodes, or is easier to read as one named block.",
+    "important_caveat": "A Material Function is not automatically cheaper at compiled shader level. It usually improves readability, reuse, and consistency; shader cost still depends on the expressions inside the function."
+  },
+
+  "tooling_contract": {
+    "create_call_node": "Use add_material_expression with expression_type='MaterialFunctionCall' and function_path set to the full function asset path.",
+    "inspect_function": "Use get_material_function_info before wiring any non-trivial MaterialFunctionCall.",
+    "wire_safely": "Prefer connect_material_nodes.target_input_name for MaterialFunctionCall inputs instead of raw target_input_index.",
+    "validate_support": "Use Tools/Validation/run_material_function_probe.ps1 to verify curated functions can be loaded, inspected, and instantiated through the bridge.",
+    "catalog_reference": "Knowledge/Materials/Reference/material_node_catalog_current.json"
+  },
+
+  "when_to_prefer_functions": [
+    {
+      "case": "Flipbook and SubUV helpers",
+      "why": "A function keeps frame math, UV offsets, and optional motion-vector blending out of the main material graph.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions02/Texturing/FlipBook_UniformNonUniform.FlipBook_UniformNonUniform",
+        "/Engine/Functions/Engine_MaterialFunctions02/Texturing/FlipBook_MotionVectors.FlipBook_MotionVectors",
+        "/Engine/Functions/Engine_MaterialFunctions03/Texturing/SubUV_Function.SubUV_Function",
+        "/Engine/Functions/Engine_MaterialFunctions03/Texturing/SubUV_Function_MipDerivative.SubUV_Function_MipDerivative"
+      ]
+    },
+    {
+      "case": "Range remap, contrast, and image adjustment",
+      "why": "These blocks are common in dissolve, smoke alpha shaping, packed mask cleanup, and emissive shaping.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions01/ImageAdjustment/CheapContrast.CheapContrast",
+        "/Engine/Functions/Engine_MaterialFunctions01/ImageAdjustment/CheapContrast_RGB.CheapContrast_RGB",
+        "/Engine/Functions/Engine_MaterialFunctions03/Math/RemapValueRange.RemapValueRange",
+        "/Engine/Functions/Engine_MaterialFunctions03/Math/RemapValueRangeNormalized.RemapValueRangeNormalized"
+      ]
+    },
+    {
+      "case": "Radial, spherical, and coordinate conversion",
+      "why": "Coordinate conversion is easy to misbuild from scratch and should stay readable for portal rings, shockwaves, decals, sky UVs, and radial masks.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/VectorToRadialValue.VectorToRadialValue",
+        "/Engine/Functions/Engine_MaterialFunctions01/Coordinates/LongLatToUV.LongLatToUV",
+        "/Engine/Functions/Engine_MaterialFunctions01/Coordinates/UVToLongLat.UVToLongLat"
+      ]
+    },
+    {
+      "case": "World/object aligned sampling",
+      "why": "World aligned texture and normal logic becomes noisy if rebuilt inline and often has several artist-facing inputs.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions01/Texturing/WorldAlignedTexture.WorldAlignedTexture",
+        "/Engine/Functions/Engine_MaterialFunctions01/Texturing/WorldAlignedNormal.WorldAlignedNormal",
+        "/Engine/Functions/Engine_MaterialFunctions01/AlphaBlend/WorldAlignedBlend.WorldAlignedBlend",
+        "/Engine/Functions/Engine_MaterialFunctions02/UVs/BoundingBoxBased_0-1_UVW.BoundingBoxBased_0-1_UVW"
+      ]
+    },
+    {
+      "case": "Blend modes and color compositing",
+      "why": "Blend functions communicate intent better than hand-built math chains and reduce repetitive graph clutter.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions03/Blends/Blend_Screen.Blend_Screen",
+        "/Engine/Functions/Engine_MaterialFunctions03/Blends/Blend_Overlay.Blend_Overlay",
+        "/Engine/Functions/Engine_MaterialFunctions03/Blends/Blend_ColorDodge.Blend_ColorDodge",
+        "/Engine/Functions/Engine_MaterialFunctions03/Blends/Blend_LinearDodge.Blend_LinearDodge"
+      ]
+    },
+    {
+      "case": "Packed vector/component utility",
+      "why": "BreakOut and MakeFloat functions make packed texture workflows easier to inspect and safer to wire by name.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/BreakOutFloat2Components.BreakOutFloat2Components",
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/BreakOutFloat3Components.BreakOutFloat3Components",
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/BreakOutFloat4Components.BreakOutFloat4Components",
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/MakeFloat2.MakeFloat2",
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/MakeFloat3.MakeFloat3",
+        "/Engine/Functions/Engine_MaterialFunctions02/Utility/MakeFloat4.MakeFloat4"
+      ]
+    },
+    {
+      "case": "Depth, camera fade, and environment integration",
+      "why": "Depth-related material blocks are visually sensitive. A named function block helps preserve the intended fade behavior.",
+      "examples": [
+        "/Engine/Functions/Engine_MaterialFunctions01/Opacity/CameraDepthFade.CameraDepthFade"
+      ]
+    }
+  ],
+
+  "when_to_keep_expressions_inline": [
+    "Use Add, Multiply, OneMinus, Saturate, Clamp, Power, ComponentMask, AppendVector, and simple parameters directly when the logic is only one or two nodes.",
+    "Use ParticleColor, DynamicParameter, ParticleRelativeTime, ParticleSubUV, DepthFade, PixelDepth, and WorldPosition directly when they are the primary data source.",
+    "Do not hide key artist controls inside functions unless the function exposes clear input pins and documented defaults.",
+    "Do not replace every math chain with a function. Readability is the goal, not abstraction for its own sake."
+  ],
+
+  "agent_workflow": [
+    "Classify the material task and load the curated VFX recipe first.",
+    "If the graph needs a reusable block, search material_node_catalog_current.json for candidate MaterialFunctions.",
+    "Run get_material_function_info on the candidate and inspect input/output names.",
+    "Instantiate with add_material_expression using MaterialFunctionCall and the exact function_path.",
+    "Wire by target_input_name whenever possible.",
+    "If the function is not already in run_material_function_probe.ps1, add it to that script before depending on it in production automation.",
+    "After wiring, inspect or compile the material and save the asset."
+  ],
+
+  "vfx_defaults": {
+    "fire_smoke_flipbook": "Prefer ParticleSubUV for Niagara sprite renderer flipbook sampling. Use FlipBook_UniformNonUniform or FlipBook_MotionVectors when the material needs custom UV frame logic outside ParticleSubUV.",
+    "opacity_fade": "For additive fire, Niagara alpha often appears as emissive intensity instead of true transparency. Use Translucent alpha/depth fade when actual fade-out must be visible.",
+    "function_wiring": "Always prefer pin-name wiring for functions with artist-facing inputs such as HueShift, RemapValueRange, CameraDepthFade, WorldAlignedTexture, and Blend functions."
+  },
+
+  "validation": {
+    "function_probe_script": "Tools/Validation/run_material_function_probe.ps1",
+    "node_probe_script": "Tools/Validation/run_material_node_probe.ps1",
+    "catalog_export_script": "Tools/Validation/export_material_node_catalog.ps1",
+    "function_docs_export_script": "Tools/Validation/export_material_function_docs.ps1",
+    "function_study_index": "Knowledge/Materials/Reference/material_function_study_index_current.json",
+    "function_docs_asset_registry_rule": "When building semantic Material Function docs, use scan_assets with asset_type='MaterialFunction' instead of trusting every .uasset under Engine/Content/Functions.",
+    "known_redirector_caution": "The catalog may include legacy or redirector-like function names. For world aligned alpha blending, use WorldAlignedBlend instead of World_Aligned_Blend because the latter may not load through EditorAssetLibrary in bridge automation."
+  }
+}

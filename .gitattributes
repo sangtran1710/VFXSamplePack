@@ -1,0 +1,8 @@
+* text=auto
+
+*.uasset binary
+*.umap binary
+*.ubulk binary
+*.uexp binary
+*.uproject text
+

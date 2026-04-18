@@ -1,0 +1,130 @@
+{
+  "_description": "Material technique: Panning UV / Scrolling textures. Fundamental for flowing effects — fire, water, energy, magic, clouds, force fields.",
+
+  "overview": "Panning UV shifts texture coordinates over time, creating the illusion of movement without particle simulation. Combined with multiple layers at different speeds, it creates complex flowing visuals cheaply.",
+
+  "node_graph": {
+    "basic_panning": {
+      "steps": [
+        {
+          "step": 1,
+          "nodes": "TexCoord[0] + (Time * PanSpeed)",
+          "note": "PanSpeed is Vector2 (U direction, V direction). Positive U = scroll right, positive V = scroll up."
+        },
+        {
+          "step": 2,
+          "nodes": "Result → UV input of Texture Sample",
+          "note": "Texture must have Wrap addressing mode (not Clamp)"
+        }
+      ]
+    },
+    "dual_layer_panning": {
+      "description": "Two textures panning at different speeds/directions for complex motion",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Layer A: noise texture at speed (0.1, 0.2)",
+          "nodes": "TexCoord * ScaleA + Time * SpeedA → Sample TextureA"
+        },
+        {
+          "step": 2,
+          "action": "Layer B: same or different noise at speed (-0.05, 0.15)",
+          "nodes": "TexCoord * ScaleB + Time * SpeedB → Sample TextureB"
+        },
+        {
+          "step": 3,
+          "action": "Combine layers",
+          "nodes": "Multiply, Add, or Lerp depending on desired look",
+          "options": {
+            "multiply": "Creates interference pattern, good for caustics/water",
+            "add": "Brightens, good for energy/fire overlay",
+            "min": "Creates erosion-like reveal pattern",
+            "lerp_with_mask": "One layer visible through gaps in other"
+          }
+        }
+      ],
+      "note": "Different directions + different speeds = organic, non-repeating look"
+    },
+    "distorted_panning": {
+      "description": "Use one panning texture to distort the UVs of another",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Pan a noise/distortion texture",
+          "nodes": "TexCoord + Time * DistortSpeed → Sample DistortionTex → RG channels"
+        },
+        {
+          "step": 2,
+          "action": "Use distortion to offset main texture UVs",
+          "nodes": "MainUV = TexCoord + (DistortionRG - 0.5) * DistortStrength + Time * MainSpeed"
+        },
+        {
+          "step": 3,
+          "action": "Sample main texture with distorted UVs",
+          "nodes": "Sample MainTexture with MainUV"
+        }
+      ],
+      "note": "This is the KEY technique for realistic fire, lava, and energy. The distortion creates organic wavering."
+    }
+  },
+
+  "common_applications": {
+    "fire_material": {
+      "technique": "distorted_panning",
+      "layers": "fire gradient (vertical pan up) + noise distortion (slow pan)",
+      "pan_speed_main": "(0.0, -0.3) — upward",
+      "pan_speed_distort": "(0.05, -0.1) — slow diagonal",
+      "distort_strength": "0.05-0.15",
+      "note": "Vertical panning + horizontal distortion = flickering flames"
+    },
+    "water_surface": {
+      "technique": "dual_layer_panning (multiply)",
+      "layers": "normal map A + normal map B at different scales and angles",
+      "pan_speed_a": "(0.03, 0.02)",
+      "pan_speed_b": "(-0.02, 0.04)",
+      "note": "Two normal maps panning creates convincing water ripples"
+    },
+    "energy_shield": {
+      "technique": "dual_layer_panning (add)",
+      "layers": "hex pattern + noise, both panning slowly",
+      "pan_speed": "very slow (0.01-0.05) for ambient motion",
+      "note": "Combined with fresnel for edge glow"
+    },
+    "lava_flow": {
+      "technique": "distorted_panning",
+      "layers": "lava color texture + heavy noise distortion",
+      "pan_speed_main": "(0.0, -0.05) — very slow flow",
+      "distort_strength": "0.1-0.3 (heavy distortion)",
+      "note": "Slow speed + heavy distortion = thick viscous flow"
+    },
+    "magic_trail": {
+      "technique": "panning along particle ribbon UV",
+      "pan_speed": "(-1.0, 0.0) — scroll along ribbon length",
+      "note": "Pan direction opposite to ribbon travel direction"
+    },
+    "cloud_layer": {
+      "technique": "dual_layer_panning",
+      "layers": "cloud noise at two scales",
+      "pan_speed_a": "(0.005, 0.002) — very slow drift",
+      "pan_speed_b": "(0.003, -0.001)",
+      "note": "Extremely slow speeds for environmental clouds"
+    }
+  },
+
+  "speed_guidelines": {
+    "very_slow": "0.001-0.01 — clouds, ambient energy fields",
+    "slow": "0.01-0.05 — water surface, lava, shields",
+    "medium": "0.05-0.2 — fire, smoke, moderate energy",
+    "fast": "0.2-0.5 — fast fire, rapids, intense energy",
+    "very_fast": "0.5-2.0 — speed lines, laser beams, dash trails",
+    "note": "These are multiplied by Time node which runs in seconds"
+  },
+
+  "common_mistakes": [
+    "Texture set to Clamp instead of Wrap → texture stops at edges instead of repeating",
+    "Both layers same speed and direction → no complexity, looks like single sliding texture",
+    "Pan speed too fast → looks mechanical and CG, most natural motion is slower than you think",
+    "Not using distortion → clean panning looks artificial, always add some UV distortion",
+    "Forgetting to subtract 0.5 from distortion texture → UV offset is biased, texture shifts off-center"
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "_description": "Universal VFX timing principles. Agent MUST reference these when setting lifetime, spawn rate, and curves.",
+
+  "core_rules": {
+    "fast_in_slow_out": "Most VFX effects appear quickly and fade slowly. Attack phase is 10-20% of total lifetime, sustain/decay is 80-90%.",
+    "anticipation": "Large effects benefit from a small anticipation cue 0.1-0.3s before the main burst (glow, spark, camera shake).",
+    "overshoot": "Scale/opacity can briefly exceed target value then settle. Creates energy and weight.",
+    "secondary_motion": "Main effect should trigger secondary effects with slight delay (0.05-0.15s). Explosion → debris → smoke → dust."
+  },
+
+  "effect_timing_profiles": {
+    "explosion": {
+      "total_duration": "0.8-2.0s",
+      "flash": "0.02-0.05s (instant bright core)",
+      "fireball_expand": "0.1-0.3s",
+      "smoke_rise": "0.5-2.0s (slow, lingers)",
+      "debris": "0.3-1.5s (gravity-driven)",
+      "shockwave": "0.1-0.3s (fast radial expand)",
+      "spawn_pattern": "single burst + sustained smoke emitter"
+    },
+    "fire_loop": {
+      "total_duration": "continuous",
+      "particle_lifetime": "0.3-0.8s per particle",
+      "spawn_rate": "20-80 particles/sec depending on intensity",
+      "flicker_frequency": "8-15 Hz for natural look",
+      "ember_lifetime": "1.0-3.0s",
+      "spawn_pattern": "continuous with rate variation ±20%"
+    },
+    "smoke": {
+      "total_duration": "2.0-8.0s",
+      "particle_lifetime": "1.5-5.0s per particle",
+      "spawn_rate": "5-30 particles/sec",
+      "rise_speed": "50-200 units/sec (slow, buoyant)",
+      "expansion_rate": "grows 2-4x initial size over lifetime",
+      "spawn_pattern": "continuous, decreasing over time"
+    },
+    "impact_hit": {
+      "total_duration": "0.3-0.8s",
+      "flash": "0.02-0.04s",
+      "sparks": "0.1-0.4s",
+      "dust_puff": "0.3-0.8s",
+      "decal_fade": "2.0-5.0s",
+      "spawn_pattern": "single burst, no sustain"
+    },
+    "magic_cast": {
+      "total_duration": "0.5-1.5s",
+      "charge_up": "0.2-0.5s (anticipation, glow buildup)",
+      "release": "0.05-0.1s (fast burst)",
+      "trail_fade": "0.3-1.0s",
+      "spawn_pattern": "ramp up → burst → trail"
+    },
+    "electricity": {
+      "total_duration": "0.1-0.5s per strike",
+      "strike_duration": "0.02-0.08s",
+      "branch_delay": "0.01-0.03s between branches",
+      "glow_persistence": "0.1-0.3s (afterimage)",
+      "flicker_rate": "random, 15-30 Hz",
+      "spawn_pattern": "random bursts, irregular interval"
+    },
+    "coreenergy": {
+      "total_duration": "continuous or 0.5-2.0s for charge/overload beats",
+      "pulse_cycle": "0.4-1.2s for idle, 0.2-0.6s for charging or unstable states",
+      "filament_restrike": "0.03-0.12s between visible filament surges",
+      "spark_lifetime": "0.05-0.18s",
+      "glow_persistence": "0.1-0.25s after stronger pulses",
+      "spawn_pattern": "continuous core + pulsed filament surges + optional accent bursts"
+    },
+    "water_splash": {
+      "total_duration": "0.5-1.5s",
+      "initial_burst": "0.05-0.1s",
+      "droplet_rise": "0.1-0.3s",
+      "droplet_fall": "0.2-0.5s (gravity)",
+      "ripple_expand": "0.5-1.5s",
+      "mist": "0.3-1.0s",
+      "spawn_pattern": "burst → gravity-driven arcs"
+    },
+    "dissolve": {
+      "total_duration": "0.5-2.0s",
+      "edge_glow_lead": "appears 0.1-0.2s before dissolve reaches that area",
+      "particle_emission": "emits from dissolve edge during transition",
+      "spawn_pattern": "driven by dissolve threshold parameter, not time"
+    }
+  },
+
+  "curve_guidelines": {
+    "opacity_over_life": {
+      "fire": "quick ramp up (0-10%), hold (10-60%), gradual fade (60-100%)",
+      "smoke": "slow ramp up (0-20%), hold (20-50%), very slow fade (50-100%)",
+      "spark": "instant full (0%), linear fade to zero",
+      "magic": "ease-in to peak, sharp drop with slight tail"
+    },
+    "size_over_life": {
+      "fire": "start small, grow 1.5-2x, slight shrink at end",
+      "smoke": "start medium, grow 2-4x continuously",
+      "explosion": "rapid expand 3-5x in first 20%, then slow growth",
+      "spark": "constant or slight shrink"
+    },
+    "velocity_over_life": {
+      "general": "most particles decelerate over lifetime (drag)",
+      "fire": "slight upward acceleration (buoyancy)",
+      "debris": "gravity-driven parabolic arc",
+      "magic": "can accelerate or follow custom curves"
+    }
+  }
+}

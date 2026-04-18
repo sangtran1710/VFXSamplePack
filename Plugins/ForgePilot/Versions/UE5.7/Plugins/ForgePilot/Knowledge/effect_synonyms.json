@@ -1,0 +1,168 @@
+{
+  "_description": "Synonym and phrase mappings used by ForgePilot to resolve effect types and variants from freeform text prompts.",
+  "effect_type_synonyms": {
+    "Fire": [
+      "campfire",
+      "camp fire",
+      "torch",
+      "ember",
+      "embers",
+      "flame",
+      "bonfire",
+      "burning fire",
+      "fire loop"
+    ],
+    "Smoke": [
+      "dust",
+      "dust cloud",
+      "fog",
+      "mist",
+      "steam",
+      "soot",
+      "smoke plume",
+      "fire smoke"
+    ],
+    "Explosion": [
+      "blast",
+      "grenade",
+      "shockwave",
+      "detonation",
+      "boom",
+      "fireball explosion",
+      "vehicle explosion"
+    ],
+    "Electricity": [
+      "lightning",
+      "electric",
+      "arc",
+      "tesla",
+      "electrical"
+    ],
+    "CoreEnergy": [
+      "core energy",
+      "energy core",
+      "core orb",
+      "energy orb",
+      "plasma orb",
+      "energy sphere",
+      "reactor core",
+      "contained energy",
+      "power core"
+    ],
+    "Magic": [
+      "magic",
+      "spell",
+      "arcane",
+      "holy",
+      "dark magic",
+      "sorcery"
+    ],
+    "Water": [
+      "splash",
+      "wave",
+      "foam",
+      "spray",
+      "water splash",
+      "water burst"
+    ]
+  },
+  "variant_synonyms": {
+    "Fire": {
+      "campfire": [
+        "campfire",
+        "camp fire",
+        "bonfire"
+      ],
+      "torch": [
+        "torch",
+        "torch flame"
+      ],
+      "hand_fire": [
+        "hand fire",
+        "palm fire",
+        "fire in hand"
+      ],
+      "fire_burst": [
+        "fire burst",
+        "fire blast",
+        "burst fire"
+      ],
+      "wall_of_fire": [
+        "wall of fire",
+        "fire wall",
+        "fire barrier"
+      ]
+    },
+    "Smoke": {
+      "fire_smoke": [
+        "fire smoke",
+        "hot smoke"
+      ],
+      "ground_fog": [
+        "ground fog",
+        "low fog",
+        "ground mist"
+      ],
+      "dust_cloud": [
+        "dust cloud",
+        "impact dust"
+      ],
+      "steam": [
+        "steam",
+        "hot vapor"
+      ],
+      "smoke_trail": [
+        "smoke trail",
+        "trail smoke"
+      ]
+    },
+    "Explosion": {
+      "grenade": [
+        "grenade explosion",
+        "small explosion"
+      ],
+      "vehicle_explosion": [
+        "vehicle explosion",
+        "car explosion",
+        "truck explosion"
+      ],
+      "cinematic_large": [
+        "large dramatic explosion",
+        "cinematic explosion",
+        "huge explosion",
+        "massive explosion"
+      ],
+      "magical_explosion": [
+        "magic explosion",
+        "arcane explosion",
+        "energy blast"
+      ]
+    },
+    "CoreEnergy": {
+      "idle_orb": [
+        "idle orb",
+        "stable core",
+        "stable orb",
+        "contained orb"
+      ],
+      "charging_core": [
+        "charging core",
+        "charging orb",
+        "charge up core",
+        "charging energy"
+      ],
+      "overload_core": [
+        "overload core",
+        "overloaded core",
+        "unstable core",
+        "critical core"
+      ],
+      "reactor_core": [
+        "reactor core",
+        "reactor orb",
+        "machine core",
+        "engine core"
+      ]
+    }
+  }
+}

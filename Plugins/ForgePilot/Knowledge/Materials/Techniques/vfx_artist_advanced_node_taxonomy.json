@@ -1,0 +1,365 @@
+{
+  "_description": "Advanced node taxonomy for senior VFX artists building Unreal materials for Niagara, mesh effects, and environment-aware shaders. Use this after the foundational taxonomy when the effect needs stronger depth integration, procedural logic, platform control, or mesh-aware deformation.",
+
+  "overview": "Senior-level VFX material work often moves beyond simple tint, panning, and mask shaping. The next layer is about making effects integrate with scene depth, object scale, world space, shader variants, packed texture data, procedural shape generation, and animated mesh data. These nodes are not always the first nodes to place, but they are often the nodes that make the effect production-ready.",
+
+  "use_after_foundation": "Read Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json first. This advanced taxonomy assumes the artist already understands Niagara data links, basic UV motion, masking, and simple deformation.",
+
+  "priority_order_for_senior_vfx_artists": [
+    "Depth and spatial integration",
+    "advanced UV and flipbook control",
+    "optimization and shader branching",
+    "procedural math and custom logic",
+    "mesh data and animation-aware deformation"
+  ],
+
+  "categories": [
+    {
+      "category": "depth_and_space",
+      "display_name": "Node xu ly khong gian va chieu sau",
+      "why_it_matters": "These nodes make the effect sit inside the world correctly instead of clipping harshly against geometry or ignoring world-space context.",
+      "most_important_nodes": [
+        {
+          "node": "DepthFade",
+          "primary_role": "Soften the edge where translucent particles intersect world geometry.",
+          "typical_vfx_usage": [
+            "smoke soft intersection",
+            "water splash contact softening",
+            "dust cards against ground",
+            "portal and energy edge blending"
+          ],
+          "agent_rule": "For translucent cards that touch environment geometry, DepthFade is often mandatory. It should usually be one of the last operations on the opacity branch, not the primary shape generator."
+        },
+        {
+          "node": "SceneDepth or PixelDepth",
+          "primary_role": "Read or compare scene depth for view-based or depth-based effects.",
+          "typical_vfx_usage": [
+            "murky water by depth",
+            "scanline depth reveal",
+            "soft depth-driven blend",
+            "camera-relative atmospheric shaping"
+          ],
+          "agent_rule": "Use SceneDepth or PixelDepth when the effect must react to what the camera sees in depth. Keep in mind that this is screen-space logic, so view dependence is part of the look."
+        },
+        {
+          "node": "DistanceToNearestSurface",
+          "primary_role": "Query distance field proximity to nearby surfaces.",
+          "typical_vfx_usage": [
+            "ripples around contact points",
+            "surface crawling electricity",
+            "contact glows on walls",
+            "distance-field-based intersection masks"
+          ],
+          "agent_rule": "This is a high-value node for environment-aware effects, but it depends on distance field availability and project settings. Use it when contact behavior with nearby surfaces is the hero requirement."
+        },
+        {
+          "node": "ObjectRadius",
+          "primary_role": "Read the approximate scale of the object for scale-aware effects.",
+          "typical_vfx_usage": [
+            "scale-consistent radial masks",
+            "mesh-size-aware dissolves",
+            "object-relative glow widths"
+          ],
+          "agent_rule": "Use ObjectRadius when the effect should keep a similar visual ratio across differently sized meshes."
+        },
+        {
+          "node": "ObjectPosition or ActorPositionWS style data",
+          "primary_role": "Anchor effects in world space around an object location.",
+          "typical_vfx_usage": [
+            "world-space scans",
+            "height-based reveals",
+            "position-centered pulses",
+            "object-anchored procedural gradients"
+          ],
+          "agent_rule": "Use object-position data when the effect must be stable in world space and tied to object location rather than only UV layout."
+        }
+      ],
+      "common_mistakes": [
+        "using DepthFade as the main silhouette instead of as a final softening pass",
+        "forgetting that SceneDepth and PixelDepth are view-dependent and can change look with camera angle",
+        "using DistanceToNearestSurface without verifying distance fields are enabled and meaningful for the target assets",
+        "building object-scale-sensitive logic without ObjectRadius and then wondering why the effect breaks across mesh sizes"
+      ]
+    },
+    {
+      "category": "advanced_uv_and_flipbook",
+      "display_name": "Node UV nang cao va flipbook",
+      "why_it_matters": "These nodes and patterns give senior artists tighter control over radial motion, atlas playback, mesh-relative UV logic, and custom sheet sampling behavior.",
+      "most_important_nodes": [
+        {
+          "node": "Flipbook or custom SubUV logic",
+          "primary_role": "Drive atlas frame playback, either through the built-in path or through custom math.",
+          "typical_vfx_usage": [
+            "water splash sheets",
+            "smoke flipbooks",
+            "explosion atlases",
+            "stylized animated decals"
+          ],
+          "agent_rule": "Use built-in ParticleSubUV or Flipbook logic first. Reach for custom Floor plus Frac logic when you need manual frame control, custom blending behavior, or a cheaper specialized variant."
+        },
+        {
+          "node": "Floor and Frac",
+          "primary_role": "Build custom frame stepping and interpolation math.",
+          "typical_vfx_usage": [
+            "manual flipbook frame index",
+            "smooth frame blending",
+            "sub-frame timing control",
+            "custom atlas addressing"
+          ],
+          "agent_rule": "Do not rebuild flipbook logic by habit. Use Floor and Frac only when the stock SubUV route is not flexible enough for the effect's playback needs."
+        },
+        {
+          "node": "VectorToRadialValue",
+          "primary_role": "Convert UVs into polar-style radial coordinates.",
+          "typical_vfx_usage": [
+            "shockwaves",
+            "magic circles",
+            "portal rims",
+            "radial energy rings"
+          ],
+          "agent_rule": "If the motion or shape is circular, radial, or angular, VectorToRadialValue is often a better start than forcing the look through flat Cartesian UV panning."
+        },
+        {
+          "node": "BoundingBoxBased_0-1_UVW",
+          "primary_role": "Generate normalized object-space coordinates based on mesh bounds.",
+          "typical_vfx_usage": [
+            "top-down reveal",
+            "mesh-space dissolve bands",
+            "consistent object-space gradients across scaled meshes",
+            "coverage masks independent of UV unwrap quality"
+          ],
+          "agent_rule": "Use bounding-box UVW when the effect should follow the mesh volume or height consistently even if the UVs are poor or stretched."
+        }
+      ],
+      "common_mistakes": [
+        "rebuilding custom flipbook math when ParticleSubUV already solves the problem cleanly",
+        "using radial logic on a shape that should read as directional flow instead of circular motion",
+        "forgetting that bounding-box-based coordinates depend on object bounds and can change if mesh scale changes in unexpected ways"
+      ]
+    },
+    {
+      "category": "optimization_and_branching",
+      "display_name": "Node logic va toi uu hoa",
+      "why_it_matters": "Production VFX materials are often feature-rich master materials. These nodes control cost, variant support, and packed data usage without multiplying the runtime burden unnecessarily.",
+      "most_important_nodes": [
+        {
+          "node": "Static Switch Parameter",
+          "primary_role": "Compile shader variants that enable or disable features per material instance.",
+          "typical_vfx_usage": [
+            "toggle distortion on or off",
+            "optional emissive lane",
+            "switch between cheap and hero variant",
+            "optional normal or depth support"
+          ],
+          "agent_rule": "Use Static Switch Parameter for feature families that should truly disappear from shader cost when disabled. Avoid turning every tiny artistic tweak into its own switch."
+        },
+        {
+          "node": "Feature Level Switch",
+          "primary_role": "Branch shader behavior based on target platform capability.",
+          "typical_vfx_usage": [
+            "mobile fallback logic",
+            "reduced noise layers on weaker platforms",
+            "disable expensive distortion on low feature levels"
+          ],
+          "agent_rule": "Use Feature Level Switch when the project supports multiple hardware tiers and the material needs clear high-end versus fallback behavior."
+        },
+        {
+          "node": "ComponentMask",
+          "primary_role": "Extract selected channels from packed texture or data sources.",
+          "typical_vfx_usage": [
+            "packed mask extraction",
+            "read emissive mask from one channel and erosion mask from another",
+            "separate RG motion vectors from A alpha",
+            "reduce texture sample count through channel packing"
+          ],
+          "agent_rule": "If the material relies on packed textures, ComponentMask is a first-class workflow tool, not just a convenience node. Document channel meaning clearly so packed maps remain maintainable."
+        }
+      ],
+      "common_mistakes": [
+        "using too many Static Switch Parameters and creating an unmanageable master material explosion",
+        "forgetting to provide a clear cheap fallback path for heavy materials",
+        "packing many meanings into a texture without documenting channel ownership",
+        "using runtime math to emulate what a static compile-time switch should handle"
+      ]
+    },
+    {
+      "category": "procedural_math_and_custom_logic",
+      "display_name": "Node math va thu thuat procedural",
+      "why_it_matters": "These nodes and methods let senior artists create shapes, masks, and custom behavior without depending on external textures for every pattern.",
+      "most_important_nodes": [
+        {
+          "node": "Custom node (HLSL)",
+          "primary_role": "Write custom shader logic directly when the standard graph becomes too limited or too heavy.",
+          "typical_vfx_usage": [
+            "specialized noise",
+            "custom flipbook blending",
+            "compact math helpers",
+            "simple raymarching or field logic"
+          ],
+          "agent_rule": "Use a Custom node only after a readable graph solution is understood. Custom HLSL is powerful, but it raises maintenance cost and should solve a real instruction, clarity, or capability problem."
+        },
+        {
+          "node": "Distance with SDF-style math",
+          "primary_role": "Build procedural shapes and distance-driven masks without texture samples.",
+          "typical_vfx_usage": [
+            "circles",
+            "boxes",
+            "rings",
+            "procedural shockwave masks",
+            "shape-driven dissolve fronts"
+          ],
+          "agent_rule": "Distance is a core primitive for signed-distance-style logic. Combine it with subtract, abs, power, step, ceil, or smooth thresholds to get clean procedural forms."
+        },
+        {
+          "node": "CheapContrast",
+          "primary_role": "Push alpha or mask contrast quickly and cheaply.",
+          "typical_vfx_usage": [
+            "dissolve tightening",
+            "alpha sharpening",
+            "mask cleanup before thresholding",
+            "quick breakup emphasis"
+          ],
+          "agent_rule": "Prefer CheapContrast when the goal is simply to tighten a mask. Reach for Power only when the response curve specifically needs the power-function look."
+        }
+      ],
+      "common_mistakes": [
+        "jumping to Custom HLSL before proving the graph logic and artistic goal",
+        "building a procedural shape system with no clear artistic controls exposed afterward",
+        "using high-complexity procedural logic where a single packed texture would be cheaper and easier to art direct",
+        "stacking contrast operations until the mask loses gradation and becomes brittle"
+      ]
+    },
+    {
+      "category": "mesh_data_and_vertex_animation",
+      "display_name": "Node mesh data va vertex animation",
+      "why_it_matters": "These nodes matter when the effect depends on mesh topology, skinning state, VAT workflows, or deformation that must stay stable on animated characters and meshes.",
+      "most_important_nodes": [
+        {
+          "node": "World Position Offset",
+          "primary_role": "Output deformed vertex positions at the material stage.",
+          "typical_vfx_usage": [
+            "mesh swelling",
+            "pulse expansion",
+            "surface flutter",
+            "VAT-driven deformation",
+            "procedural peel and burst motion"
+          ],
+          "agent_rule": "World Position Offset is the main output gate for mesh deformation. Use it when actual silhouette or surface position change is required, not just color animation."
+        },
+        {
+          "node": "Vertex Normal WS",
+          "primary_role": "Provide the world-space normal direction used for outward displacement.",
+          "typical_vfx_usage": [
+            "inflation",
+            "exploding shell push",
+            "surface puffing",
+            "normal-based expansion"
+          ],
+          "agent_rule": "Pair Vertex Normal WS with World Position Offset when the deformation should move outward from the surface in a stable and readable way."
+        },
+        {
+          "node": "Pre-Skinned Local Position",
+          "primary_role": "Read vertex position before skeletal skinning deformation.",
+          "typical_vfx_usage": [
+            "stable character-space masks",
+            "material effects that should not swim on animated characters",
+            "pre-skin procedural gradients",
+            "VAT or deformation mappings on animated bodies"
+          ],
+          "agent_rule": "Use Pre-Skinned Local Position when a character effect must stay locked to the body consistently before animation transforms distort the mapping."
+        }
+      ],
+      "common_mistakes": [
+        "using animated world position data when the effect really needs stable pre-skin space",
+        "driving large WPO deformation without checking bounds, clipping, and readability",
+        "assuming VAT-like behavior can be improvised without stable coordinate conventions"
+      ]
+    }
+  ],
+
+  "node_selection_heuristics": {
+    "if_you_need": [
+      {
+        "need": "soften particle intersection against geometry",
+        "start_with": [
+          "DepthFade"
+        ]
+      },
+      {
+        "need": "camera-view-dependent depth comparison or underwater depth response",
+        "start_with": [
+          "SceneDepth",
+          "PixelDepth"
+        ]
+      },
+      {
+        "need": "effect reacting to nearest environment surface",
+        "start_with": [
+          "DistanceToNearestSurface"
+        ]
+      },
+      {
+        "need": "manual flipbook frame control or smooth custom atlas stepping",
+        "start_with": [
+          "Floor",
+          "Frac"
+        ]
+      },
+      {
+        "need": "radial shockwave, magic circle, or portal motion",
+        "start_with": [
+          "VectorToRadialValue"
+        ]
+      },
+      {
+        "need": "object-space gradient independent of UV unwrap quality",
+        "start_with": [
+          "BoundingBoxBased_0-1_UVW"
+        ]
+      },
+      {
+        "need": "turn master-material features on or off cheaply per instance",
+        "start_with": [
+          "Static Switch Parameter"
+        ]
+      },
+      {
+        "need": "packed texture channel extraction",
+        "start_with": [
+          "ComponentMask"
+        ]
+      },
+      {
+        "need": "procedural ring, circle, box, or custom shape math",
+        "start_with": [
+          "Distance",
+          "Step",
+          "CheapContrast"
+        ]
+      },
+      {
+        "need": "stable mapping on a skinned character before animation distorts it",
+        "start_with": [
+          "Pre-Skinned Local Position"
+        ]
+      }
+    ]
+  },
+
+  "cross_reference_playbook": {
+    "basic_prerequisite": "Pair with Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json for the foundational node layer.",
+    "material_math": "Pair with Knowledge/Materials/Techniques/vfx_artist_material_math_taxonomy.json when the graph problem is primarily arithmetic, thresholds, trig, vector math, or packed-channel manipulation.",
+    "fire_and_smoke_flipbooks": "Pair with Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json when the advanced logic is being applied to sprite-sheet fire or smoke materials.",
+    "radial_effects": "Pair with Knowledge/Materials/Techniques/portal_ring.json when VectorToRadialValue and depth-aware ring shaping are central to the effect.",
+    "uv_motion_materials": "Pair with Knowledge/Materials/Techniques/panning_uv.json when custom UV motion and advanced flow are part of the solution.",
+    "fresnel_shells": "Pair with Knowledge/Materials/Techniques/fresnel.json when edge emphasis, shell glow, or view-dependent reads are still core to the look."
+  },
+
+  "agent_guardrails": [
+    "Start from the simplest readable graph first, then add advanced space, optimization, or procedural logic only when the effect goal truly needs it.",
+    "Depth-aware nodes are usually support logic for integration and polish, not the hero silhouette by themselves.",
+    "Prefer documented, reusable channel conventions and switch usage over one-off ad hoc graph logic.",
+    "If a custom HLSL node appears necessary, first write down what capability or instruction reduction it is replacing.",
+    "For skinned character effects, decide explicitly whether the mapping should live in world space, object space, or pre-skinned local space before building the graph."
+  ]
+}

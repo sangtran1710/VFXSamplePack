@@ -1,0 +1,179 @@
+{
+  "_description": "Complete recipe for smoke effects in Niagara. Covers rising smoke, ground fog, dust cloud, and steam variants.",
+
+  "shared_references": [
+    "Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json",
+    "Knowledge/Materials/Techniques/vfx_artist_essential_node_taxonomy.json",
+    "Knowledge/Materials/Techniques/vfx_artist_advanced_node_taxonomy.json"
+  ],
+
+  "subuv_flipbook_material_recipe": {
+    "when_to_use": "Use this shared playbook when smoke is authored from a sprite sheet and Niagara playback is handled through ParticleSubUV.",
+    "preferred_material_family": "Translucent smoke material with ParticleSubUV, CameraDepthFade, and DepthFade. Prefer lit smoke for production quality; use unlit fallback only when sharing the same SubUV graph style as fire.",
+    "dynamic_parameter_standard": {
+      "parameter_index": 0,
+      "channel_names": [
+        "PowerEmissive",
+        "FadeDistance",
+        "CameraDpthFade",
+        "Power"
+      ],
+      "default_value": {
+        "R": 1.0,
+        "G": 1.0,
+        "B": 1.0,
+        "A": 2.0
+      }
+    },
+    "graph_summary": [
+      "ParticleSubUV A -> Power with DynamicParameter.A -> * ParticleColor A -> * CameraDepthFade(DynamicParameter.B) -> DepthFade(DynamicParameter.G) -> Opacity",
+      "For lit smoke, drive BaseColor from ParticleSubUV RGB * ParticleColor RGB and keep emissive off or extremely low",
+      "For unlit fallback smoke, keep emissive restrained and let opacity silhouette stay the hero read"
+    ],
+    "authoring_rule": "Do not treat smoke like additive fire. The fade silhouette must stay readable and broad, so DepthFade and low-emissive opacity shaping matter more than punch."
+  },
+
+  "base_architecture": {
+    "system_name_convention": "NS_{Context}Smoke_{Variant}",
+    "emitter_layers": [
+      {
+        "name": "Smoke_Main",
+        "purpose": "Primary visible smoke body — large, soft, billowing sprites",
+        "priority": "required",
+        "renderer": "sprite",
+        "material_type": "M_Smoke_Lit (Translucent, Volumetric Directional lit, SubUV)",
+        "material_notes": "Lit smoke reacts to scene lighting → much more realistic than unlit. Use Volumetric NonDirectional for cheaper option.",
+        "spawn_rate": "5-20/sec depending on density",
+        "particle_lifetime": "2.0-6.0s",
+        "initial_size": "30-80 cm",
+        "size_over_life": "grow 2-4x over lifetime. Curve: slow start, accelerate in middle, plateau at end",
+        "velocity": "upward 50-200 cm/s + slight random horizontal ±30 cm/s",
+        "color": "reference Principles/color_palettes.json → smoke_dark or smoke_light",
+        "opacity_over_life": "0→peak(0.15-0.35) over 0-15%, hold, fade to 0 over 50-100%",
+        "opacity_note": "Smoke should NEVER be fully opaque. Max 0.3-0.4 for thick smoke, 0.1-0.2 for light.",
+        "rotation": "random initial (0-360°), slow spin 10-40 deg/s",
+        "drag": "0.2-0.4 (smoke decelerates)",
+        "curl_noise": "strength 20-60, frequency 0.5-2.0 — creates billowing",
+        "sort_order": 0
+      },
+      {
+        "name": "Smoke_Detail",
+        "purpose": "Smaller, faster particles for surface detail and texture",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "Same as main or different noise texture",
+        "spawn_rate": "30-50% of main rate",
+        "particle_lifetime": "60-80% of main lifetime",
+        "initial_size": "40-60% of main size",
+        "velocity": "slightly faster than main, more horizontal variation",
+        "opacity": "lower than main (50-70% of main opacity)",
+        "sort_order": 1
+      },
+      {
+        "name": "Wisps",
+        "purpose": "Thin trailing wisps at smoke edges",
+        "priority": "optional (adds realism)",
+        "renderer": "sprite or ribbon",
+        "material_type": "M_Smoke_Soft (very soft, additive or translucent)",
+        "spawn_rate": "2-5/sec",
+        "particle_lifetime": "1.0-3.0s",
+        "initial_size": "small start, grow large and very transparent",
+        "opacity": "very low, 0.02-0.08",
+        "velocity": "slightly more horizontal than main, wind-influenced",
+        "sort_order": 2
+      }
+    ]
+  },
+
+  "variants": {
+    "chimney_smoke": {
+      "description": "Continuous rising smoke from chimney/stack",
+      "modifications": {
+        "velocity_upward": "100-300 cm/s",
+        "spawn_shape": "small cylinder at chimney top",
+        "wind_force": "moderate (smoke leans with wind)",
+        "color": "smoke_light or smoke_dark depending on fuel",
+        "scale": "medium (initial 20-40 cm)"
+      }
+    },
+    "fire_smoke": {
+      "description": "Smoke rising from fire/explosion",
+      "modifications": {
+        "color_start": "dark brown-orange (hot smoke)",
+        "color_end": "dark gray (cooled smoke)",
+        "initial_velocity": "higher (200-400 cm/s, driven by fire heat)",
+        "opacity": "thicker (0.2-0.4 peak)",
+        "emissive": "slight emissive at start (0.5-2.0) that fades quickly"
+      }
+    },
+    "ground_fog": {
+      "description": "Low-lying fog/mist layer",
+      "modifications": {
+        "velocity": "mostly horizontal, very slow (10-30 cm/s), minimal upward",
+        "gravity": "slight downward force to keep low",
+        "kill_volume": "kill particles above certain height",
+        "spawn_shape": "large box or cylinder, wide and flat",
+        "opacity": "very low (0.03-0.1)",
+        "size": "very large (200-500 cm), grow 2-3x",
+        "lifetime": "long (5-15s)"
+      }
+    },
+    "dust_cloud": {
+      "description": "Kicked up dust from impact, footstep, or explosion",
+      "modifications": {
+        "spawn_pattern": "burst (10-30 particles) or short burst period",
+        "velocity": "radial outward + slight upward (50-150 cm/s)",
+        "color": "brown-tan, match environment ground",
+        "opacity": "moderate start (0.2-0.3), fast fade",
+        "lifetime": "short (0.5-2.0s)",
+        "gravity": "slight (-50 to -100 cm/s²) to settle",
+        "size_start": "small (10-30 cm), grow 3-5x quickly"
+      }
+    },
+    "steam": {
+      "description": "Hot steam/vapor",
+      "modifications": {
+        "color": "white-light gray",
+        "opacity": "very low (0.05-0.15)",
+        "velocity_upward": "fast (200-400 cm/s)",
+        "lifetime": "short (0.5-1.5s, dissipates quickly)",
+        "size_growth": "rapid expansion, 3-5x",
+        "spawn_shape": "narrow, directional"
+      }
+    },
+    "smoke_trail": {
+      "description": "Smoke trailing behind moving object (missile, vehicle)",
+      "modifications": {
+        "spawn_rate": "high (30-60/sec) for continuous trail",
+        "inherit_velocity": "partial (0.2-0.5 of emitter velocity)",
+        "drag": "higher (0.4-0.6) so trail particles stop quickly",
+        "renderer": "can use ribbon renderer for smooth trail"
+      }
+    }
+  },
+
+  "key_principles": {
+    "never_fully_opaque": "Real smoke is translucent. Max opacity 0.3-0.4 even for thick smoke.",
+    "growth_is_essential": "Smoke particles MUST grow over lifetime. Start small, end 2-4x larger.",
+    "curl_noise_is_mandatory": "Without curl noise, smoke looks like floating spheres. Always add curl noise force.",
+    "variety_in_timing": "Randomize lifetime ±20%, size ±30%, speed ±25% for natural look.",
+    "lit_is_better": "Use lit translucent material. Smoke that responds to light is dramatically more realistic.",
+    "rotation_breaks_pattern": "Random initial rotation + slow spin prevents obvious texture tiling."
+  },
+
+  "niagara_modules_needed": [
+    "Initialize Particle",
+    "Spawn Rate (continuous) or Spawn Burst (one-shot)",
+    "Shape Location (cylinder/sphere/box)",
+    "Add Velocity (upward + random horizontal)",
+    "Curl Noise Force (CRITICAL — creates billowing)",
+    "Drag (0.2-0.4)",
+    "Wind Force (if environmental wind desired)",
+    "Gravity Force (slight, optional — depends on variant)",
+    "Scale Sprite Size (grow 2-4x over life)",
+    "Scale Color (color and opacity over life)",
+    "Sprite Rotation Rate (slow spin)",
+    "Solve Forces and Velocity",
+    "Particle State (kill on lifetime)"
+  ]
+}

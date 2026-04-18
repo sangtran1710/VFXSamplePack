@@ -1,0 +1,187 @@
+{
+  "_description": "Scaffold recipe for contained core-energy orb effects. Covers idle reactor cores, charging orbs, and overload states with a white-hot center, filament breakup, turbulence, and strong emissive shell.",
+
+  "base_architecture": {
+    "system_name_convention": "NS_CoreEnergy_{Variant}",
+    "design_philosophy": "Core energy should read as a contained but unstable power source. The center is hottest and near-white, thin filament arcs create high-frequency energy structure, and the outer plasma shell carries the warm orange body color.",
+
+    "emitter_layers": [
+      {
+        "name": "Core_Orb",
+        "purpose": "Primary white-hot center mass anchoring the effect read",
+        "priority": "required",
+        "renderer": "sprite",
+        "material_type": "M_CoreEnergy_Core (Additive, radial falloff, white-hot emissive)",
+        "spawn_rate": "1-3 persistent particles attached to the orb center",
+        "particle_lifetime": "continuous while system is active",
+        "initial_size": "18-40 cm radius",
+        "size_over_life": "subtle pulse 0.9-1.1x over a 0.4-1.0s cycle",
+        "color": "near-white center, emissive 25-80",
+        "opacity_over_life": "mostly stable with a very slight pulse",
+        "sort_order": 5,
+        "notes": "This is the dominant read. Keep it compact so the orb does not become a flat glowing disk."
+      },
+      {
+        "name": "Filament_Arcs",
+        "purpose": "Thin swirling plasma filaments and arc streaks inside the orb volume",
+        "priority": "required",
+        "renderer": "ribbon",
+        "material_type": "M_CoreEnergy_Filaments (Additive, high-contrast filament mask, panning distortion)",
+        "spawn_rate": "12-30 particles/sec in irregular pulses",
+        "particle_lifetime": "0.08-0.2s per filament strand",
+        "initial_size": "2-6 cm ribbon width",
+        "size_over_life": "hold thin width, taper slightly at the end",
+        "velocity": "tangential swirl 40-120 cm/s with inward-outward turbulence",
+        "color": "white-yellow to hot orange, emissive 15-40",
+        "opacity_over_life": "flash in fast, hold briefly, fade fast",
+        "curl_noise": "medium-high, multi-scale, biased to circular flow",
+        "sort_order": 6,
+        "notes": "Must read as thin energetic filaments, not soft cloudy noise. Branching and asymmetry are required."
+      },
+      {
+        "name": "Plasma_Shell",
+        "purpose": "Warm emissive shell that gives the orb its spherical orange body",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "M_CoreEnergy_Shell (Additive, soft shell gradient with animated breakup)",
+        "spawn_rate": "1-2 persistent particles",
+        "particle_lifetime": "continuous while system is active",
+        "initial_size": "1.5-2.5x Core_Orb size",
+        "size_over_life": "slow breathing pulse 0.95-1.08x",
+        "color": "hot orange body, emissive 6-18",
+        "opacity_over_life": "soft stable shell, never fully opaque",
+        "sort_order": 2,
+        "notes": "Supports body volume. Do not let it overpower the core or hide the filaments."
+      },
+      {
+        "name": "Secondary_Turbulence",
+        "purpose": "Soft internal energy motion behind the main filament layer",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "M_CoreEnergy_Turbulence (Additive, low-contrast noise flow)",
+        "spawn_rate": "4-10 particles/sec or 1-2 persistent volume cards",
+        "particle_lifetime": "0.25-0.6s if particle-based, continuous if persistent",
+        "initial_size": "20-55 cm",
+        "size_over_life": "gentle swell and shrink",
+        "velocity": "slow circular drift 15-50 cm/s",
+        "color": "orange-yellow secondary glow, emissive 3-10",
+        "opacity_over_life": "low-opacity support layer",
+        "curl_noise": "medium, smoother than Filament_Arcs",
+        "sort_order": 1,
+        "notes": "Adds depth behind the filaments. Keep contrast low so it does not muddy the read."
+      },
+      {
+        "name": "Rim_Glow",
+        "purpose": "Controlled edge accent to reinforce spherical containment",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "M_CoreEnergy_Rim (Additive fresnel-like edge glow)",
+        "spawn_rate": "1 persistent particle",
+        "particle_lifetime": "continuous while system is active",
+        "initial_size": "2.0-2.8x Core_Orb size",
+        "size_over_life": "very subtle pulse only",
+        "color": "orange-red edge glow, emissive 4-12",
+        "opacity_over_life": "low, controlled edge-only response",
+        "sort_order": 3,
+        "notes": "This is a support read only. Avoid a thick outline or halo ring."
+      },
+      {
+        "name": "Pulse_Sparks",
+        "purpose": "Short-lived accent sparks kicked off during stronger energy surges",
+        "priority": "optional",
+        "renderer": "sprite",
+        "material_type": "M_CoreEnergy_Spark (Additive, bright streak or mote)",
+        "spawn_rate": "4-12/sec during surges or burst 6-16 on pulse peaks",
+        "particle_lifetime": "0.05-0.18s",
+        "initial_size": "1-4 cm",
+        "velocity": "radial and tangential mix, 80-240 cm/s",
+        "color": "white-hot to orange sparks, emissive 12-35",
+        "opacity_over_life": "bright first frame, rapid fade",
+        "drag": "0.1-0.25",
+        "sort_order": 7,
+        "notes": "Keep these sparse. They are punctuation, not the main body."
+      }
+    ]
+  },
+
+  "variants": {
+    "idle_orb": {
+      "description": "Contained energy orb with stable pulsing and readable internal motion",
+      "modifications": {
+        "pulse_rate": "slow, 0.6-1.2 Hz",
+        "filament_density": "medium",
+        "spark_activity": "minimal",
+        "shell_stability": "stable, low distortion"
+      }
+    },
+    "charging_core": {
+      "description": "Core entering a charge-up state before release or activation",
+      "modifications": {
+        "core_intensity_ramp": "increase emissive over 0.3-1.0s",
+        "filament_density": "increase over charge time",
+        "spark_activity": "moderate and accelerating",
+        "shell_pulse": "faster and tighter",
+        "notes": "Should feel like energy is compressing inward before release."
+      }
+    },
+    "overload_core": {
+      "description": "Unstable overload state with stronger arcs, harsher flicker, and violent turbulence",
+      "modifications": {
+        "pulse_rate": "fast, 2-5 Hz",
+        "filament_density": "high",
+        "spark_activity": "high with burst spikes",
+        "rim_instability": "more breakup and occasional spikes",
+        "notes": "Use stronger asymmetry and more aggressive secondary motion."
+      }
+    },
+    "reactor_core": {
+      "description": "Larger contained core for machine or environmental reactor visuals",
+      "modifications": {
+        "scale_factor": 2.0,
+        "secondary_turbulence": "broader and slower",
+        "spark_activity": "low-medium",
+        "notes": "Readable from distance. Favor silhouette and pulse over tiny detail."
+      }
+    }
+  },
+
+  "technical_approach": {
+    "recommended_material_stack": {
+      "core_mask": "Radial or sphere mask for the white-hot center",
+      "filament_breakup": "High-contrast noise threshold or flow-mapped breakup for thin internal lines",
+      "secondary_depth": "Lower-contrast noise layer at a different scale and speed",
+      "rim_accent": "Controlled fresnel-like edge response",
+      "color_gradient": "White-hot center to warm orange shell"
+    },
+    "niagara_authoring_notes": {
+      "hero_read": "Material does most of the heavy lifting. Niagara layers should support motion, pulse, and accent readability.",
+      "filament_motion": "Prefer orbit or tangential flow with curl noise rather than generic upward fountain motion.",
+      "surge_behavior": "Pulse_Sparks and higher filament density should be driven by a user intensity parameter."
+    }
+  },
+
+  "key_principles": {
+    "center_is_hottest": "The hottest point must stay centered and near-white. If the whole orb becomes equally bright, the read collapses.",
+    "filaments_not_clouds": "Primary breakup must read as thin filament structure. Soft cloudy noise is an anti-pattern for this archetype.",
+    "body_supports_core": "The orange shell exists to sell volume and heat, not to replace the white-hot center.",
+    "controlled_rim": "The rim glow should help the orb feel contained, but must never turn into a thick donut outline.",
+    "layered_motion": "Use at least two motion scales: fast filament motion and slower secondary turbulence.",
+    "pulse_with_intent": "Pulsing should communicate contained energy pressure, not random brightness wobble."
+  },
+
+  "niagara_modules_needed": [
+    "Initialize Particle",
+    "Spawn Rate",
+    "Spawn Burst Instantaneous",
+    "Sphere Location",
+    "Vortex Velocity or Rotate Around Point",
+    "Add Velocity",
+    "Curl Noise Force",
+    "Scale Sprite Size",
+    "Scale Ribbon Width",
+    "Color",
+    "Drag",
+    "Solve Forces and Velocity",
+    "Particle State"
+  ]
+}

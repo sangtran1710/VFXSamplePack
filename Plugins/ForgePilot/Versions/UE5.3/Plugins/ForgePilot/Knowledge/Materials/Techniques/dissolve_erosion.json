@@ -1,0 +1,41 @@
+{
+  "overview": "Dissolve and erosion materials should communicate a single readable coverage progression, a controlled edge frontier, and secondary breakup that never fights the main progress mask.",
+  "visual_reads": [
+    "clear coverage progression",
+    "readable edge frontier",
+    "secondary crack and erosion breakup",
+    "emissive edge as support only"
+  ],
+  "lane_order": [
+    "build_material_depth_mask_lane",
+    "build_material_crack_mask_lane",
+    "build_material_fresnel_lane"
+  ],
+  "required_root_pins": [
+    "Opacity",
+    "OpacityMask",
+    "EmissiveColor"
+  ],
+  "preferred_nodes": [
+    "DepthFade",
+    "PixelDepth",
+    "Fresnel",
+    "Noise"
+  ],
+  "preferred_parameters": [
+    "TransformAlpha",
+    "BurnEdgeWidth",
+    "EdgeIntensity",
+    "BreakupContrast"
+  ],
+  "common_failure_modes": [
+    "mixing multiple independent progress controls",
+    "emissive flooding ahead of the coverage mask",
+    "edge width changing so much that the frontier stops reading cleanly"
+  ],
+  "capture_review_checklist": [
+    "Front shot shows a single clear transition frontier.",
+    "Three-quarter shot preserves breakup while keeping the coverage read intact.",
+    "Grazing shot keeps the edge visible without turning into a full-surface glow."
+  ]
+}

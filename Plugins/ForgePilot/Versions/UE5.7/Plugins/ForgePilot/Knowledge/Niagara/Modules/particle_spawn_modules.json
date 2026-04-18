@@ -1,0 +1,131 @@
+{
+  "_description": "Complete Niagara Particle Spawn module reference. Agent uses this to know which modules exist and what they do when building emitter stacks.",
+  "_source": "UE5.6 Epic Documentation - Particle Spawn Group Reference",
+
+  "initialization": {
+    "Initialize Particle": {
+      "purpose": "Set initial values: Lifetime, Position, Mass, Color, Sprite Size, Sprite Rotation, Mesh Scale",
+      "placement": "TOP of Particle Spawn stack (always first)",
+      "vfx_usage": "ALWAYS required. Every emitter needs this."
+    },
+    "Initialize Ribbon": {
+      "purpose": "Set initial ribbon values: same as Initialize Particle + Ribbon Width, Ribbon Twist",
+      "placement": "TOP of Particle Spawn stack",
+      "vfx_usage": "Use for trails, beams, ribbons, magic streams"
+    }
+  },
+
+  "location": {
+    "Box Location": {"purpose": "Spawn in rectangular box shape", "vfx_usage": "Flat ground effects, rain spawn volumes"},
+    "Cone Location": {"purpose": "Spawn in cone shape", "vfx_usage": "Directional sprays, fountain, flamethrower"},
+    "Cylinder Location": {"purpose": "Spawn in cylinder with lathe controls", "vfx_usage": "Aura pillars, tornado base, ring effects"},
+    "Grid Location": {"purpose": "Even distribution on grid", "vfx_usage": "Structured patterns, LED-style effects"},
+    "Sphere Location": {"purpose": "Spawn in sphere, hemisphere options", "vfx_usage": "Explosions, magic orbs, point-source effects"},
+    "Torus Location": {"purpose": "Spawn in torus/donut shape", "vfx_usage": "Ring effects, portals, halos"},
+    "System Location": {"purpose": "Spawn at system position", "vfx_usage": "Simple point-source, attached effects"},
+    "Skeletal Mesh Location": {"purpose": "Spawn on bone/socket/triangle/vertex of skeletal mesh", "vfx_usage": "Character-attached effects, body fire, aura"},
+    "Static Mesh Location": {"purpose": "Spawn from static mesh surface", "vfx_usage": "Object burning, dissolve particles from surface"},
+    "Jitter Position": {"purpose": "Random offset on delay timer", "vfx_usage": "Flickering position, unstable effects"},
+    "Rotate Around Point": {"purpose": "Position on circle around center point", "vfx_usage": "Orbital particles, spinning magic, charge-up"}
+  },
+
+  "velocity": {
+    "Add Velocity": {"purpose": "Assign velocity to particles", "vfx_usage": "Most common - upward for fire/smoke, outward for explosion"},
+    "Add Velocity from Point": {"purpose": "Velocity from arbitrary point with falloff", "vfx_usage": "Explosion radial burst, repulsion"},
+    "Add Velocity in Cone": {"purpose": "Velocity in cone shape with angle control", "vfx_usage": "Directional sprays, flamethrower, jets"},
+    "Inherit Velocity": {"purpose": "Inherit velocity from parent/system", "vfx_usage": "Moving emitter trails, vehicle exhaust"},
+    "Scale Velocity": {"purpose": "Multiply velocity by vector", "vfx_usage": "Slow down/speed up over time"},
+    "Static Mesh Velocity": {"purpose": "Velocity from static mesh normals", "vfx_usage": "Particles flying off mesh surface"},
+    "Vortex Velocity": {"purpose": "Angular velocity around vortex axis", "vfx_usage": "Tornado, whirlpool, spiral magic"}
+  },
+
+  "forces": {
+    "Acceleration Force": {"purpose": "Add to Physics.Force (acceleration)", "vfx_usage": "General purpose force"},
+    "Apply Initial Forces": {"purpose": "Convert forces to velocity at spawn", "vfx_usage": "Place AFTER force modules in spawn stack"},
+    "Curl Noise Force": {"purpose": "Organic noise-based force field", "vfx_usage": "ESSENTIAL for smoke, fire, magic - creates organic movement"},
+    "Drag": {"purpose": "Slow particles over time", "vfx_usage": "Realistic deceleration, 0.1-0.3 for most effects"},
+    "Gravity Force": {"purpose": "Gravitational pull (cm/s²)", "vfx_usage": "Debris (-980), sparks, rain, anything physical"},
+    "Limit Force": {"purpose": "Cap max force magnitude", "vfx_usage": "Prevent extreme acceleration"},
+    "Line Attraction Force": {"purpose": "Pull toward line segment", "vfx_usage": "Beam effects, laser particles"},
+    "Linear Force": {"purpose": "Constant directional force", "vfx_usage": "Wind, constant push"},
+    "Mesh Rotation Force": {"purpose": "Rotational force on yaw/pitch/roll", "vfx_usage": "Tumbling debris, spinning shrapnel"},
+    "Point Attraction Force": {"purpose": "Pull toward point", "vfx_usage": "Implosion, black hole, charge-up gathering"},
+    "Point Force": {"purpose": "Force from point with falloff", "vfx_usage": "Radial push/pull from source"},
+    "Vector Noise Force": {"purpose": "Random noise into force", "vfx_usage": "Turbulence, chaotic movement"},
+    "Vortex Force": {"purpose": "Circular force around axis", "vfx_usage": "Tornado, whirlpool, spiral"},
+    "Wind Force": {"purpose": "Wind with air resistance", "vfx_usage": "Environmental wind on smoke, embers, leaves"}
+  },
+
+  "color": {
+    "Color": {"purpose": "Set Particles.Color directly with RGB + Alpha scale", "vfx_usage": "Color over life curves, static color"}
+  },
+
+  "materials": {
+    "Dynamic Material Parameters": {
+      "purpose": "Write to Dynamic Parameter node in Material Editor (4 floats per parameter, up to 4 parameters = 16 floats)",
+      "vfx_usage": "Pass particle data to material: dissolve amount, erosion progress, custom masks"
+    }
+  },
+
+  "subuv": {
+    "SubUVAnimation": {
+      "purpose": "Animate flipbook sprite sheet",
+      "vfx_usage": "Fire, smoke, explosion flipbooks. Set frame count and animation curve."
+    }
+  },
+
+  "kill": {
+    "Kill Particles": {"purpose": "Kill all particles (boolean switch)", "vfx_usage": "Conditional kill"},
+    "Kill Particles in Volume": {"purpose": "Kill in box/plane/slab/sphere shape", "vfx_usage": "Keep particles in bounds, ground plane kill"}
+  },
+
+  "beam": {
+    "Beam Width": {"purpose": "Control beam width via RibbonWidth", "vfx_usage": "Lightning, laser beams"},
+    "Spawn Beam": {"purpose": "Place particles along bezier/line between points", "vfx_usage": "Static beam, electricity arc"}
+  },
+
+  "mesh_sampling": {
+    "Initialize Mesh Reproduction Sprite": {"purpose": "Sample skeletal mesh surface for sprite reproduction", "vfx_usage": "Dissolve from mesh, mesh-shaped particle cloud"},
+    "Sample Skeletal Mesh Skeleton": {"purpose": "Sample bone/socket positions", "vfx_usage": "Attach particles to skeleton joints"},
+    "Sample Skeletal Mesh Surface": {"purpose": "Sample skinned mesh surface", "vfx_usage": "Body fire, character aura, surface emission"},
+    "Sample Static Mesh": {"purpose": "Sample static mesh data", "vfx_usage": "Object surface effects"}
+  },
+
+  "orientation": {
+    "Align Sprite to Mesh Orientation": {"purpose": "Align sprite to mesh particle orientation", "vfx_usage": "Sprite follows mesh rotation"},
+    "Initial Mesh Orientation": {"purpose": "Align mesh to vector or rotate", "vfx_usage": "Oriented debris, directional mesh particles"},
+    "Orient Mesh to Vector": {"purpose": "Align mesh to input vector", "vfx_usage": "Arrows pointing direction, velocity-aligned mesh"}
+  },
+
+  "texture": {
+    "Sample Texture": {"purpose": "Sample texture at UV (GPU only)", "vfx_usage": "Read texture data for particle behavior"},
+    "Sample Pseudo Volume Texture": {"purpose": "Sample pseudo volume texture at UVW", "vfx_usage": "3D noise fields, volumetric data"},
+    "Sub UV Texture Sample": {"purpose": "Sample single pixel in SubUV grid", "vfx_usage": "Per-frame texture lookup"},
+    "World Aligned Texture Sample": {"purpose": "Sample texture based on world position", "vfx_usage": "World-space patterns"}
+  },
+
+  "events": {
+    "Generate Location Event": {"purpose": "Emit event with particle position, velocity, ID, age", "vfx_usage": "Trigger secondary emitters from particle positions"}
+  },
+
+  "common_particle_parameters": {
+    "Particles.Lifetime": "Lifetime in seconds",
+    "Particles.Position": "World position",
+    "Particles.Velocity": "Velocity in cm/s",
+    "Particles.Color": "RGBA color",
+    "Particles.SpriteSize": "Sprite quad size",
+    "Particles.SpriteRotation": "Screen-aligned roll in degrees",
+    "Particles.Scale": "XYZ scale for non-sprites",
+    "Particles.Mass": "Mass for physics",
+    "Particles.MeshOrientation": "Axis-angle rotation for meshes",
+    "Particles.SubImageIndex": "SubUV frame index",
+    "Particles.NormalizedAge": "Age/Lifetime (0-1), useful for curves",
+    "Particles.MaterialRandom": "Random value sent to material's Particle Random node",
+    "Particles.DynamicMaterialParameter": "4-float vector sent to Dynamic Parameter node in material",
+    "Particles.RibbonID": "Groups particles into ribbons",
+    "Particles.RibbonWidth": "Ribbon width in cm",
+    "Particles.RibbonTwist": "Ribbon twist in degrees",
+    "Particles.RibbonLinkOrder": "Order of particles within ribbon",
+    "Particles.CameraOffset": "Distance offset from camera"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "_description": "Workflow for keeping current Material Function docs usable by ForgePilot, Codex, Claude, and other AI agents.",
+
+  "source_catalog": "Knowledge/Materials/Reference/material_node_catalog_current.json",
+  "semantic_index": "Knowledge/Materials/Reference/material_function_study_index_current.json",
+  "docs_root": "Docs/MaterialFunctions/Current",
+  "export_script": "Tools/Validation/export_material_function_docs.ps1",
+
+  "goal": "Let agents understand the available Material Function categories, pick useful reusable blocks, and avoid rebuilding large graph chunks from primitive expressions when a validated function already exists.",
+
+  "workflow": [
+    "Regenerate the broad material node catalog when the UE version or engine content changes.",
+    "Run export_material_function_docs.ps1 with IncludeFunctionInfo and IncludeInternalGraph to scan /Engine/Functions through the bridge Asset Registry, filter actual MaterialFunction assets, and inspect every real Engine MaterialFunction through get_material_function_info.",
+    "Read the generated category markdown docs before choosing a MaterialFunctionCall for a production graph.",
+    "Use material_function_usage_strategy.json for the expression-versus-function decision rules.",
+    "Use run_material_function_probe.ps1 for curated high-value VFX functions that must remain callable through the bridge.",
+    "For a selected function, inspect it again with get_material_function_info immediately before wiring because function pins are the highest-risk part of automation.",
+    "Wire inputs by target_input_name rather than raw input index."
+  ],
+
+  "docs_for_agents": [
+    "Docs/MaterialFunctions/Current/README.md",
+    "Knowledge/Materials/Reference/material_function_usage_strategy.json",
+    "Knowledge/Materials/Reference/material_function_semantic_notes_current.json",
+    "Knowledge/Materials/Reference/material_function_study_index_current.json",
+    "Knowledge/Materials/Reference/material_node_catalog_current.json"
+  ],
+
+  "guardrails": [
+    "Do not assume Material Functions are faster than equivalent expressions; they are mainly cleaner and more reusable.",
+    "Do not use ExampleContent, NotInUse, MAXScripts, SupportFiles, Strata, or MaterialLayerFunctions blindly in particle VFX materials.",
+    "Do not wire function pins by guessed index when target_input_name is available.",
+    "Do not replace simple one-node or two-node math with functions unless the function exposes clearer artist-facing controls."
+  ],
+
+  "catalog_caution": "The file-system catalog may see every .uasset under Engine/Content/Functions, including textures, example materials, and support assets. The function study exporter uses scan_assets with asset_type MaterialFunction when IncludeFunctionInfo is enabled, so the semantic docs are based on real MaterialFunction assets rather than folder contents alone.",
+
+  "deep_graph_rule": "Generated function docs under Docs/MaterialFunctions/Current/Functions contain exact internal nodes, pin wiring, connection lists, and output trace roots. Use those docs as graph truth before explaining or rebuilding a function.",
+
+  "semantic_notes_rule": "Deep graph docs provide structure, but they do not always compress a graph into a clean artist-facing formula. For high-value functions where artists need exact behavior, add a hand-traced entry to material_function_semantic_notes_current.json."
+}

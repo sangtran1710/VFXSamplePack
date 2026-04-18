@@ -1,0 +1,97 @@
+{
+  "taxonomy_name": "arcane_pull_orb_failure_taxonomy",
+  "scope": "Rules-based V2 critic for arcane pull orb reads.",
+  "labels": {
+    "hero_sweep_missing": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroArcaneSweep emitter is missing or under-authored.",
+        "Hero arcane sweep is not visually distinct from support layers."
+      ],
+      "allowed_repair_ops": [
+        "build_main_attraction_layer",
+        "rebuild_hero_arcane_sweep_layer"
+      ],
+      "escalation_rule": "Two consecutive hero-layer failures force a rebuild."
+    },
+    "no_outside_to_core_read": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "HeroArcaneSweep does not read as magical energy being drawn toward the core."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family",
+        "rebuild_hero_arcane_sweep_layer"
+      ],
+      "escalation_rule": "Two consecutive failures force a rebuild."
+    },
+    "electrical_zigzag_dominance": {
+      "category": "motion",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "Hero arcane layer reads as sharp electrical zigzags instead of smooth magical pull."
+      ],
+      "allowed_repair_ops": [
+        "retune_motion_family",
+        "rebuild_hero_arcane_sweep_layer"
+      ],
+      "escalation_rule": "Repeated hits force a hero rebuild."
+    },
+    "closed_ring_orb": {
+      "category": "shape_layering",
+      "severity": "high",
+      "hard_gate": true,
+      "detection_rules": [
+        "Layer overlap closes into a ring shell around the orb."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer",
+        "rebuild_hero_arcane_sweep_layer"
+      ],
+      "escalation_rule": "If repeated on the hero layer, rebuild the hero sweep."
+    },
+    "secondary_overwhelms_hero": {
+      "category": "shape_layering",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "SecondaryArcaneFilaments compete with HeroArcaneSweep."
+      ],
+      "allowed_repair_ops": [
+        "build_secondary_filament_layer"
+      ],
+      "escalation_rule": "Reduce secondary support before touching the hero sweep."
+    },
+    "linework_not_flame_body": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Arcane streak material is too graphic or line-heavy instead of flowing magical mass."
+      ],
+      "allowed_repair_ops": [
+        "simplify_hero_ribbon_material",
+        "retune_longitudinal_flow"
+      ],
+      "escalation_rule": "Simplify the body before increasing glow."
+    },
+    "over_bloomed_glyph_haze": {
+      "category": "material",
+      "severity": "medium",
+      "hard_gate": false,
+      "detection_rules": [
+        "Core glow overwhelms internal arcane detail and collapses the orb into haze."
+      ],
+      "allowed_repair_ops": [
+        "build_core_merge_glow_material",
+        "build_shock_glow_layer"
+      ],
+      "escalation_rule": "Reduce bloom dominance while keeping readable core detail."
+    }
+  }
+}

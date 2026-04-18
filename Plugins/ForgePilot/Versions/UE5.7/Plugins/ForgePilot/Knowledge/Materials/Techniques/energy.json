@@ -1,0 +1,41 @@
+{
+  "overview": "Generic energy materials should read through a dominant color family, a controlled view-dependent edge, and limited supporting breakup rather than complex surface realism.",
+  "visual_reads": [
+    "clear primary energy color",
+    "supporting breakup without noise flood",
+    "controlled edge emphasis",
+    "emissive-led readability"
+  ],
+  "lane_order": [
+    "build_material_fresnel_lane",
+    "build_material_crack_mask_lane",
+    "build_material_shell_core_lane"
+  ],
+  "required_root_pins": [
+    "EmissiveColor",
+    "BaseColor",
+    "Opacity"
+  ],
+  "preferred_nodes": [
+    "Fresnel",
+    "Noise",
+    "DepthFade",
+    "ReflectionVectorWS"
+  ],
+  "preferred_parameters": [
+    "EdgeColor",
+    "CoreColor",
+    "EdgePower",
+    "BreakupContrast"
+  ],
+  "common_failure_modes": [
+    "using every lane at once with no clear energy read",
+    "breakup overpowering the primary color",
+    "opaque center killing the emissive-led look"
+  ],
+  "capture_review_checklist": [
+    "Front shot keeps a single dominant energy color.",
+    "Three-quarter shot shows breakup supporting the read rather than replacing it.",
+    "Grazing shot strengthens edge readability without clipping the frame."
+  ]
+}

@@ -1,0 +1,295 @@
+{
+  "_description": "Material library recipe extracted from /Game/VFX/NiagaraDissolveEdge/Materials. Use this to teach ForgePilot how this folder organizes visual logic for portal rims, lightning arcs, radial energy sprites, masked motion shapes, smoke support, and grounded surface references.",
+
+  "source_folder": "/Game/VFX/NiagaraDissolveEdge/Materials",
+
+  "overview": "This library is centered around radial edge reads, dissolving/noisy portal rings, simple energy sprites, and a few support references for smoke, ice, rock, and masked motion silhouettes. The key lesson is that strong VFX visuals here come from separating visual roles: radial edge, arc line, support smoke, masked animated silhouette, and grounded surface reference are all different material families.",
+
+  "library_design_rules": [
+    "Do not treat the folder as one unified look. It is a small visual library with several distinct roles.",
+    "Radial edge materials should prioritize silhouette and threshold logic before detail noise.",
+    "Lightning and line energy should prioritize directional read and motion first, not full-surface glow.",
+    "Masked animated silhouette materials should stay separate from generic additive sprite logic.",
+    "Grounded surface references like rock or ice are support references, not default choices for Niagara sprite particles."
+  ],
+
+  "material_families": {
+    "radial_energy_edge": {
+      "purpose": "Circular rims, star cores, ring edges, aura bursts, and dissolving circular energy shapes.",
+      "materials": [
+        "M_Portal",
+        "M_Star",
+        "M_CA"
+      ],
+      "dominant_logic": [
+        "radial coordinate space or radial gradient logic",
+        "thresholded edge extraction",
+        "emissive-led silhouette",
+        "optional depth fade or noise breakup",
+        "ring or core read before secondary detail"
+      ],
+      "selection_rules": [
+        "Use M_Portal when the read should be a noisy ring or portal rim.",
+        "Use M_Star when the read should be a compact additive radial burst or bright star-like core.",
+        "Use M_CA when the look needs a synthetic energy shape driven more by math than by texture."
+      ],
+      "best_use_cases": [
+        "portal edge",
+        "summon ring",
+        "magic seal rim",
+        "radial burst sprite",
+        "orb core accent",
+        "circular dissolve edge"
+      ]
+    },
+
+    "arc_and_lightning_line": {
+      "purpose": "Lightning-like line energy, animated arc strips, and aggressive directional energy flow.",
+      "materials": [
+        "M_Lightning"
+      ],
+      "dominant_logic": [
+        "multiple panners",
+        "GeneratedBand-style line construction",
+        "color dodge or aggressive additive composition",
+        "WorldPositionOffset support for unstable line motion"
+      ],
+      "selection_rules": [
+        "Use M_Lightning for arc energy, jagged line strips, or animated electrical edge motion.",
+        "Prefer this family when the read must feel directional and unstable rather than circular."
+      ],
+      "best_use_cases": [
+        "lightning strip",
+        "arc beam accent",
+        "energy crackle on ring edge",
+        "electrical tendril sheet"
+      ]
+    },
+
+    "masked_motion_shape": {
+      "purpose": "Animated masked silhouettes with emissive support and WPO motion.",
+      "materials": [
+        "M_Butterfly"
+      ],
+      "dominant_logic": [
+        "masked unlit silhouette",
+        "texture-driven shape identity",
+        "radial or object-pivot aware motion support",
+        "WorldPositionOffset for life-like motion"
+      ],
+      "selection_rules": [
+        "Use this family when the visual identity comes from the silhouette itself, not from soft translucent glow.",
+        "Keep masked animated motifs separate from generic spark or portal materials."
+      ],
+      "best_use_cases": [
+        "spectral butterfly",
+        "masked magical familiar",
+        "animated motif particles",
+        "stylized summon silhouettes"
+      ]
+    },
+
+    "soft_support_volume": {
+      "purpose": "Soft translucent support smoke or haze around the hero read.",
+      "materials": [
+        "M_Smoke_1"
+      ],
+      "dominant_logic": [
+        "translucent unlit soft opacity",
+        "texture-driven volume softness",
+        "support role rather than hero shape"
+      ],
+      "selection_rules": [
+        "Use this as a support layer only.",
+        "Do not use this material family to carry the primary portal or energy silhouette."
+      ],
+      "best_use_cases": [
+        "portal haze",
+        "summon smoke",
+        "dissolve support fog",
+        "soft atmosphere around edge effects"
+      ]
+    },
+
+    "grounded_surface_reference": {
+      "purpose": "Surface-bound grounded materials used as environmental or dissolve-target references rather than as Niagara sprite defaults.",
+      "materials": [
+        "M_Rock",
+        "M_Ice"
+      ],
+      "dominant_logic": [
+        "opaque default-lit surface shading",
+        "texture-driven surface identity",
+        "normal and roughness support",
+        "grounded object read"
+      ],
+      "selection_rules": [
+        "Use these as mesh or target-surface references, not as portal/spark sprite materials.",
+        "M_Ice is useful when a dissolve-edge effect needs a frozen target aesthetic or emissive ice cracking support.",
+        "M_Rock is a neutral grounded reference for hard-surface dissolve targets."
+      ],
+      "best_use_cases": [
+        "dissolve target mesh",
+        "frozen breakup target",
+        "environmental grounding reference"
+      ]
+    }
+  },
+
+  "reusable_logic_patterns": {
+    "dual_threshold_ring": {
+      "description": "Build a ring by subtracting an inner threshold from an outer threshold on top of a noisy radial field.",
+      "best_examples": [
+        "M_Portal"
+      ],
+      "key_nodes": [
+        "VectorToRadialValue",
+        "RadialGradientExponential",
+        "Step",
+        "Subtract",
+        "DepthFade"
+      ]
+    },
+    "compact_additive_core": {
+      "description": "A very small graph can still produce a strong burst/core read if the radial gradient and emissive are clean.",
+      "best_examples": [
+        "M_Star"
+      ],
+      "key_nodes": [
+        "RadialGradientExponential",
+        "EmissiveColor",
+        "Opacity"
+      ]
+    },
+    "procedural_energy_shape": {
+      "description": "Procedural math-driven shapes can replace texture dependence for synthetic magical or chromatic effects.",
+      "best_examples": [
+        "M_CA"
+      ],
+      "key_nodes": [
+        "math composition",
+        "MakeFloat3",
+        "emissive/opacity shaping"
+      ]
+    },
+    "animated_arc_strip": {
+      "description": "A line or strip effect can be sold by layered panners, aggressive blend mode, and unstable deformation.",
+      "best_examples": [
+        "M_Lightning"
+      ],
+      "key_nodes": [
+        "GeneratedBand",
+        "Panner",
+        "Blend_ColorDodge",
+        "WorldPositionOffset"
+      ]
+    },
+    "masked_animated_motif": {
+      "description": "Use a masked silhouette plus WPO when the motif itself must stay recognizable while moving.",
+      "best_examples": [
+        "M_Butterfly"
+      ],
+      "key_nodes": [
+        "OpacityMask",
+        "ObjectPivotPoint",
+        "VectorToRadialValue",
+        "WorldPositionOffset"
+      ]
+    },
+    "soft_support_haze": {
+      "description": "Support smoke should stay soft and unobtrusive, reinforcing the main effect rather than replacing it.",
+      "best_examples": [
+        "M_Smoke_1"
+      ],
+      "key_nodes": [
+        "texture-driven opacity",
+        "translucent emissive softness"
+      ]
+    }
+  },
+
+  "selection_playbook": {
+    "if_the_effect_needs": [
+      {
+        "need": "portal rim or circular energy gate",
+        "pick_family": "radial_energy_edge",
+        "recommended_materials": [
+          "M_Portal"
+        ]
+      },
+      {
+        "need": "bright core burst or magical star center",
+        "pick_family": "radial_energy_edge",
+        "recommended_materials": [
+          "M_Star"
+        ]
+      },
+      {
+        "need": "math-driven synthetic energy shape",
+        "pick_family": "radial_energy_edge",
+        "recommended_materials": [
+          "M_CA"
+        ]
+      },
+      {
+        "need": "lightning strip or arc line",
+        "pick_family": "arc_and_lightning_line",
+        "recommended_materials": [
+          "M_Lightning"
+        ]
+      },
+      {
+        "need": "animated masked silhouette motif",
+        "pick_family": "masked_motion_shape",
+        "recommended_materials": [
+          "M_Butterfly"
+        ]
+      },
+      {
+        "need": "soft portal haze or dissolve support smoke",
+        "pick_family": "soft_support_volume",
+        "recommended_materials": [
+          "M_Smoke_1"
+        ]
+      },
+      {
+        "need": "grounded mesh reference for dissolve target",
+        "pick_family": "grounded_surface_reference",
+        "recommended_materials": [
+          "M_Rock",
+          "M_Ice"
+        ]
+      }
+    ]
+  },
+
+  "authoring_guidance_for_forgepilot": [
+    "When a prompt asks for a portal or ring edge, begin with radial_energy_edge logic, not with generic sprite panning.",
+    "When a prompt asks for lightning or crackling line energy, prefer the arc_and_lightning_line family rather than adapting a portal material.",
+    "Keep masked motif materials separate from translucent sprite materials.",
+    "Use support smoke only as a secondary layer around the hero edge or portal read.",
+    "Use rock and ice as dissolve-target or environment reference materials, not as default Niagara particle materials."
+  ],
+
+  "common_failure_modes": [
+    "using portal-ring logic for line lightning",
+    "using a soft smoke material as the main portal silhouette",
+    "trying to get a crisp masked motif out of a generic translucent energy material",
+    "using grounded opaque surface materials as if they were sprite VFX parents",
+    "letting noise or smoke replace the primary edge silhouette"
+  ],
+
+  "agent_recipe": {
+    "step_1": "Classify the requested visual into one of these roles: radial edge, line arc, masked motif, soft support haze, or grounded surface reference.",
+    "step_2": "Choose the closest material family from this library before proposing graph edits.",
+    "step_3": "Preserve the family-defining logic: radial thresholds for portal/ring, directional panning for lightning, masked silhouette for motif, soft opacity for support haze, surface shading for grounded targets.",
+    "step_4": "Expose art-facing parameters where possible when adapting these graphs, because the source library relies heavily on hard-coded values.",
+    "step_5": "Split one effect into multiple material roles instead of trying to force one material family to solve all visual problems."
+  },
+
+  "known_reusability_risks": [
+    "Most materials in this folder expose few or no artist-facing parameters. ForgePilot should treat them as logic references first, not as final reusable parents.",
+    "Several graphs rely on hard-coded textures or constants; future reusable versions should promote those to parameters.",
+    "M_Portal, M_Lightning, and M_CA are especially useful as logic patterns, but should be rebuilt with MI-friendly controls if used as production bases."
+  ]
+}

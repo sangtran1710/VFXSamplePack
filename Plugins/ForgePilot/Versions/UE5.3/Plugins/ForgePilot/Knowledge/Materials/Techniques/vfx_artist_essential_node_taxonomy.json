@@ -1,0 +1,359 @@
+{
+  "_description": "Foundational node taxonomy for VFX artists building Unreal materials that interact with Niagara. Use this as a priority map when deciding which material nodes matter most for common production VFX work.",
+
+  "overview": "A production VFX material is usually built from a small set of high-value nodes reused in different combinations. A strong VFX artist does not need to memorize every node in the editor. They need to know which node families solve data flow, texture motion, masking, deformation, and natural variation first.",
+
+  "priority_order_for_vfx_artists": [
+    "Niagara data link",
+    "UV and texture motion",
+    "shape and masking math",
+    "vertex deformation",
+    "noise and time variation"
+  ],
+
+  "categories": [
+    {
+      "category": "niagara_data_link",
+      "display_name": "Node giao tiep voi Niagara",
+      "why_it_matters": "These nodes carry data from Niagara into the material. Without them, the material cannot react cleanly to lifetime, tint, alpha, or per-particle control values.",
+      "most_important_nodes": [
+        {
+          "node": "Particle Color",
+          "primary_role": "Read particle RGB and Alpha directly from Niagara.",
+          "typical_vfx_usage": [
+            "color over life",
+            "opacity over life",
+            "sprite tint variation",
+            "fade control from Scale Color"
+          ],
+          "agent_rule": "If Niagara is expected to drive tint or fade, keep Particle Color in the graph and make sure its Alpha influences the opacity path or the emissive path when additive blending is involved."
+        },
+        {
+          "node": "Dynamic Parameter",
+          "primary_role": "Send up to four float channels from Niagara into the material.",
+          "typical_vfx_usage": [
+            "emissive shaping exponent",
+            "depth fade distance",
+            "camera depth fade length",
+            "distortion strength",
+            "blend controls"
+          ],
+          "agent_rule": "Prefer stable shared channel naming across a material family so Niagara-side parameter setup stays reusable. For the shared fire and smoke ParticleSubUV workflow, use PowerEmissive, FadeDistance, CameraDpthFade, Power with default values R=1, G=1, B=1, A=2."
+        },
+        {
+          "node": "Particle Relative Time",
+          "primary_role": "Read normalized lifetime from 0 to 1 directly in the material.",
+          "typical_vfx_usage": [
+            "material-only fades",
+            "dissolve timing",
+            "lifetime-based rim intensity",
+            "spawn-to-death visual ramps"
+          ],
+          "agent_rule": "Use Particle Relative Time when timing should live inside the material. If Niagara already owns the fade curve, do not duplicate the same timing logic in the material unless there is a specific artistic reason."
+        }
+      ],
+      "common_mistakes": [
+        "omitting Particle Color and then wondering why Niagara color or alpha curves do not affect the material",
+        "using Dynamic Parameter channels with inconsistent naming from one material to the next",
+        "duplicating lifetime logic in both Niagara and the material without a clear reason"
+      ]
+    },
+    {
+      "category": "uv_and_motion",
+      "display_name": "Node dieu khien UV va chuyen dong",
+      "why_it_matters": "Most VFX motion is faked through UV movement or frame lookup rather than heavy geometry simulation.",
+      "most_important_nodes": [
+        {
+          "node": "Panner",
+          "primary_role": "Scroll texture UVs in a chosen direction.",
+          "typical_vfx_usage": [
+            "fire flow",
+            "smoke drift",
+            "energy crawl",
+            "water motion"
+          ],
+          "agent_rule": "When a look needs cheap continuous flow, try Panner before inventing a more complex graph."
+        },
+        {
+          "node": "Rotator",
+          "primary_role": "Rotate texture UVs over time or by a control value.",
+          "typical_vfx_usage": [
+            "swirl motion",
+            "magic rings",
+            "rotating energy shells",
+            "soft smoke card variation"
+          ],
+          "agent_rule": "Use Rotator when the visual needs circular or orbiting motion instead of linear drift."
+        },
+        {
+          "node": "TextureCoordinate",
+          "primary_role": "Control UV tiling and coordinate scale.",
+          "typical_vfx_usage": [
+            "noise scale control",
+            "flipbook atlas sampling support",
+            "detail texture scale",
+            "radial mask density tuning"
+          ],
+          "agent_rule": "Treat TextureCoordinate as the root scaling control for most sampled textures. It is usually the first stop for fixing tiling density before touching more advanced nodes."
+        },
+        {
+          "node": "ParticleSubUV",
+          "primary_role": "Read flipbook frames from a sprite sheet using Niagara SubUV playback.",
+          "typical_vfx_usage": [
+            "fire flipbooks",
+            "smoke flipbooks",
+            "explosion sheets",
+            "pre-rendered bursts"
+          ],
+          "agent_rule": "If the motion is stored in the atlas frames, prefer ParticleSubUV over trying to fake that motion with panners. Verify the Niagara renderer SubUV grid before debugging the material."
+        }
+      ],
+      "common_mistakes": [
+        "using a plain Texture Sample where ParticleSubUV is required for a real flipbook sheet",
+        "driving motion with too many unrelated panners so the read becomes noisy instead of directional",
+        "forgetting to match the Niagara renderer SubUV grid to the actual atlas layout"
+      ]
+    },
+    {
+      "category": "shape_and_masking_math",
+      "display_name": "Node hinh khoi va masking",
+      "why_it_matters": "These nodes define silhouettes, cutoffs, rims, and dissolves. They are often the difference between a readable effect and an amorphous blob.",
+      "most_important_nodes": [
+        {
+          "node": "SphereMask",
+          "primary_role": "Create soft radial masks and falloffs.",
+          "typical_vfx_usage": [
+            "aura spheres",
+            "soft circular reveals",
+            "radial impact masks",
+            "orb shells"
+          ],
+          "agent_rule": "Use SphereMask when the effect wants a soft center-to-edge radial falloff."
+        },
+        {
+          "node": "Distance",
+          "primary_role": "Measure distance between positions or values.",
+          "typical_vfx_usage": [
+            "influence radius",
+            "proximity masks",
+            "custom aura widths",
+            "distance-based blending"
+          ],
+          "agent_rule": "Distance is usually a support node for masks or fields, not the final visual by itself."
+        },
+        {
+          "node": "Fresnel",
+          "primary_role": "Create view-dependent edge emphasis.",
+          "typical_vfx_usage": [
+            "energy shields",
+            "magic rims",
+            "ghost edges",
+            "shell glows"
+          ],
+          "agent_rule": "If an effect needs readable edges or a magical shell feel, Fresnel is usually a first-choice node."
+        },
+        {
+          "node": "CheapContrast",
+          "primary_role": "Push mask contrast cheaply without a full custom setup.",
+          "typical_vfx_usage": [
+            "tightening dissolve bands",
+            "sharpening mask breakup",
+            "crisping threshold reads"
+          ],
+          "agent_rule": "Use CheapContrast when the graph needs a quick contrast push without overbuilding."
+        },
+        {
+          "node": "Step",
+          "primary_role": "Create hard threshold cuts.",
+          "typical_vfx_usage": [
+            "dissolve cutoff",
+            "ring band extraction",
+            "binary mask logic"
+          ],
+          "agent_rule": "Step is for decisive hard cutoffs. Pair it with SmoothStep when aliasing becomes too harsh."
+        },
+        {
+          "node": "SmoothStep",
+          "primary_role": "Create a soft threshold between two values.",
+          "typical_vfx_usage": [
+            "soft dissolve band",
+            "controlled edge softness",
+            "mask antialiasing"
+          ],
+          "agent_rule": "Prefer SmoothStep when the artist wants threshold control with softer transitions."
+        }
+      ],
+      "common_mistakes": [
+        "adding noise detail before the main silhouette is readable",
+        "using hard Step everywhere and creating ugly aliasing",
+        "letting Fresnel become the entire effect instead of supporting the hero shape"
+      ]
+    },
+    {
+      "category": "vertex_deformation",
+      "display_name": "Node bien dang",
+      "why_it_matters": "Some VFX need motion in the actual mesh or card shape, not only in texture color. These nodes control that behavior.",
+      "most_important_nodes": [
+        {
+          "node": "World Position Offset",
+          "primary_role": "Move vertices in world space at the material output stage.",
+          "typical_vfx_usage": [
+            "flame card flutter",
+            "organic wobble",
+            "mesh expansion",
+            "dissolve peel",
+            "environmental sway"
+          ],
+          "agent_rule": "Use World Position Offset when silhouette motion matters. Do not use it as a substitute for texture motion when only the internal pattern needs to move."
+        },
+        {
+          "node": "Vertex Normal WS",
+          "primary_role": "Provide outward vertex direction for inflation or directional displacement.",
+          "typical_vfx_usage": [
+            "shell inflation",
+            "pulse expansion",
+            "mesh swelling",
+            "outward reveal push"
+          ],
+          "agent_rule": "Vertex Normal WS is usually paired with World Position Offset to push geometry outward cleanly."
+        }
+      ],
+      "common_mistakes": [
+        "using World Position Offset on effects that only need internal texture motion",
+        "forgetting that aggressive World Position Offset can break collision expectations or card readability",
+        "expecting World Position Offset to solve flipbook timing problems"
+      ]
+    },
+    {
+      "category": "noise_random_and_time",
+      "display_name": "Node noise va random",
+      "why_it_matters": "Natural-looking VFX need controlled irregularity. Time and noise provide that motion and breakup without manually animating everything.",
+      "most_important_nodes": [
+        {
+          "node": "Noise or Perlin-style noise",
+          "primary_role": "Create procedural breakup and organic variation.",
+          "typical_vfx_usage": [
+            "clouds",
+            "smoke breakup",
+            "fire distortion masks",
+            "magic turbulence",
+            "dissolve noise"
+          ],
+          "agent_rule": "Noise is a support layer. Use it to enrich the read after the primary silhouette and flow are already working."
+        },
+        {
+          "node": "Time",
+          "primary_role": "Drive continuous animation in the material.",
+          "typical_vfx_usage": [
+            "panners",
+            "oscillation",
+            "procedural pulses",
+            "scrolling masks"
+          ],
+          "agent_rule": "Time by itself is rarely the effect. Pair it with Panner, Sine, Cosine, or UV math."
+        },
+        {
+          "node": "Sine or Cosine",
+          "primary_role": "Turn time into periodic oscillation.",
+          "typical_vfx_usage": [
+            "blinking",
+            "heartbeat pulsing",
+            "soft emissive oscillation",
+            "cyclic distortion"
+          ],
+          "agent_rule": "Use Sine or Cosine for deliberate rhythm. Avoid it when the effect should feel chaotic or stochastic."
+        }
+      ],
+      "common_mistakes": [
+        "using too much noise and losing the hero read",
+        "making oscillation perfectly rhythmic when the effect should feel organic",
+        "stacking multiple time-based layers without clear speed separation"
+      ]
+    }
+  ],
+
+  "node_selection_heuristics": {
+    "if_you_need": [
+      {
+        "need": "Niagara-controlled tint or fade",
+        "start_with": [
+          "Particle Color"
+        ]
+      },
+      {
+        "need": "four artist-tunable floats from Niagara",
+        "start_with": [
+          "Dynamic Parameter"
+        ]
+      },
+      {
+        "need": "animated sprite sheet playback",
+        "start_with": [
+          "ParticleSubUV"
+        ]
+      },
+      {
+        "need": "cheap flow in one direction",
+        "start_with": [
+          "Panner",
+          "TextureCoordinate"
+        ]
+      },
+      {
+        "need": "rim glow or shell read",
+        "start_with": [
+          "Fresnel"
+        ]
+      },
+      {
+        "need": "radial orb or aura mask",
+        "start_with": [
+          "SphereMask"
+        ]
+      },
+      {
+        "need": "hard dissolve band",
+        "start_with": [
+          "Step",
+          "CheapContrast"
+        ]
+      },
+      {
+        "need": "soft threshold or edge fade",
+        "start_with": [
+          "SmoothStep"
+        ]
+      },
+      {
+        "need": "geometry swelling or flutter",
+        "start_with": [
+          "Vertex Normal WS",
+          "World Position Offset"
+        ]
+      },
+      {
+        "need": "organic breakup",
+        "start_with": [
+          "Noise",
+          "Time"
+        ]
+      }
+    ]
+  },
+
+  "cross_reference_playbook": {
+    "use_with_fire_and_smoke_flipbooks": "Pair this taxonomy with Knowledge/Materials/Techniques/particle_subuv_flipbook_fire_smoke.json when building Niagara-driven fire or smoke sheets.",
+    "use_with_fresnel_shell_work": "Pair this taxonomy with Knowledge/Materials/Techniques/fresnel.json when the effect read depends on edge glow or shell shaping.",
+    "use_with_uv_flow_materials": "Pair this taxonomy with Knowledge/Materials/Techniques/panning_uv.json when the main motion comes from UV scrolling instead of frame playback.",
+    "use_with_portal_or_ring_effects": "Pair this taxonomy with Knowledge/Materials/Techniques/portal_ring.json when the hero shape is radial and threshold-driven.",
+    "use_with_advanced_senior_workflows": "Pair this taxonomy with Knowledge/Materials/Techniques/vfx_artist_advanced_node_taxonomy.json when the effect also needs depth-aware integration, custom flipbook math, optimization switches, or mesh-animation-aware mapping."
+  },
+
+  "agent_guardrails": [
+    "Prefer a small readable graph built from these foundational nodes before escalating to Custom or HLSL.",
+    "Separate Niagara-owned responsibilities from material-owned responsibilities.",
+    "When ParticleSubUV is present, verify the renderer SubUV grid and playback path before blaming the material.",
+    "When a fade seems broken, inspect whether the visible energy is coming from Emissive, Opacity, or both.",
+    "Do not introduce World Position Offset, heavy noise, or extra masks until the core silhouette and timing are already readable."
+  ]
+}

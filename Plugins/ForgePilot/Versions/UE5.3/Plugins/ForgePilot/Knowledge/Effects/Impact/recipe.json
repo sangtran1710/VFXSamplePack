@@ -1,0 +1,190 @@
+{
+  "_description": "Complete recipe for impact/hit effects. Covers melee hits, bullet impacts, magic hits on various surfaces.",
+
+  "base_architecture": {
+    "system_name_convention": "NS_Impact_{Surface}_{Type}",
+    "emitter_layers": [
+      {
+        "name": "Flash",
+        "purpose": "Instant bright flash at impact point",
+        "priority": "required",
+        "renderer": "sprite",
+        "material_type": "M_ImpactFlash (Additive, radial gradient or star shape)",
+        "spawn": "burst: 1 particle",
+        "particle_lifetime": "0.03-0.06s",
+        "initial_size": "20-60 cm",
+        "size_over_life": "rapid expand 1.5-2x then vanish",
+        "color": "white-yellow, emissive 20-80",
+        "opacity_over_life": "1→0 instant",
+        "sort_order": 5
+      },
+      {
+        "name": "Sparks",
+        "purpose": "Bright particles streaking from impact point",
+        "priority": "required (for hard surface hits)",
+        "renderer": "sprite (velocity-stretched) or ribbon",
+        "material_type": "M_Spark (Additive, small bright dot/line)",
+        "spawn": "burst: 8-25 particles",
+        "particle_lifetime": "0.1-0.4s",
+        "initial_size": "1-4 cm",
+        "velocity": "radial outward 300-1000 cm/s from impact normal hemisphere",
+        "gravity": "-980 cm/s² (arcing trajectories)",
+        "color": "bright orange-yellow or white, emissive 10-30",
+        "opacity_over_life": "1→0 linear",
+        "alignment": "velocity-aligned, stretch 3-6x",
+        "sort_order": 4,
+        "notes": "Spawn in hemisphere aligned to surface normal (sparks fly AWAY from surface)"
+      },
+      {
+        "name": "Debris_Chunks",
+        "purpose": "Small surface chunks flying off",
+        "priority": "recommended",
+        "renderer": "mesh (small chunks) or sprite",
+        "material_type": "match surface material (stone, wood, metal)",
+        "spawn": "burst: 3-10 particles",
+        "particle_lifetime": "0.3-1.0s",
+        "initial_size": "1-8 cm (random range)",
+        "velocity": "radial outward 200-600 cm/s from normal",
+        "gravity": "-980 cm/s²",
+        "rotation": "fast tumble 180-540 deg/s",
+        "sort_order": 3,
+        "notes": "Size variety essential. Some tiny, some larger."
+      },
+      {
+        "name": "Dust_Puff",
+        "purpose": "Soft dust cloud at impact point",
+        "priority": "recommended",
+        "renderer": "sprite",
+        "material_type": "M_Dust (Translucent, soft, lit or unlit)",
+        "spawn": "burst: 3-6 particles",
+        "particle_lifetime": "0.3-0.8s",
+        "initial_size": "10-25 cm",
+        "size_over_life": "grow 2-3x",
+        "velocity": "slow radial outward 30-80 cm/s",
+        "color": "match surface: gray for stone, brown for dirt, light gray for concrete",
+        "opacity_over_life": "0.15-0.25 peak, fade to 0",
+        "sort_order": 0,
+        "notes": "Gives the hit weight and grounding"
+      },
+      {
+        "name": "Decal_Mark",
+        "purpose": "Impact mark on surface (bullet hole, scratch, scorch)",
+        "priority": "optional",
+        "renderer": "sprite (surface-aligned) or Decal spawner",
+        "material_type": "M_ImpactDecal (dark mark, translucent, alpha blended)",
+        "spawn": "1 particle, long lifetime",
+        "particle_lifetime": "3.0-10.0s (lingers then fades)",
+        "opacity_over_life": "instant appear, hold, slow fade 70-100%",
+        "orientation": "aligned to surface normal",
+        "sort_order": -1
+      }
+    ]
+  },
+
+  "surface_variants": {
+    "metal": {
+      "flash_color": "white-blue tint, very bright",
+      "sparks": "many (15-25), bright orange, long streaks, high velocity",
+      "debris": "minimal small chips, metallic color",
+      "dust": "minimal, light gray",
+      "sound_cue": "metallic clang/ring",
+      "decal": "scratch or dent mark"
+    },
+    "stone_concrete": {
+      "flash_color": "warm white, moderate",
+      "sparks": "few (5-10), dimmer, shorter",
+      "debris": "many small chips (5-10), gray/white",
+      "dust": "significant, gray-white",
+      "decal": "chip/crater mark"
+    },
+    "wood": {
+      "flash_color": "dim or none",
+      "sparks": "none or very few",
+      "debris": "splinters (elongated shapes), brown/tan",
+      "dust": "moderate, brown/tan",
+      "extra_layers": ["Wood_Splinters (elongated mesh particles, tumbling)"],
+      "decal": "gouge/hole mark"
+    },
+    "dirt_ground": {
+      "flash_color": "none",
+      "sparks": "none",
+      "debris": "small dirt clumps, brown",
+      "dust": "significant, brown, rises then settles",
+      "extra_layers": ["Dirt_Spray (small particles arcing up then falling)"],
+      "decal": "small crater/displacement"
+    },
+    "flesh": {
+      "flash_color": "none or dim red",
+      "sparks": "none",
+      "debris": "none or minimal",
+      "dust": "none",
+      "extra_layers": ["Blood_Spray (red particles, radial burst)", "Blood_Mist (fine red mist, translucent)"],
+      "decal": "blood splat on nearby surfaces"
+    },
+    "energy_shield": {
+      "flash_color": "match shield color, very bright, emissive 30-80",
+      "sparks": "energy sparks (shield color), erratic movement",
+      "debris": "none",
+      "dust": "none",
+      "extra_layers": ["Shield_Ripple (expanding ring from impact point)", "Hex_Flash (hexagonal pattern reveal at impact)"],
+      "decal": "none"
+    },
+    "water": {
+      "flash_color": "white splash highlight",
+      "sparks": "none",
+      "debris": "water droplets (small spheres or sprites)",
+      "dust": "mist/spray",
+      "extra_layers": ["Splash_Ring (expanding ring of droplets)", "Ripple (concentric rings on surface)"],
+      "decal": "none"
+    }
+  },
+
+  "weapon_type_variants": {
+    "bullet": {
+      "scale_factor": 0.5,
+      "spark_count": "10-20",
+      "debris_count": "3-8",
+      "velocity_multiplier": 1.5,
+      "notes": "Fast, sharp, focused impact"
+    },
+    "melee_sword": {
+      "scale_factor": 0.8,
+      "spark_count": "5-15 (only on metal/stone)",
+      "debris_count": "2-5",
+      "extra_layers": ["Slash_Trail (short arc ribbon, fades fast)"],
+      "notes": "More spread, less precise than bullet"
+    },
+    "magic_projectile": {
+      "scale_factor": 1.0,
+      "use_surface_variant": "energy_shield style but on any surface",
+      "extra_layers": ["Magic_Burst (colored energy expanding sphere)", "Particle_Scatter (magic particles flying off)"],
+      "notes": "Color matches spell element. No physical debris."
+    },
+    "explosion_impact": {
+      "description": "Use Explosion recipe instead — this is for the ground/surface impact component only",
+      "extra_layers": ["Scorch_Expanding (growing scorch mark)", "Crack_Pattern (fracture decal)"]
+    }
+  },
+
+  "niagara_modules_needed": [
+    "Initialize Particle",
+    "Spawn Burst Instantaneous",
+    "Shape Location (hemisphere aligned to surface normal)",
+    "Add Velocity (radial from normal)",
+    "Gravity Force (debris and sparks only)",
+    "Drag (0.1-0.2 for sparks, 0.3-0.5 for dust)",
+    "Scale Sprite Size (grow dust, shrink sparks)",
+    "Color (color over life)",
+    "Solve Forces and Velocity",
+    "Sprite Facing Mode (velocity-aligned for sparks)",
+    "Particle State"
+  ],
+
+  "key_principles": {
+    "surface_normal_alignment": "Impact direction/spread must align to surface normal. Sparks fly AWAY from surface, not random directions.",
+    "scale_to_weapon": "Bigger weapon = bigger impact effect. But don't make it too large — impacts should be quick and punchy.",
+    "multiple_surface_types": "AAA games have different impacts per surface (PhysMaterial). Agent should ask or infer surface type.",
+    "frame_count": "Entire impact should be mostly done in 10-20 frames (0.15-0.3s at 60fps). Only dust and decal linger.",
+    "layering_sells_it": "Flash alone looks cheap. Flash + sparks looks OK. Flash + sparks + dust + debris looks AAA."
+  }
+}

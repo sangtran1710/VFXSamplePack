@@ -1,0 +1,43 @@
+{
+  "_description": "How ForgePilot should use the broad material node catalog without overbuilding shader graphs.",
+
+  "principle": "ForgePilot should know the broad node surface, but it should not treat every available Material node as equally useful for VFX automation. Start from curated VFX recipes, then consult the catalog only when a task requires a node family not covered by the recipe.",
+
+  "catalog_reference": "Knowledge/Materials/Reference/material_node_catalog_current.json",
+
+  "function_strategy_reference": "Knowledge/Materials/Reference/material_function_usage_strategy.json",
+
+  "validation_references": [
+    "Tools/Validation/run_material_node_probe.ps1",
+    "Tools/Validation/run_material_function_probe.ps1"
+  ],
+
+  "workflow": [
+    "Classify the requested look: sprite flipbook, ribbon, mesh deformation, dissolve, depth integration, distortion, water, fire, smoke, portal, or generic material utility.",
+    "Load the curated taxonomy first: essential nodes, advanced nodes, and material math nodes.",
+    "Use the broad catalog as a discovery index for native MaterialExpression classes and engine MaterialFunctions.",
+    "If a node is already covered by the material node probe, it is safe for bridge-driven authoring.",
+    "If a node exists in the catalog but is not covered by the probe, add a small validation case before depending on it in an automated build.",
+    "Prefer MaterialFunctionCall for complex reusable engine functions instead of rebuilding large subgraphs by hand.",
+    "When using MaterialFunctionCall, inspect the function with get_material_function_info and wire by target_input_name instead of guessed input index.",
+    "Keep generated graphs small and readable. A graph that uses fewer well-chosen nodes is better than a graph that shows off many node families."
+  ],
+
+  "decision_rules": [
+    "For Niagara-driven sprite color and alpha, start with ParticleColor, DynamicParameter, ParticleRelativeTime, and ParticleSubUV before advanced nodes.",
+    "For texture motion, start with TexCoord, Panner, Rotator, Frac, Floor, and flipbook functions.",
+    "For procedural masks, start with Distance, Length, SphereMask, Step, SmoothStep, CheapContrast, RemapValueRange, and Saturate.",
+    "For world interaction, start with DepthFade, SceneDepth, PixelDepth, DistanceToNearestSurface, ObjectPositionWS, and ObjectRadius.",
+    "For mesh deformation, start with VertexNormalWS, PreSkinnedLocalPosition, TransformPosition, and WorldPositionOffset.",
+    "For platform or feature control, start with StaticSwitchParameter and FeatureLevelSwitch.",
+    "For packed texture workflows, start with ComponentMask, AppendVector, BreakOutFloat functions, and MakeFloat functions."
+  ],
+
+  "guardrails": [
+    "Do not build a graph by browsing the entire catalog and adding many nodes. Use the catalog to answer targeted questions.",
+    "Do not use Custom HLSL unless a native node or MaterialFunction path is too expensive, unavailable, or unreadable.",
+    "Do not assume a cataloged node or function is bridge-authorable until it is covered by the probe script or manually verified.",
+    "When multiple nodes can solve the same task, prefer the simplest node with the clearest artist control.",
+    "Keep the catalog aligned with the active engine baseline. Regenerate it whenever the target Unreal Engine version changes."
+  ]
+}

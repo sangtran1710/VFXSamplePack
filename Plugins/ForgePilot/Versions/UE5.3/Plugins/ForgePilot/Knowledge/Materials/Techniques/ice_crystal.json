@@ -1,0 +1,48 @@
+{
+  "overview": "Realistic or semi-realistic ice/crystal materials should read as a darker shell around a colder, brighter core with crack/specular breakup doing more work than emissive.",
+  "visual_reads": [
+    "dark outer shell",
+    "cold bright core",
+    "crack and specular breakup",
+    "emissive as accent only"
+  ],
+  "lane_order": [
+    "build_material_shell_core_lane",
+    "build_material_crack_mask_lane",
+    "build_material_bump_offset_uv_lane",
+    "build_material_fresnel_lane"
+  ],
+  "required_root_pins": [
+    "BaseColor",
+    "Roughness",
+    "Normal",
+    "EmissiveColor"
+  ],
+  "preferred_nodes": [
+    "Fresnel",
+    "Noise",
+    "BumpOffset",
+    "TextureObject",
+    "TextureObjectParameter",
+    "ReflectionVectorWS",
+    "VertexNormalWS"
+  ],
+  "preferred_parameters": [
+    "ShellColor",
+    "CoreColor",
+    "FresnelPower",
+    "CrackContrast",
+    "HeightRatio"
+  ],
+  "common_failure_modes": [
+    "emissive carrying the whole look",
+    "flat shell with no specular breakup",
+    "cyan orb look with no shell/core separation",
+    "large shard texture reading as plastic instead of ice"
+  ],
+  "capture_review_checklist": [
+    "Front shot separates shell and core clearly.",
+    "Three-quarter shot shows crack/spec breakup instead of flat tint.",
+    "Grazing shot keeps edge readability without becoming neon."
+  ]
+}
