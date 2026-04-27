@@ -198,7 +198,7 @@ try {
     if (-not $McpTool) {
         throw "MCP tools/list did not include 'create_asset_folder'."
     }
-    foreach ($FieldName in @('mode', 'mutation_level', 'safe_default', 'project_grounded', 'default_exposure')) {
+    foreach ($FieldName in @('tool_group', 'unreal_domain', 'workflow_lane', 'surface_area', 'primary_lane', 'vfx_affinity', 'capability_tags', 'mode', 'mutation_level', 'safe_default', 'project_grounded', 'default_exposure')) {
         if (-not $McpTool.PSObject.Properties.Name.Contains($FieldName)) {
             throw "MCP tools/list metadata field '$FieldName' is missing."
         }

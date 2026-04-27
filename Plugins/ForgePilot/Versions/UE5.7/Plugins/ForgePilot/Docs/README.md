@@ -26,6 +26,7 @@ Active branch policy:
 - `Guides/TOOL_SURFACE.md` is the grouped Ask / Assist / Advanced Build inventory for the current tool surface.
 - `Guides/FORGEPILOT_MULTI_PROJECT_STRATEGY.md` describes the long-term multi-project, multi-style, and version-aware direction for ForgePilot.
 - `Guides/VFX_ART_STYLE_TAXONOMY.md` defines the major art-style families the agent should choose between before authoring visual effects.
+- `Plans/TOOL_SURFACE_LANES.md` defines simple tool groups and keeps ForgePilot from treating every task as visual-effect work.
 - `Guides/REALISTIC_VFX_ART_DIRECTION.md` captures realistic VFX art direction rules for fire, embers, smoke, dust, heat, and grounded magic.
 - `Guides/DYNAMIC_PARAMETER_WORKFLOW.md` defines the Niagara-to-Material Dynamic Parameter contract, packing strategy, art-style use cases, and validation gate.
 - `Guides/NIAGARA_CURVE_LOGIC_PATTERNS.md` captures Niagara timing-domain choice, biased random distribution, linked randomness, and curve-driven behavior design patterns.

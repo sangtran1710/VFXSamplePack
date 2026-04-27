@@ -1,7 +1,17 @@
 # ForgePilot - AI-Powered Unreal Editor Automation for Unreal Engine 5.7
 
+## Claude Opus 4.7 Review Notice
+**Important:** When you code and build anything, your codebase will be reviewed and inspected by Claude Opus 4.7.
+
+Work as if every change will be read by a strict senior reviewer:
+- keep scope tight and aligned with ForgePilot's purpose
+- prefer clear, maintainable code over clever shortcuts
+- verify behavior before claiming the work is done
+- document assumptions, risks, and version-specific limits
+- avoid project-specific hardcodes unless explicitly requested
+
 ## Project Overview
-UE5 plugin that automates Unreal Editor creative workflows through AI agents, with VFX as the strongest first-class domain.
+UE5 plugin that automates Unreal Editor creative workflows through AI agents, with VFX as the strongest first-class production lane.
 AI reads domain knowledge and recipes -> generates execution plans -> calls Unreal tools via MCP bridge -> creates or edits Niagara systems, materials, blueprints, scene content, animation-adjacent assets, and level workflows.
 
 **Owner**: Senior VFX Artist, AAA game development  
@@ -14,6 +24,12 @@ Before refactoring, rebuilding, or migrating this plugin for UE5.7, read and fol
 
 That document is the operating contract for preserving ForgePilot's product intent, bridge/tool architecture, dry-run safety, mutation controls, and Material/Niagara workflow purpose during the UE5.7 rebuild.
 
+## Tool Surface Lane Rule
+Before adding or using tools, read:
+- `Docs/Plans/TOOL_SURFACE_LANES.md`
+
+ForgePilot is a general Unreal Editor automation tool. Route by `unreal_domain` and `workflow_lane` first. Use Material, Niagara, and VFX orchestration as the strongest lanes only when the task actually needs visual effect authoring, shader work, particles, visual polish, or VFX review.
+
 ## Architecture
 
 ```text
@@ -23,6 +39,8 @@ User Prompt -> AI Agent -> Knowledge Loader -> Execution Plan -> Tool Registry -
                  Knowledge/Effects/*.json              VFXToolRegistry_*.cpp
                  Knowledge/Principles/*.json
 ```
+
+Note: `VFXToolRegistry` is a legacy internal class name. Do not treat that name as product scope; the public tool surface is general Unreal plus strong VFX lanes.
 
 ## Critical Files
 
@@ -68,9 +86,11 @@ User Prompt -> AI Agent -> Knowledge Loader -> Execution Plan -> Tool Registry -
 |------|---------|
 | `Tools/MCP/forgepilot_mcp_server.py` | MCP server exposing tools to AI |
 
+Each exposed MCP tool includes simple grouping plus routing metadata: `tool_group`, `unreal_domain`, `workflow_lane`, `surface_area`, `primary_lane`, `vfx_affinity`, and `capability_tags`.
+
 ## External VFX Research
 
-Before creating, rebuilding, or deeply debugging a visual VFX effect, research RealTimeVFX first.
+Before creating, rebuilding, or deeply debugging a visual effect, research RealTimeVFX first.
 
 Primary reference:
 - `https://realtimevfx.com/search?q=<topic>`

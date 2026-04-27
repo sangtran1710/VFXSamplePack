@@ -124,6 +124,27 @@ try {
     Assert-ToolMetadata -ToolMap $ToolMap -ToolName 'get_niagara_system_info' -ExpectedMode 'ask' -ExpectedMutationLevel 'read_only' -ExpectedSafeDefault $true -ExpectedDefaultExposure 'default'
     Assert-ToolMetadata -ToolMap $ToolMap -ToolName 'delete_asset' -ExpectedMode 'assist' -ExpectedMutationLevel 'safe_content_op' -ExpectedSafeDefault $false -ExpectedDefaultExposure 'advanced'
 
+    $ExpectedGroups = @{
+        get_context = 'Scene'
+        create_blueprint = 'Blueprint'
+        create_material = 'Material'
+        create_empty_niagara_system = 'Niagara'
+        run_effect_workflow_v2 = 'General'
+    }
+
+    foreach ($ToolName in @('get_context', 'create_blueprint', 'create_material', 'create_empty_niagara_system', 'run_effect_workflow_v2')) {
+        $tool = $ToolMap[$ToolName]
+        foreach ($FieldName in @('tool_group', 'unreal_domain', 'workflow_lane', 'surface_area', 'primary_lane', 'vfx_affinity', 'capability_tags')) {
+            if (-not $tool.PSObject.Properties.Name.Contains($FieldName)) {
+                throw "Tool '$ToolName' general surface metadata field '$FieldName' is missing."
+            }
+        }
+        if ([string]$tool.tool_group -ne $ExpectedGroups[$ToolName]) {
+            throw "Tool '$ToolName' tool_group mismatch. Expected '$($ExpectedGroups[$ToolName])', got '$($tool.tool_group)'."
+        }
+    }
+    $Summary.assertions.general_surface_metadata_present = $true
+
     $Summary.metadata.checked_tools = @(
         'create_blueprint',
         'compile_blueprint_with_feedback',

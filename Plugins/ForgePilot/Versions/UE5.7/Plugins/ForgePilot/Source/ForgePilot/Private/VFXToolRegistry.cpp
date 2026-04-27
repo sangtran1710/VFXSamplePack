@@ -215,6 +215,135 @@ static FString InferToolSurfaceArea(const FString& ToolName)
 	return TEXT("scene_world");
 }
 
+static bool IsRuntimePreviewToolName(const FString& ToolName)
+{
+	return ToolName == TEXT("start_play_in_viewport") ||
+		ToolName == TEXT("stop_play_session") ||
+		ToolName == TEXT("get_pie_session_state") ||
+		ToolName == TEXT("send_pie_key_input") ||
+		ToolName == TEXT("run_pie_probe_scenario") ||
+		ToolName == TEXT("verify_viewport_capture_state") ||
+		ToolName == TEXT("capture_viewport_screenshot") ||
+		ToolName == TEXT("capture_asset_thumbnail") ||
+		ToolName == TEXT("capture_material_graph_screenshot") ||
+		ToolName == TEXT("capture_material_visual_probe") ||
+		ToolName == TEXT("compare_material_probe_captures");
+}
+
+static bool IsVisualEffectWorkflowToolName(const FString& ToolName)
+{
+	return ToolName == TEXT("load_vfx_recipe") ||
+		ToolName == TEXT("resolve_effect_plan") ||
+		ToolName == TEXT("resolve_effect_plan_v2") ||
+		ToolName == TEXT("generate_visual_contract_data_asset") ||
+		ToolName == TEXT("review_effect_failure_taxonomy_v2") ||
+		ToolName == TEXT("review_suction_core_failure_taxonomy") ||
+		ToolName == TEXT("run_effect_workflow_v2") ||
+		ToolName == TEXT("run_suction_core_v2_workflow");
+}
+
+static FString InferUnrealDomain(const FString& ToolName)
+{
+	if (IsVisualEffectWorkflowToolName(ToolName))
+	{
+		return TEXT("visual_effect");
+	}
+	if (IsRuntimePreviewToolName(ToolName))
+	{
+		return TEXT("runtime_preview");
+	}
+	if (IsAssistToolName(ToolName) ||
+		ToolName == TEXT("scan_assets") ||
+		ToolName == TEXT("search_assets") ||
+		ToolName == TEXT("trace_asset_relationships") ||
+		ToolName == TEXT("find_empty_folders") ||
+		ToolName == TEXT("list_recent_assets") ||
+		ToolName == TEXT("find_large_assets") ||
+		ToolName == TEXT("find_assets_modified_since"))
+	{
+		return TEXT("content_browser");
+	}
+
+	const FString Category = InferToolCategory(ToolName);
+	if (Category == TEXT("blueprint") ||
+		Category == TEXT("material") ||
+		Category == TEXT("niagara") ||
+		Category == TEXT("animation"))
+	{
+		return Category;
+	}
+
+	return TEXT("scene");
+}
+
+static FString InferWorkflowLane(const FString& ToolName)
+{
+	if (IsVisualEffectWorkflowToolName(ToolName))
+	{
+		return TEXT("vfx_orchestration");
+	}
+	if (IsRuntimePreviewToolName(ToolName))
+	{
+		return TEXT("runtime_preview");
+	}
+	if (IsAssistToolName(ToolName) ||
+		InferUnrealDomain(ToolName) == TEXT("content_browser"))
+	{
+		return TEXT("content_ops");
+	}
+
+	const FString Category = InferToolCategory(ToolName);
+	if (Category == TEXT("material"))
+	{
+		return TEXT("material_authoring");
+	}
+	if (Category == TEXT("niagara"))
+	{
+		return TEXT("niagara_authoring");
+	}
+	if (Category == TEXT("blueprint"))
+	{
+		return TEXT("blueprint_gameplay");
+	}
+	if (Category == TEXT("animation"))
+	{
+		return TEXT("animation_inspection");
+	}
+
+	return TEXT("scene_world");
+}
+
+static FString InferToolGroup(const FString& ToolName)
+{
+	if (IsVisualEffectWorkflowToolName(ToolName) ||
+		IsRuntimePreviewToolName(ToolName) ||
+		IsAssistToolName(ToolName) ||
+		InferUnrealDomain(ToolName) == TEXT("content_browser"))
+	{
+		return TEXT("General");
+	}
+
+	const FString Category = InferToolCategory(ToolName);
+	if (Category == TEXT("blueprint"))
+	{
+		return TEXT("Blueprint");
+	}
+	if (Category == TEXT("material"))
+	{
+		return TEXT("Material");
+	}
+	if (Category == TEXT("niagara"))
+	{
+		return TEXT("Niagara");
+	}
+	if (Category == TEXT("animation"))
+	{
+		return TEXT("Animation");
+	}
+
+	return TEXT("Scene");
+}
+
 static FString InferPrimaryLane(const FString& ToolName)
 {
 	const FString Category = InferToolCategory(ToolName);
@@ -224,7 +353,7 @@ static FString InferPrimaryLane(const FString& ToolName)
 	}
 	if (Category == TEXT("niagara"))
 	{
-		return TEXT("niagara_vfx");
+		return TEXT("niagara");
 	}
 	if (Category == TEXT("blueprint"))
 	{
@@ -574,6 +703,18 @@ FVFXToolRegistry::FVFXToolRegistry()
 void FVFXToolRegistry::RegisterTool(const FVFXToolDefinition& ToolDef)
 {
 	FVFXToolDefinition FinalDef = ToolDef;
+	if (FinalDef.ToolGroup.IsEmpty())
+	{
+		FinalDef.ToolGroup = InferToolGroup(FinalDef.Name);
+	}
+	if (FinalDef.UnrealDomain.IsEmpty())
+	{
+		FinalDef.UnrealDomain = InferUnrealDomain(FinalDef.Name);
+	}
+	if (FinalDef.WorkflowLane.IsEmpty())
+	{
+		FinalDef.WorkflowLane = InferWorkflowLane(FinalDef.Name);
+	}
 	if (FinalDef.SurfaceArea.IsEmpty())
 	{
 		FinalDef.SurfaceArea = InferToolSurfaceArea(FinalDef.Name);
@@ -713,6 +854,9 @@ TArray<TSharedPtr<FJsonValue>> FVFXToolRegistry::GetToolDefinitionsJson() const
 		{
 			ToolObj->SetObjectField(TEXT("input_schema"), Def.InputSchema);
 		}
+		ToolObj->SetStringField(TEXT("tool_group"), Def.ToolGroup);
+		ToolObj->SetStringField(TEXT("unreal_domain"), Def.UnrealDomain);
+		ToolObj->SetStringField(TEXT("workflow_lane"), Def.WorkflowLane);
 		ToolObj->SetStringField(TEXT("surface_area"), Def.SurfaceArea);
 		ToolObj->SetStringField(TEXT("primary_lane"), Def.PrimaryLane);
 		ToolObj->SetStringField(TEXT("vfx_affinity"), Def.VfxAffinity);

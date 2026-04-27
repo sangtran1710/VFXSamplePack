@@ -4,7 +4,7 @@
 
 ForgePilot is not a one-project helper.
 
-It is a growing VFX automation and knowledge system intended to become useful across many Unreal Engine projects, art directions, teams, and engine versions.
+It is a growing Unreal automation and knowledge system with a strong visual-effect lane, intended to become useful across many Unreal Engine projects, art directions, teams, and engine versions.
 
 The current plugin implementation is validated against the active host-project target:
 
@@ -33,7 +33,7 @@ The best long-term agent is boringly reliable first, then increasingly expressiv
 
 Never assume one project style is universal.
 
-Every VFX task should identify:
+Every visual-effect task should identify:
 
 - project context
 - engine version

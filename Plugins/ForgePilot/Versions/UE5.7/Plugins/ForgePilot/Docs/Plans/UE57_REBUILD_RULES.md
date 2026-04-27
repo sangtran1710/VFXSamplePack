@@ -1,7 +1,7 @@
 # UE5.7 Rebuild Rules
 
 ## Purpose
-This document is the operating contract for rebuilding `ForgePilot` from its original UE5.3, project-specific form into a UE5.7-ready, project-agnostic VFX authoring system.
+This document is the operating contract for rebuilding `ForgePilot` from its original UE5.3, project-specific form into a UE5.7-ready, project-agnostic Unreal Editor automation system with VFX as its strongest production lane.
 
 The goal is not to make the code compile by any means necessary. The goal is to preserve and strengthen the system's original purpose:
 
@@ -11,14 +11,16 @@ The goal is not to make the code compile by any means necessary. The goal is to 
 - keep every mutating action reviewable, bounded, and recoverable
 
 ## Non-Negotiable Product Intent
-`ForgePilot` must remain a workflow engine for VFX production.
+`ForgePilot` must remain a workflow engine for Unreal Editor creative automation, with VFX production as the strongest and deepest lane.
 
 Every refactor must support at least one of these outcomes:
 
 - better project understanding
+- cleaner general Unreal tool routing
 - safer tool execution
 - more reliable Material authoring
 - more reliable Niagara authoring
+- better Blueprint, scene, animation, or runtime-preview support when those tasks are requested
 - clearer critique and iteration
 - better restart, recovery, or packaging
 - cleaner multi-project support
@@ -136,11 +138,20 @@ Every new or migrated tool must define:
 - name
 - description
 - input schema
+- simple tool group
+- unreal domain
+- workflow lane
+- surface area
+- primary lane
+- VFX affinity
+- capability tags
 - mode: `ask`, `assist`, or `build`
 - mutation level
 - safe-default status
 - project-grounded status
 - default exposure
+
+Agents must route by `tool_group` first, then by `unreal_domain` and `workflow_lane` when finer routing is needed. Material, Niagara, and VFX orchestration remain the strongest lanes, but ForgePilot should not treat Blueprint, level, animation, runtime preview, or content organization requests as VFX work unless the user asks for that connection.
 
 ### Compatibility Layer
 UE5.7-specific C++ API changes should be isolated behind compatibility helpers where practical.
@@ -324,4 +335,6 @@ Documentation must distinguish:
 - reusable plugin defaults
 
 ## Final Rule
-Do not optimize for a fast port. Optimize for a dependable VFX authoring system that a senior artist can trust after the port.
+Do not optimize for a fast port. Optimize for a dependable Unreal Editor automation system, with a strong VFX authoring lane, that a senior artist can trust after the port.
+
+For UE5.7 onward, also optimize for a dependable general Unreal tool surface that can grow into animation, level, Blueprint, runtime preview, and content operations without weakening the VFX lane.

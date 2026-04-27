@@ -12,6 +12,9 @@ struct FVFXToolDefinition
 	FString Name;
 	FString Description;
 	TSharedPtr<FJsonObject> InputSchema;
+	FString ToolGroup;
+	FString UnrealDomain;
+	FString WorkflowLane;
 	FString SurfaceArea;
 	FString PrimaryLane;
 	FString VfxAffinity;
