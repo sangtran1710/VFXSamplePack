@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "project_name": "VFXSamplePack",
+    "content_root": "/Game/NiagaraExamples",
+    "study_name": "Epic Niagara Examples archetype study",
+    "study_mode": "deep_archetypes_first",
+    "first_pass_priority": "materials_and_material_instances"
+  },
+  "purpose": [
+    "Capture reusable production VFX patterns from the Epic Niagara sample pack.",
+    "Preserve why each pattern exists, its tradeoffs, and when ForgePilot should reuse it.",
+    "Support both machine-readable ForgePilot planning and human learning notes."
+  ],
+  "method": {
+    "inspection_tools": [
+      "get_material_info",
+      "get_material_instance_info",
+      "get_niagara_system_info",
+      "get_niagara_emitter_details",
+      "get_niagara_module_inputs",
+      "get_blueprint_summary",
+      "get_blueprint_variables",
+      "get_blueprint_components"
+    ],
+    "scope_policy": "Representative archetypes are studied deeply before broad catalog expansion.",
+    "mutation_policy": "Do not mutate .uasset content while studying; only write ForgePilot docs and knowledge files."
+  },
+  "knowledge_files": {
+    "materials": "Plugins/ForgePilot/Knowledge/Samples/EpicNiagaraExamples/material_mi_archetypes.json",
+    "niagara": "Plugins/ForgePilot/Knowledge/Samples/EpicNiagaraExamples/niagara_archetypes.json",
+    "blueprints": "Plugins/ForgePilot/Knowledge/Samples/EpicNiagaraExamples/blueprint_runtime_contracts.json",
+    "guide": "Plugins/ForgePilot/Docs/Guides/EPIC_NIAGARA_SAMPLE_PACK_STUDY.md"
+  },
+  "archetypes": [
+    {
+      "id": "additive_mesh_boundary_grid",
+      "title": "Additive mesh boundary / tech grid",
+      "priority": 1,
+      "tags": ["material", "mesh_vfx", "additive", "boundary", "tech_grid", "wpo"],
+      "representative_assets": {
+        "material_masters": ["/Game/NiagaraExamples/Materials/MasterMaterials/M_Mesh_Add.M_Mesh_Add"],
+        "material_instances": ["/Game/NiagaraExamples/Materials/MI_Boundary_TechGrid.MI_Boundary_TechGrid"],
+        "niagara_systems": [
+          "/Game/NiagaraExamples/FX_Misc/NS_Boundary.NS_Boundary",
+          "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Box.NS_Boundary_Box",
+          "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder",
+          "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Sphere.NS_Boundary_Sphere"
+        ],
+        "blueprints": ["/Game/NiagaraExamples/Blueprints/BP_TeslaCoil.BP_TeslaCoil"]
+      }
+    },
+    {
+      "id": "sprite_baseline_particle_color",
+      "title": "Particle-color driven basic sprite",
+      "priority": 2,
+      "tags": ["material", "sprite", "particle_color", "soft_mask", "cheap"],
+      "representative_assets": {
+        "material_masters": ["/Game/NiagaraExamples/Materials/MasterMaterials/M_BasicSprite.M_BasicSprite"],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_BasicSprite.MI_BasicSprite",
+          "/Game/NiagaraExamples/Materials/MI_BasicSprite_Masked.MI_BasicSprite_Masked",
+          "/Game/NiagaraExamples/Materials/MI_BasicSprite_Translucent.MI_BasicSprite_Translucent"
+        ],
+        "niagara_systems": [
+          "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Idle.NS_Pickup_Idle",
+          "/Game/NiagaraExamples/FX_Markers/NS_Marker_Target.NS_Marker_Target"
+        ],
+        "blueprints": ["/Game/NiagaraExamples/Utilities/Blueprints/BP_VFX_Preview_Spawner.BP_VFX_Preview_Spawner"]
+      }
+    },
+    {
+      "id": "smoke_fire_flipbook_sprite",
+      "title": "Physically shaped smoke/fire flipbook sprite",
+      "priority": 3,
+      "tags": ["material", "niagara", "flipbook", "subuv", "smoke", "fire", "temperature"],
+      "representative_assets": {
+        "material_masters": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_SmokeAndFire_Sprites.M_SmokeAndFire_Sprites",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Turbulent_SmokeSubUV.M_Turbulent_SmokeSubUV"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Explosion_8x8.MI_Explosion_8x8",
+          "/Game/NiagaraExamples/Materials/MI_ExplosionRoil_8x8.MI_ExplosionRoil_8x8",
+          "/Game/NiagaraExamples/Materials/MI_SmokePuff_8x8.MI_SmokePuff_8x8",
+          "/Game/NiagaraExamples/Materials/MI_SmokePuffLight_8x8.MI_SmokePuffLight_8x8",
+          "/Game/NiagaraExamples/Materials/MI_FireBall_8x8.MI_FireBall_8x8",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/Materials/Instances/MI_Flipbook_Pyro_Muzzle.MI_Flipbook_Pyro_Muzzle"
+        ],
+        "niagara_systems": [
+          "/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion",
+          "/Game/NiagaraExamples/FX_Smoke/NS_Smoke_Plume.NS_Smoke_Plume",
+          "/Game/NiagaraExamples/FX_Footstep/NS_Footstep_Fire.NS_Footstep_Fire",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/NS_MuzzleFlash.NS_MuzzleFlash"
+        ],
+        "blueprints": [
+          "/Game/NiagaraExamples/Blueprints/BP_WeaponBase.BP_WeaponBase",
+          "/Game/NiagaraExamples/Blueprints/BP_Launcher.BP_Launcher"
+        ]
+      }
+    },
+    {
+      "id": "flare_bright_core",
+      "title": "Flare and bright core emissive accents",
+      "priority": 4,
+      "tags": ["material", "additive", "flare", "core", "exposure_compensation", "camera_fade"],
+      "representative_assets": {
+        "material_masters": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Flare.M_Flare",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_BrightCore.M_BrightCore"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Flare.MI_Flare",
+          "/Game/NiagaraExamples/Materials/MI_ExplosionFlare.MI_ExplosionFlare",
+          "/Game/NiagaraExamples/Materials/MI_RocketFlareCore.MI_RocketFlareCore"
+        ],
+        "niagara_systems": [
+          "/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion",
+          "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Idle.NS_Pickup_Idle"
+        ],
+        "blueprints": []
+      }
+    },
+    {
+      "id": "distortion_refraction_support",
+      "title": "Distortion / refraction support layer",
+      "priority": 5,
+      "tags": ["material", "distortion", "refraction", "heat_haze", "support_layer"],
+      "representative_assets": {
+        "material_masters": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Distortion.M_Distortion",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/Materials/M_MuzzleFlash_Distortion.M_MuzzleFlash_Distortion"
+        ],
+        "material_instances": ["/Game/NiagaraExamples/Materials/MI_Distortion.MI_Distortion"],
+        "niagara_systems": ["/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion"],
+        "blueprints": []
+      }
+    },
+    {
+      "id": "ribbon_tracer_motion",
+      "title": "Ribbon, tracer, and motion-stretched projectile read",
+      "priority": 6,
+      "tags": ["material", "niagara", "ribbon", "tracer", "wpo", "motion_stretch"],
+      "representative_assets": {
+        "material_masters": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Ribbon_Arc.M_Ribbon_Arc",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Tracer.M_Tracer",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_TracerRibbon.M_TracerRibbon"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Tracer.MI_Tracer",
+          "/Game/NiagaraExamples/Materials/MI_TracerRibbon.MI_TracerRibbon"
+        ],
+        "niagara_systems": [
+          "/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/NS_MuzzleFlash.NS_MuzzleFlash"
+        ],
+        "blueprints": [
+          "/Game/NiagaraExamples/Blueprints/BP_Rifle.BP_Rifle",
+          "/Game/NiagaraExamples/Blueprints/BP_TeslaCoil.BP_TeslaCoil"
+        ]
+      }
+    },
+    {
+      "id": "decal_impact_marks",
+      "title": "Decal and impact surface marks",
+      "priority": 7,
+      "tags": ["material", "decal", "impact", "subuv", "surface_mark", "normal_fade"],
+      "representative_assets": {
+        "material_masters": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Decal_SubUV.M_Decal_SubUV",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Decal_Boundary.M_Decal_Boundary",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_BulletHole.M_BulletHole"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Explosion_Decal.MI_Explosion_Decal",
+          "/Game/NiagaraExamples/Materials/MI_BulletHole.MI_BulletHole",
+          "/Game/NiagaraExamples/Materials/MI_BulletHole_Glass.MI_BulletHole_Glass"
+        ],
+        "niagara_systems": [
+          "/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion",
+          "/Game/NiagaraExamples/FX_NDC/NS_NDC_Impacts.NS_NDC_Impacts"
+        ],
+        "blueprints": ["/Game/NiagaraExamples/Blueprints/BP_Rifle.BP_Rifle"]
+      }
+    },
+    {
+      "id": "mesh_overlay_status_effect",
+      "title": "Mesh overlay status / buff-debuff shell",
+      "priority": 8,
+      "tags": ["material", "mesh_overlay", "status_effect", "fresnel", "noise", "runtime_material"],
+      "representative_assets": {
+        "material_masters": ["/Game/NiagaraExamples/Materials/MasterMaterials/M_Mesh_Overlay.M_Mesh_Overlay"],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.MI_Mesh_Overlay_TeslaCoil",
+          "/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil_Player.MI_Mesh_Overlay_TeslaCoil_Player",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Player_Buff.MI_Overlay_Player_Buff",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Player_DeBuff.MI_Overlay_Player_DeBuff",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Weapon_Buff.MI_Overlay_Weapon_Buff",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Weapon_DeBuff.MI_Overlay_Weapon_DeBuff"
+        ],
+        "niagara_systems": ["/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"],
+        "blueprints": [
+          "/Game/NiagaraExamples/Blueprints/BP_TeslaCoil.BP_TeslaCoil",
+          "/Game/NiagaraExamples/Blueprints/BP_PickUp.BP_PickUp"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,563 @@
+{
+  "schema_version": "1.0",
+  "source_project": "VFXSamplePack",
+  "content_root": "/Game/NiagaraExamples",
+  "summary": "Deep material and material-instance archetypes extracted from Epic's Niagara sample pack for ForgePilot reuse.",
+  "archetypes": [
+    {
+      "id": "additive_mesh_boundary_grid",
+      "intent": "Draw readable additive boundary meshes, tech grids, and containment shapes with art-directable noise, height falloff, and optional WPO.",
+      "assets": {
+        "master_materials": ["/Game/NiagaraExamples/Materials/MasterMaterials/M_Mesh_Add.M_Mesh_Add"],
+        "material_instances": ["/Game/NiagaraExamples/Materials/MI_Boundary_TechGrid.MI_Boundary_TechGrid"],
+        "related_niagara": ["/Game/NiagaraExamples/FX_Misc/NS_Boundary.NS_Boundary"]
+      },
+      "observed_facts": {
+        "blend_mode": "Additive",
+        "shading_model": "Unlit",
+        "two_sided": true,
+        "root_inputs": ["EmissiveColor", "Opacity", "WorldPositionOffset"],
+        "stats": {
+          "expression_count": 75,
+          "connection_count": 77,
+          "texture_sample_count": 1,
+          "scalar_param_count": 9,
+          "vector_param_count": 2,
+          "custom_node_count": 0
+        },
+        "graph_regions": ["World Grid", "Z Axis Gradient", "World Aligned Screen Space Noise", "WPO"],
+        "functions": ["MF_ExposureCompensation", "WorldSpaceAlignedScreenCoordinates", "BreakOutFloat3Components", "MakeFloat2"],
+        "textures": ["/Game/NiagaraExamples/Textures/Noise/T_Hermite2Noise_CenteredTiling.T_Hermite2Noise_CenteredTiling"],
+        "instance_override_pattern": "MI_Boundary_TechGrid overrides Z Axis Gradient Amount to 1 and Z Axis Gradient Exponent to 4 while leaving texture and color structure in the parent."
+      },
+      "core_graph_or_stack": [
+        "Particle color and alpha provide the Niagara-facing color contract.",
+        "World or screen aligned UVs sample a single data noise texture.",
+        "Tech grid, Z-axis gradient, Fresnel/noise masks, and particle alpha are multiplied into opacity.",
+        "MF_ExposureCompensation feeds emissive so additive output remains stable across exposure.",
+        "Enable WPO is a static switch; disabled variants compile to a zero WPO branch."
+      ],
+      "why_this_approach": [
+        "A boundary effect needs crisp readable structure without requiring many texture variants.",
+        "World/screen aligned noise keeps the mask procedural and reusable across box, sphere, and cylinder shapes.",
+        "Z-axis gradient lets the artist make a shape feel grounded, rising, or capped without changing geometry.",
+        "Static WPO gating preserves flexibility while avoiding vertex cost when deformation is not required."
+      ],
+      "pros": [
+        "High reuse from one texture sample and mostly math-driven masks.",
+        "Good Niagara integration through particle color and alpha.",
+        "Exposure compensation is production-friendly for additive VFX.",
+        "Commented graph regions communicate the author's mental model."
+      ],
+      "cons": [
+        "75 expressions is cognitively heavy for a learner or quick one-off effect.",
+        "Some parameter names such as Param and Exp are too generic for a production-facing instance UI.",
+        "Two-sided additive meshes can become expensive when many large surfaces overlap.",
+        "World/screen aligned masks can appear to slide if used on moving objects without intent."
+      ],
+      "when_to_copy": [
+        "Forcefields, scan volumes, boundary indicators, pickup zones, and sci-fi grid shells.",
+        "Any additive mesh VFX that needs procedural breakup but should stay light on texture samples."
+      ],
+      "when_to_avoid": [
+        "Opaque physical surfaces that need lighting and material response.",
+        "Very dense mesh particles where WPO and two-sided overdraw would dominate cost.",
+        "Simple sparks or small sprites where this graph is overbuilt."
+      ],
+      "teaching_notes_vi": "Diem hay cua material nay la no khong dep nho nhieu texture. No lay mot noise texture lam du lieu, roi dung toan de tao grid, gradient theo truc Z, opacity mask va tuy chon WPO. Khi hoc, hay nhin tung cum theo y do: UV/noise -> mask -> emissive/opacity -> WPO."
+    },
+    {
+      "id": "sprite_baseline_particle_color",
+      "intent": "Provide the cheapest reusable soft sprite base where Niagara owns color, alpha, timing, and most visual variation.",
+      "assets": {
+        "master_materials": ["/Game/NiagaraExamples/Materials/MasterMaterials/M_BasicSprite.M_BasicSprite"],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_BasicSprite.MI_BasicSprite",
+          "/Game/NiagaraExamples/Materials/MI_BasicSprite_Masked.MI_BasicSprite_Masked",
+          "/Game/NiagaraExamples/Materials/MI_BasicSprite_Translucent.MI_BasicSprite_Translucent"
+        ],
+        "related_niagara": ["/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Idle.NS_Pickup_Idle"]
+      },
+      "observed_facts": {
+        "blend_mode": "Additive",
+        "shading_model": "Unlit",
+        "two_sided": true,
+        "root_inputs": ["EmissiveColor", "Opacity", "OpacityMask"],
+        "stats": {
+          "expression_count": 15,
+          "connection_count": 18,
+          "texture_sample_count": 0,
+          "scalar_param_count": 2,
+          "function_call_count": 1
+        },
+        "parameters": ["Radius", "Hardness"],
+        "functions": ["MF_ExposureCompensation"],
+        "instance_override_pattern": "The default MI has no overrides; masked/translucent variants mainly exist as compiled material property variants."
+      },
+      "core_graph_or_stack": [
+        "Procedural radial mask controlled by Radius and Hardness.",
+        "Particle Color drives tint and alpha.",
+        "Emissive uses exposure compensation.",
+        "No texture sample is required."
+      ],
+      "why_this_approach": [
+        "Small sprites are often authored faster and cheaper in Niagara than in the material graph.",
+        "Keeping the graph textureless makes it a universal base for glows, sparkles, motes, and simple flashes.",
+        "Radius/Hardness are enough for most simple soft-disc use cases."
+      ],
+      "pros": [
+        "Very cheap and easy to reason about.",
+        "Excellent for rapid Niagara iteration.",
+        "No asset dependency beyond the material itself.",
+        "Good teaching example for Particle Color -> Emissive/Opacity."
+      ],
+      "cons": [
+        "Visually generic without Niagara variation.",
+        "No internal texture breakup, so it can look sterile if overused.",
+        "Not suitable for hero shapes that need silhouette detail."
+      ],
+      "when_to_copy": [
+        "Sparkles, glow dots, debug-friendly VFX placeholders, pickup motes, simple additive accents."
+      ],
+      "when_to_avoid": [
+        "Smoke, fire, decals, projectiles, or any effect that needs authored texture detail."
+      ],
+      "teaching_notes_vi": "Day la bai hoc nen hoc som: material cang don gian thi Niagara cang co vai tro lon. Neu sprite chi can cham sang hoac glow mem, dung Particle Color va mot mask radial la du."
+    },
+    {
+      "id": "smoke_fire_flipbook_sprite",
+      "intent": "Render smoke, fire, and explosion sprites from flipbook/atlas data while preserving lighting-like shaping, temperature control, normals, depth fade, and SubUV playback.",
+      "assets": {
+        "master_materials": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_SmokeAndFire_Sprites.M_SmokeAndFire_Sprites",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Turbulent_SmokeSubUV.M_Turbulent_SmokeSubUV"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Explosion_8x8.MI_Explosion_8x8",
+          "/Game/NiagaraExamples/Materials/MI_ExplosionRoil_8x8.MI_ExplosionRoil_8x8",
+          "/Game/NiagaraExamples/Materials/MI_SmokePuff_8x8.MI_SmokePuff_8x8",
+          "/Game/NiagaraExamples/Materials/MI_SmokePuffLight_8x8.MI_SmokePuffLight_8x8",
+          "/Game/NiagaraExamples/Materials/MI_FireBall_8x8.MI_FireBall_8x8",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/Materials/Instances/MI_MuzzleFlash_Sphere.MI_MuzzleFlash_Sphere",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/Materials/Instances/MI_Flipbook_Pyro_Muzzle.MI_Flipbook_Pyro_Muzzle"
+        ],
+        "related_niagara": [
+          "/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion",
+          "/Game/NiagaraExamples/FX_Smoke/NS_Smoke_Plume.NS_Smoke_Plume",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/NS_MuzzleFlash.NS_MuzzleFlash"
+        ]
+      },
+      "observed_facts": {
+        "blend_mode": "Unknown",
+        "shading_model": "DefaultLit",
+        "root_input": "MaterialAttributes",
+        "stats": {
+          "expression_count": 225,
+          "connection_count": 260,
+          "texture_sample_count": 4,
+          "unique_texture_count": 2,
+          "scalar_param_count": 24,
+          "vector_param_count": 5,
+          "custom_node_count": 1,
+          "function_call_count": 9
+        },
+        "graph_regions": [
+          "Texture Data",
+          "Particle Data",
+          "Base Color",
+          "Emissive",
+          "Opacity",
+          "Normal",
+          "Emissive Exposure Compensation",
+          "Use a physical opacity/shadow model for smoke",
+          "Add near and depth fade to opacity and emissive"
+        ],
+        "key_parameters": [
+          "SubUV Tiles X",
+          "SubUV Tiles Y",
+          "SubUV Speed",
+          "Emissive Gain",
+          "Temperature Min",
+          "Temperature Max",
+          "Opacity Gain",
+          "Opacity Exponent",
+          "Depth Fade Distance",
+          "Near Fade Distance",
+          "Flatten Texture Normal",
+          "Fake Directional Light Intensity",
+          "Fake Ambient Light Intensity"
+        ],
+        "functions": ["SubUV_Function", "MF_ExposureCompensation", "MF_FastSphereNormal", "RemapValueRangeNormalized", "BlendAngleCorrectedNormals"],
+        "instance_override_pattern": "Explosion, smoke, fire, and muzzle MIs share the parent but swap atlas inputs and tune temperature, emissive gain, opacity exponent, and normal flattening."
+      },
+      "core_graph_or_stack": [
+        "Atlas/flipbook textures provide emission, occlusion, opacity, and normals.",
+        "SubUV logic supports Niagara renderer SubUV playback and material-side frame lookup.",
+        "Particle data and temperature parameters shape color and emissive response.",
+        "Fake directional and ambient lighting keep smoke volumetric without true volume simulation.",
+        "Depth and near fades prevent hard intersections and camera clipping."
+      ],
+      "why_this_approach": [
+        "High-quality smoke/fire needs authored motion and shading detail that pure procedural math cannot easily fake.",
+        "A single parent lets fire, smoke, explosion, and muzzle variants share the same lighting/opacity model.",
+        "Temperature controls separate visual heat from raw color picking, giving more physical art direction.",
+        "Normals and fake lighting make sprites read as soft volume rather than flat cards."
+      ],
+      "pros": [
+        "Very high visual ceiling for sprite-based VFX.",
+        "Excellent reuse across many MI variants.",
+        "Strong production controls for opacity, depth fade, emissive, temperature, and fake lighting.",
+        "Works naturally with Niagara SubUV modules."
+      ],
+      "cons": [
+        "Heavy graph with 225 expressions and 260 connections.",
+        "Harder for a learner to debug than simple additive materials.",
+        "Texture atlas quality and channel packing become critical dependencies.",
+        "DefaultLit and material attributes add complexity and can be overkill for tiny support particles."
+      ],
+      "when_to_copy": [
+        "Hero smoke, fire, explosion, muzzle flash, and pyro sprite families.",
+        "Effects where material instances should tune look while Niagara owns spawn, timing, and SubUV playback."
+      ],
+      "when_to_avoid": [
+        "Simple sparkles or one-frame flashes.",
+        "Effects without good atlas textures.",
+        "Mobile or low-end cases where shader complexity and overdraw are strict."
+      ],
+      "teaching_notes_vi": "Day la master material nang nhung rat dang hoc. No cho thay khi nao nen dau tu vao material lon: khi mot parent phai phuc vu nhieu effect nhu smoke, fire, explosion. Hay hoc theo tung lop: texture atlas -> SubUV -> opacity -> color/temperature -> fake lighting -> depth fade."
+    },
+    {
+      "id": "flare_bright_core",
+      "intent": "Create bright additive accent layers such as lens flare, explosion flare, rocket cores, and hot inner energy.",
+      "assets": {
+        "master_materials": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Flare.M_Flare",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_BrightCore.M_BrightCore"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Flare.MI_Flare",
+          "/Game/NiagaraExamples/Materials/MI_ExplosionFlare.MI_ExplosionFlare",
+          "/Game/NiagaraExamples/Materials/MI_RocketFlareCore.MI_RocketFlareCore"
+        ]
+      },
+      "observed_facts": {
+        "m_flare": {
+          "blend_mode": "Additive",
+          "shading_model": "Unlit",
+          "root_inputs": ["EmissiveColor"],
+          "expression_count": 22,
+          "texture": "LensFlare_01",
+          "parameters": ["Intensity", "Exponent", "Desaturation", "Fade Distance", "Camera Fade Length", "Camera Fade Offset"],
+          "functions": ["MF_ExposureCompensation", "CameraDepthFade"]
+        },
+        "m_bright_core": {
+          "blend_mode": "Additive",
+          "shading_model": "Unlit",
+          "root_inputs": ["EmissiveColor", "Opacity"],
+          "expression_count": 33,
+          "texture": "T_Hermite2Noise_CenteredTiling",
+          "parameters": ["Tiling", "Distortion Gain", "Temperature", "Emissive Gain", "Glow Exponent", "Speed", "Hue Shift", "Depth Fade"]
+        },
+        "instance_override_pattern": "MI_ExplosionFlare mostly changes Desaturation, Exponent, and Fade Distance, showing that flare variants are intended to be tuned through a small set of high-level perceptual controls."
+      },
+      "core_graph_or_stack": [
+        "Texture or noise shapes a bright mask.",
+        "Exponent and intensity tune falloff and hotspot sharpness.",
+        "Camera/depth fade prevents near-camera clipping or harsh intersection.",
+        "Exposure compensation protects additive brightness."
+      ],
+      "why_this_approach": [
+        "A VFX effect often needs a separate readability layer that is brighter and simpler than the body material.",
+        "Using small additive accents lets Niagara stack visual hierarchy: flash/core first, body second, smoke/debris after.",
+        "Camera fade is important because flare cards are visually obvious when they intersect the camera."
+      ],
+      "pros": [
+        "Small graph, easy to instance and tune.",
+        "Useful across explosion, pickup, projectile, muzzle, and energy effects.",
+        "Good separation of accent brightness from body material complexity."
+      ],
+      "cons": [
+        "Additive flares can blow out quickly on bright backgrounds.",
+        "Too many flare layers make an effect look noisy or gamey.",
+        "Texture-dependent flare shape can repeat visibly."
+      ],
+      "when_to_copy": [
+        "Impact flashes, explosion cores, projectile cores, pickup glints, muzzle center flashes."
+      ],
+      "when_to_avoid": [
+        "Persistent soft smoke/fog layers.",
+        "Grounded physical materials where additive glow would break believability."
+      ],
+      "teaching_notes_vi": "Flare/core la lop doc nhan. No khong can graph qua phuc tap, nhung can dung dung thoi diem: them vao de mat nguoi xem thay diem nong cua effect."
+    },
+    {
+      "id": "distortion_refraction_support",
+      "intent": "Add an invisible or subtle support layer that bends, distorts, or implies heat/pressure without carrying the main color read.",
+      "assets": {
+        "master_materials": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Distortion.M_Distortion",
+          "/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/Materials/M_MuzzleFlash_Distortion.M_MuzzleFlash_Distortion"
+        ],
+        "material_instances": ["/Game/NiagaraExamples/Materials/MI_Distortion.MI_Distortion"]
+      },
+      "observed_facts": {
+        "blend_mode": "Translucent",
+        "shading_model": "Unlit",
+        "root_inputs": ["EmissiveColor", "Opacity"],
+        "stats": {
+          "expression_count": 19,
+          "connection_count": 23,
+          "texture_sample_count": 1,
+          "scalar_param_count": 1
+        },
+        "texture": "T_HermiteNoise_CenteredTiling",
+        "parameters": ["Distortion Opacity"]
+      },
+      "core_graph_or_stack": [
+        "Noise texture shapes opacity or distortion influence.",
+        "Material stays visually minimal so it can sit under brighter layers.",
+        "Niagara timing controls when distortion peaks and fades."
+      ],
+      "why_this_approach": [
+        "Heat haze and shockwave read are often better as a separate layer than baked into every sprite material.",
+        "A support layer can be enabled only for effects that need air displacement.",
+        "Keeping the graph small avoids making every pyro material pay for distortion logic."
+      ],
+      "pros": [
+        "Modular support effect.",
+        "Low graph complexity.",
+        "Easy to combine with flash, smoke, or explosion bodies."
+      ],
+      "cons": [
+        "Hard to judge in isolation; it needs viewport/background context.",
+        "Translucent distortion can be expensive in stacked overdraw.",
+        "Too much opacity/distortion makes effects feel smeared."
+      ],
+      "when_to_copy": [
+        "Muzzle flashes, explosions, heat vents, shockwaves, magical pressure pulses."
+      ],
+      "when_to_avoid": [
+        "Clean UI-like VFX, tiny sparks, or scenes where refraction sorting artifacts are unacceptable."
+      ],
+      "teaching_notes_vi": "Distortion khong phai lop chinh de nhin mau. No la lop cam giac: lam khong khi bi uon, nong, hoac co ap luc. Nen tach rieng de de bat/tat va tune."
+    },
+    {
+      "id": "ribbon_tracer_motion",
+      "intent": "Make fast projectile trails, electric arcs, and ribbon effects readable by combining motion stretch, WPO, camera fade, and ribbon-specific UV logic.",
+      "assets": {
+        "master_materials": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Ribbon_Arc.M_Ribbon_Arc",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Tracer.M_Tracer",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_TracerRibbon.M_TracerRibbon"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Tracer.MI_Tracer",
+          "/Game/NiagaraExamples/Materials/MI_TracerRibbon.MI_TracerRibbon"
+        ],
+        "related_niagara": ["/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"]
+      },
+      "observed_facts": {
+        "m_ribbon_arc": {
+          "blend_mode": "Translucent",
+          "shading_model": "Unlit",
+          "root_inputs": ["EmissiveColor", "Opacity", "WorldPositionOffset"],
+          "expression_count": 100,
+          "texture": "T_HermiteNoise_CenteredTiling",
+          "functions": ["MF_ExposureCompensation", "CameraOffset", "Swizzle", "CameraDepthFade"],
+          "graph_regions": ["Solves Branch Origin from Main Arc", "Dynamic Parameter 0"]
+        },
+        "m_tracer": {
+          "blend_mode": "Additive",
+          "shading_model": "Unlit",
+          "root_inputs": ["EmissiveColor", "Opacity", "OpacityMask", "WorldPositionOffset", "PixelDepthOffset"],
+          "expression_count": 37,
+          "textures": ["SphereRenderHeightMap", "T_HermiteNoise_CenteredTiling"],
+          "functions": ["MF_ExposureCompensation", "Sprite_Capsule", "MF_MotionStretchSpark"],
+          "instance_overrides": ["DeltaTime Min", "DeltaTime Max", "Shutter"]
+        },
+        "m_tracer_ribbon": {
+          "blend_mode": "Translucent",
+          "shading_model": "Unlit",
+          "root_inputs": ["EmissiveColor", "Opacity"],
+          "expression_count": 10
+        }
+      },
+      "core_graph_or_stack": [
+        "Tracer material uses motion stretch and shutter/delta time controls to fake fast projectile length.",
+        "Ribbon arc uses WPO and camera offset to keep arcs visually readable.",
+        "Dynamic parameters and ribbon UVs let Niagara steer branch/fade behavior."
+      ],
+      "why_this_approach": [
+        "Fast projectiles need visible length, not physically correct tiny dots.",
+        "Ribbon topology needs a different material contract than sprites because UVs follow a path.",
+        "Camera fade and offset reduce view-dependent popping."
+      ],
+      "pros": [
+        "Strong readability for fast motion.",
+        "Good separation between sprite tracer and ribbon trail use cases.",
+        "Motion-stretch controls are exposed as MI parameters."
+      ],
+      "cons": [
+        "Ribbon arc graph is complex and can be hard to modify safely.",
+        "Camera-facing tricks can fail under unusual angles.",
+        "Tracer WPO/PDO can be overkill for slow or small particles."
+      ],
+      "when_to_copy": [
+        "Bullets, energy bolts, electric arcs, Tesla links, magic slashes, beam fragments."
+      ],
+      "when_to_avoid": [
+        "Slow ambient wisps or smoke where motion stretch feels artificial.",
+        "Effects that need physically stable geometry rather than camera-dependent readability."
+      ],
+      "teaching_notes_vi": "Projectile nhanh khong nen chi ve mot cham nho. Material phai giup mat doc duoc huong va toc do: stretch, shutter, ribbon UV, opacity fade."
+    },
+    {
+      "id": "decal_impact_marks",
+      "intent": "Project impact evidence onto surfaces separately from airborne particles, using decal-specific fade, SubUV frame selection, and normal flattening.",
+      "assets": {
+        "master_materials": [
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Decal_SubUV.M_Decal_SubUV",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_Decal_Boundary.M_Decal_Boundary",
+          "/Game/NiagaraExamples/Materials/MasterMaterials/M_BulletHole.M_BulletHole"
+        ],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Explosion_Decal.MI_Explosion_Decal",
+          "/Game/NiagaraExamples/Materials/MI_BulletHole.MI_BulletHole",
+          "/Game/NiagaraExamples/Materials/MI_BulletHole_Glass.MI_BulletHole_Glass"
+        ]
+      },
+      "observed_facts": {
+        "m_decal_subuv": {
+          "blend_mode": "Translucent",
+          "shading_model": "DefaultLit",
+          "root_inputs": ["BaseColor", "Specular", "Roughness", "Opacity"],
+          "expression_count": 23,
+          "texture": "ExplosionDecalMasks",
+          "parameters": ["Opacity Exponent", "Frame Number", "Sub Images", "Base Color"],
+          "functions": ["SubUV_Function", "MF_DecalNormalFade"]
+        },
+        "m_decal_boundary": {
+          "blend_mode": "Translucent",
+          "shading_model": "DefaultLit",
+          "root_inputs": ["EmissiveColor", "Opacity"],
+          "expression_count": 47,
+          "parameters": ["Border Gradient Exponent", "Shape", "Border Thickness", "Dimensions"]
+        },
+        "m_bullethole": {
+          "blend_mode": "Translucent",
+          "shading_model": "DefaultLit",
+          "root_inputs": ["BaseColor", "Specular", "Roughness", "EmissiveColor", "Opacity", "Normal"],
+          "expression_count": 32,
+          "textures": ["BulletHole", "BulletHole_Normals"],
+          "parameters": ["Opacity", "Specular", "Roughness", "Normal Flatness", "Base Color Gain"]
+        }
+      },
+      "core_graph_or_stack": [
+        "Decal materials handle surface story separately from particle body.",
+        "SubUV frame selection supports multiple impact masks from one atlas.",
+        "MF_DecalNormalFade reduces decal artifacts on steep surface angles.",
+        "Bullet hole material includes normal and roughness/specular controls for grounded surface response."
+      ],
+      "why_this_approach": [
+        "Impacts read better when they leave evidence after the burst fades.",
+        "Decals need different shading and fade logic than airborne sprites.",
+        "SubUV atlas frame selection avoids many separate decal materials."
+      ],
+      "pros": [
+        "Improves gameplay readability and scene storytelling.",
+        "Good reuse for explosion marks, bullet holes, and boundary projections.",
+        "Separates surface response from airborne particle cost."
+      ],
+      "cons": [
+        "Decal projection has sorting and angle limitations.",
+        "Requires correct receiver surfaces and lifetime cleanup.",
+        "Too many decals can become a memory/performance issue."
+      ],
+      "when_to_copy": [
+        "Bullet impacts, explosion scorch marks, target indicators, boundary decals, floor spell marks."
+      ],
+      "when_to_avoid": [
+        "Effects that happen entirely in air.",
+        "Surfaces where projected decals are disabled or visually unstable."
+      ],
+      "teaching_notes_vi": "Decal la lop 'dau vet'. Particle cho khoanh khac, decal cho cau chuyen sau va cham. Dung material rieng vi logic surface khac hoan toan sprite bay trong khong gian."
+    },
+    {
+      "id": "mesh_overlay_status_effect",
+      "intent": "Apply animated status, buff, debuff, or electrical overlay shells on existing meshes without replacing the base material.",
+      "assets": {
+        "master_materials": ["/Game/NiagaraExamples/Materials/MasterMaterials/M_Mesh_Overlay.M_Mesh_Overlay"],
+        "material_instances": [
+          "/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.MI_Mesh_Overlay_TeslaCoil",
+          "/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil_Player.MI_Mesh_Overlay_TeslaCoil_Player",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Player_Buff.MI_Overlay_Player_Buff",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Player_DeBuff.MI_Overlay_Player_DeBuff",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Weapon_Buff.MI_Overlay_Weapon_Buff",
+          "/Game/NiagaraExamples/Materials/MI_Overlay_Weapon_DeBuff.MI_Overlay_Weapon_DeBuff"
+        ],
+        "related_blueprints": [
+          "/Game/NiagaraExamples/Blueprints/BP_TeslaCoil.BP_TeslaCoil",
+          "/Game/NiagaraExamples/Blueprints/BP_PickUp.BP_PickUp"
+        ]
+      },
+      "observed_facts": {
+        "blend_mode": "Translucent",
+        "shading_model": "DefaultLit",
+        "root_inputs": ["EmissiveColor", "Opacity"],
+        "stats": {
+          "expression_count": 93,
+          "connection_count": 92,
+          "texture_sample_count": 1,
+          "scalar_param_count": 21,
+          "vector_param_count": 5,
+          "panner_count": 1
+        },
+        "graph_regions": ["Noise Mask", "Blend In/Out (Normalized 0.0 - 1.0)", "Noise UVW", "Noise UVW Distortion", "Flicker Emissive", "Opacity"],
+        "parameters": [
+          "Time",
+          "Duration",
+          "Reverse Time",
+          "Fresnel Exponent",
+          "Noise Mask Amount",
+          "Noise Mask Exponent",
+          "Noise Scale",
+          "Noise Panning",
+          "Flicker Low",
+          "Flicker High",
+          "Flicker Speed",
+          "Opacity Multiplier"
+        ],
+        "instance_override_pattern": "Tesla overlay MI has 16 overrides, while player/weapon buff variants usually override only panning, scale, or one color direction."
+      },
+      "core_graph_or_stack": [
+        "Fresnel and noise isolate mesh edges and animated breakup.",
+        "Blend In/Out time controls allow runtime-driven appearance and disappearance.",
+        "Flicker block creates unstable electrical/emissive variation.",
+        "Panning and distortion vectors create perceived surface flow."
+      ],
+      "why_this_approach": [
+        "Status effects should sit over the character or weapon without requiring every base material to be rewritten.",
+        "Time and duration parameters make it suitable for Blueprint or Niagara-driven state transitions.",
+        "Fresnel plus noise reads clearly on many mesh shapes."
+      ],
+      "pros": [
+        "Strong reusable status-effect parent.",
+        "Can cover buff, debuff, electricity, and magical overlays with MI tuning.",
+        "Keeps base material ownership separate from VFX overlay ownership."
+      ],
+      "cons": [
+        "Large translucent overlay on characters can be expensive.",
+        "Parameter surface is broad and needs grouping/naming discipline.",
+        "DefaultLit translucent overlay may sort poorly in complex scenes."
+      ],
+      "when_to_copy": [
+        "Buff/debuff shells, target highlights, electric shocks on a character, weapon enchantment overlays."
+      ],
+      "when_to_avoid": [
+        "Tiny particles or one-frame flashes.",
+        "Meshes with already-heavy translucent materials."
+      ],
+      "teaching_notes_vi": "Overlay material la cach them trang thai len mesh ma khong pha base material. Hoc no nhu mot lop phu: Fresnel de bat canh, noise de pha mat, time/duration de blend theo gameplay."
+    }
+  ]
+}

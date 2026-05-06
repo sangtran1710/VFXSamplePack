@@ -19,6 +19,7 @@ public class ForgePilot : ModuleRules
 			"Slate",
 			"SlateCore",
 			"InputCore",
+			"ApplicationCore",
 			"UnrealEd",
 			"EditorSubsystem",
 			"EditorFramework",

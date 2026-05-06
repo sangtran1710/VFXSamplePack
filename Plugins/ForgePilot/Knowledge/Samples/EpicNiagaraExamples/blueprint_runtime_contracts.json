@@ -1,0 +1,262 @@
+{
+  "schema_version": "1.0",
+  "source_project": "VFXSamplePack",
+  "content_root": "/Game/NiagaraExamples",
+  "summary": "Runtime Blueprint contracts observed in the Epic Niagara sample pack. These describe what Blueprint should own versus what Niagara and materials should own.",
+  "contracts": [
+    {
+      "id": "weapon_base_fire_contract",
+      "blueprints": [
+        "/Game/NiagaraExamples/Blueprints/BP_WeaponBase.BP_WeaponBase",
+        "/Game/NiagaraExamples/Blueprints/BP_Launcher.BP_Launcher",
+        "/Game/NiagaraExamples/Blueprints/BP_Rifle.BP_Rifle"
+      ],
+      "observed_facts": {
+        "bp_weapon_base_parent": "Actor",
+        "bp_launcher_parent": "BP_WeaponBase_C",
+        "bp_rifle_parent": "BP_WeaponBase_C",
+        "weapon_base_components": ["SkeletalMeshComponent: Mesh", "NiagaraComponent: MuzzleFlash"],
+        "launcher_extra_component": ["TriggerExplosion_C: TriggerExplosion"],
+        "rifle_extra_component": ["TriggerImpact_C: TriggerImpact"],
+        "weapon_base_variables": ["TestFire", "Range", "Can Fire", "Actors To Ignore", "Weapon Muzzle Socket Name", "Firing Rate", "Type", "Cool Down"]
+      },
+      "runtime_responsibility": {
+        "blueprint": [
+          "Own weapon state, firing cooldown, muzzle socket, range, and hit/impact decision.",
+          "Select whether launcher-style explosion or rifle-style impact logic runs.",
+          "Trigger Niagara muzzle flash and impact/explosion systems at the correct world transform."
+        ],
+        "niagara": [
+          "Own burst timing, sprite/light renderers, SubUV playback, and projectile/impact visual layers."
+        ],
+        "material": [
+          "Own emissive/opacity/flipbook shading response, not gameplay hit logic."
+        ]
+      },
+      "why_this_approach": [
+        "Weapon firing is gameplay state; it belongs in Blueprint or gameplay code.",
+        "Niagara should receive a clear event and transform, then handle visual timing locally.",
+        "Materials stay reusable when they do not know about weapon classes."
+      ],
+      "pros": [
+        "Good separation of gameplay and VFX.",
+        "Launcher and rifle can share base weapon behavior while swapping trigger components.",
+        "Easy to replace visual systems without rewriting firing logic."
+      ],
+      "cons": [
+        "Blueprint and Niagara lifetimes must be coordinated.",
+        "If muzzle socket naming changes, VFX placement breaks.",
+        "Rapid fire can expose performance cost from light renderers and spawned impact systems."
+      ],
+      "forgepilot_guidance": [
+        "When generating weapon VFX, create or use a base runtime contract first: socket, cooldown, hit result, muzzle flash, impact event.",
+        "Do not encode weapon state inside a material graph.",
+        "Expose material tuning through MI or Niagara user/dynamic parameters."
+      ],
+      "teaching_notes_vi": "BP_WeaponBase cho thay ranh gioi dung: BP quyet dinh ban khi nao, o dau, trung cai gi. Niagara chi ve su kien do. Material chi quyet dinh pixel nhin ra sao."
+    },
+    {
+      "id": "pickup_state_contract",
+      "blueprints": ["/Game/NiagaraExamples/Blueprints/BP_PickUp.BP_PickUp"],
+      "observed_facts": {
+        "parent": "Actor",
+        "components": ["SceneComponent: DefaultSceneRoot", "StaticMeshComponent: Pickup Mesh", "NiagaraComponent: Pickup Idle", "SphereComponent: Sphere", "TextRenderComponent: TextRender"],
+        "variables": [
+          "Pickup Success",
+          "Pickup Spawn In",
+          "Pickup Timeout",
+          "RespawnTimer",
+          "Timeout",
+          "Glow Color Primary",
+          "Glow Color Secondary",
+          "Text",
+          "Object Type",
+          "Status Type",
+          "bRespawn",
+          "bTimeout"
+        ],
+        "related_systems": [
+          "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Idle.NS_Pickup_Idle",
+          "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Spawn.NS_Pickup_Spawn",
+          "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Success.NS_Pickup_Success",
+          "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Timeout.NS_Pickup_Timeout"
+        ]
+      },
+      "runtime_responsibility": {
+        "blueprint": [
+          "Own pickup availability, respawn, timeout, text, object type, status type, and color selection.",
+          "Run persistent idle Niagara while the pickup is available.",
+          "Spawn or activate transition systems for spawn-in, success, and timeout."
+        ],
+        "niagara": [
+          "Own idle motion, glow, sparkles, sphere/shell read, and transition bursts."
+        ],
+        "material": [
+          "Own colorable glow, flare, and shell surfaces through MI and user parameter binding."
+        ]
+      },
+      "why_this_approach": [
+        "Pickups are state machines, not just particle systems.",
+        "Keeping state in BP makes respawn and timeout explicit.",
+        "Using separate Niagara systems prevents one system graph from becoming a tangled state machine."
+      ],
+      "pros": [
+        "Clear visual state transitions.",
+        "Easy to create buff/debuff or weapon/player pickup variants.",
+        "Readable for designers because important values are Blueprint variables."
+      ],
+      "cons": [
+        "More systems to maintain.",
+        "Color-only differentiation can be weak if gameplay categories are visually close.",
+        "Transitions need synchronized lifetimes and cleanup."
+      ],
+      "forgepilot_guidance": [
+        "For pickup-style features, generate a persistent idle system plus separate success/timeout systems.",
+        "Expose primary and secondary colors at the Blueprint or Niagara user-param level.",
+        "Keep MI variants focused on look; do not make each MI imply gameplay state by itself."
+      ],
+      "teaching_notes_vi": "Pickup la state machine. Neu nhet tat ca vao mot Niagara thi se kho doc. Cach tot la BP quan ly trang thai, moi trang thai goi system rieng."
+    },
+    {
+      "id": "tesla_target_status_contract",
+      "blueprints": ["/Game/NiagaraExamples/Blueprints/BP_TeslaCoil.BP_TeslaCoil"],
+      "observed_facts": {
+        "parent": "Actor",
+        "components": ["StaticMeshComponent: SM_TorchBase", "StaticMeshComponent: Sphere", "NiagaraComponent: NS_TeslaCoil", "CapsuleComponent: Capsule", "NiagaraComponent: Boundary", "SphereComponent: Camera_Sphere"],
+        "variables": ["HasTarget", "Attach Point Name", "Looping Impact", "Other Actor", "Status Mesh"],
+        "related_systems": [
+          "/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil",
+          "/Game/NiagaraExamples/FX_Misc/NS_Boundary.NS_Boundary"
+        ],
+        "related_materials": ["/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.MI_Mesh_Overlay_TeslaCoil"]
+      },
+      "runtime_responsibility": {
+        "blueprint": [
+          "Own target detection, target actor reference, attach point name, and whether a target exists.",
+          "Maintain looping impact or status mesh references.",
+          "Coordinate boundary feedback and Tesla coil Niagara visuals."
+        ],
+        "niagara": [
+          "Own electric ribbon/arc, boundary pulse, impact loop, and target-facing motion."
+        ],
+        "material": [
+          "Own mesh overlay, Fresnel/noise/flicker, and status shell look."
+        ]
+      },
+      "why_this_approach": [
+        "Target selection is gameplay logic and should not be embedded in Niagara.",
+        "Electric connection and status overlay are separate visual messages.",
+        "Blueprint can cleanly attach visuals to sockets or actor components."
+      ],
+      "pros": [
+        "Strong full-chain pattern for target-linked VFX.",
+        "Reusable for beams, tethers, debuffs, shocks, and buff links.",
+        "Clear layer split: boundary, ribbon, mesh overlay."
+      ],
+      "cons": [
+        "Requires robust cleanup when target changes or disappears.",
+        "Looping impact and overlay timing can desync if Blueprint state changes mid-effect.",
+        "More complex to author and test than standalone burst VFX."
+      ],
+      "forgepilot_guidance": [
+        "When building linked-target effects, make Blueprint own target references and attach points.",
+        "Use Niagara user parameters or component bindings for target transforms where available.",
+        "Use mesh overlay materials only as visual state layers, not as gameplay source of truth."
+      ],
+      "teaching_notes_vi": "TeslaCoil la mau full-chain rat hay: BP chon target, Niagara ve duong ket noi, material overlay cho thay target bi tac dong."
+    },
+    {
+      "id": "fog_card_runtime_material_contract",
+      "blueprints": ["/Game/NiagaraExamples/FX_Fog/BP_FogBankCard.BP_FogBankCard"],
+      "observed_facts": {
+        "parent": "Actor",
+        "components": ["SceneComponent: DefaultSceneRoot", "StaticMeshComponent: Plane"],
+        "variables": [
+          "Material Instance",
+          "Master Material",
+          "Fog Texture",
+          "Fog Color",
+          "Opacity Gain",
+          "Opacity Exponent",
+          "Depth Fade Distance",
+          "Flatten Normal",
+          "Camera Fade Distance",
+          "Opacity Fresnel Exponent"
+        ],
+        "related_material": "/Game/NiagaraExamples/Materials/MasterMaterials/M_FogBankCard.M_FogBankCard"
+      },
+      "runtime_responsibility": {
+        "blueprint": [
+          "Own per-placed fog card material instance and expose artist-facing fog tuning values.",
+          "Assign fog texture and scalar/color parameters at runtime or construction time."
+        ],
+        "niagara": [
+          "Not required for the card itself; this is actor/material-driven fog presentation."
+        ],
+        "material": [
+          "Own fog opacity, depth fade, camera fade, Fresnel opacity, and texture response."
+        ]
+      },
+      "why_this_approach": [
+        "Large fog banks are often easier to place and tune as cards/actors than as particle systems.",
+        "Runtime material instances let each fog card vary without duplicating master materials.",
+        "Blueprint exposes a clean art-control surface for level dressing."
+      ],
+      "pros": [
+        "Good for hand-placed environmental fog.",
+        "Clear editable parameters.",
+        "Avoids Niagara overhead when particle simulation is not needed."
+      ],
+      "cons": [
+        "Less procedural than Niagara-based fog.",
+        "Large translucent cards can sort poorly.",
+        "Needs careful camera/depth fade to avoid flat planes."
+      ],
+      "forgepilot_guidance": [
+        "Use Blueprint-driven dynamic material instances for placed environmental cards.",
+        "Use Niagara only when spawn/motion/lifecycle behavior is needed.",
+        "Keep fog tuning values named semantically for artists."
+      ],
+      "teaching_notes_vi": "Khong phai VFX nao cung can Niagara. Fog card la vi du: neu chi can mot plane co material tune duoc, BP + dynamic MI co the sach hon."
+    },
+    {
+      "id": "preview_spawner_contract",
+      "blueprints": ["/Game/NiagaraExamples/Utilities/Blueprints/BP_VFX_Preview_Spawner.BP_VFX_Preview_Spawner"],
+      "observed_facts": {
+        "parent": "Actor",
+        "components": ["StaticMeshComponent: StaticMesh", "TextRenderComponent: TextRender", "StaticMeshComponent: Cylinder", "SkeletalMeshComponent: Skeletal Mesh Preview", "NiagaraComponent: Niagara"],
+        "variables": ["System Template", "LoadedSystem", "Attach Point Name", "Loop Burst", "Loop Burst Delay"]
+      },
+      "runtime_responsibility": {
+        "blueprint": [
+          "Own preview system selection, optional skeletal/static preview target, label, and looping burst behavior.",
+          "Provide a stable viewing harness for comparing effects."
+        ],
+        "niagara": [
+          "Runs as the preview target without needing gameplay context."
+        ],
+        "material": [
+          "No special runtime responsibility beyond rendering the selected systems."
+        ]
+      },
+      "why_this_approach": [
+        "A preview harness lets artists compare systems in consistent scale and context.",
+        "Loop Burst and delay controls make one-shot effects inspectable without manual retriggering."
+      ],
+      "pros": [
+        "Useful QA and teaching tool.",
+        "Separates visual review from gameplay triggers.",
+        "Good pattern for ForgePilot visual probe stages."
+      ],
+      "cons": [
+        "Preview correctness does not guarantee gameplay integration correctness.",
+        "Scale and background can bias material tuning."
+      ],
+      "forgepilot_guidance": [
+        "Prefer a preview harness for reviewing generated VFX before integrating gameplay triggers.",
+        "Use separate gameplay validation after preview approval."
+      ],
+      "teaching_notes_vi": "Preview Spawner la phong lab. No giup xem effect lap lai trong dieu kien on dinh, nhung khong thay the test gameplay that."
+    }
+  ]
+}

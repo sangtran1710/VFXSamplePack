@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "0.1.0",
-	"FriendlyName": "ForgePilot",
-	"Description": "External-AI bridge and editor automation for Unreal creative workflows, strongest in VFX.",
+	"VersionName": "0.1.0-ue5.3",
+	"FriendlyName": "ForgePilot UE5.3 Legacy",
+	"Description": "UE5.3 legacy compatibility build of ForgePilot external-AI bridge and editor automation workflows.",
 	"Category": "Editor",
 	"CreatedBy": "HenryFX",
 	"CreatedByURL": "",

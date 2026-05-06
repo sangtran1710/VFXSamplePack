@@ -27,6 +27,7 @@ public:
 
 private:
 	FReply OnReconnectClicked();
+	FReply OnCopyEndpointClicked();
 	EActiveTimerReturnType HandleStatusRefresh(double InCurrentTime, float InDeltaTime);
 
 	void RefreshBridgeStatus();
@@ -41,13 +42,21 @@ private:
 	FString GetBridgeHost() const;
 	int32 GetBridgePort() const;
 	FString GetEndpointLabel() const;
+	FString GetProjectLabel() const;
+	FString GetStartupModeLabel() const;
+	FString GetSafetyLabel() const;
 
 	TSharedRef<SWidget> CreateMainCard();
+	TSharedRef<SWidget> CreateInfoRow(const FText& Label, const TSharedRef<SWidget>& ValueWidget) const;
 
 	TSharedPtr<STextBlock> StatusPillText;
 	TSharedPtr<STextBlock> StatusHeadlineText;
 	TSharedPtr<STextBlock> StatusDetailText;
 	TSharedPtr<STextBlock> EndpointText;
+	TSharedPtr<STextBlock> ProjectText;
+	TSharedPtr<STextBlock> StartupModeText;
+	TSharedPtr<STextBlock> SafetyText;
+	TSharedPtr<STextBlock> ReconnectButtonText;
 	TSharedPtr<SButton> ReconnectButton;
 
 	EBridgeVisualState CurrentVisualState = EBridgeVisualState::Starting;

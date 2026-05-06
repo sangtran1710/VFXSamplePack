@@ -5,6 +5,7 @@ This folder is the UE5.7 rebuild internal workspace for ForgePilot.
 - Project file: `VFXSamplePack.uproject`
 - Plugin: `Plugins/ForgePilot`
 - Engine association: `5.7`
+- Plugin browser label: `ForgePilot UE5.7`
 - Product role: canonical ForgePilot build/rebuild workspace
 
 Internal path: `Plugins/ForgePilot/Versions/UE5.7`

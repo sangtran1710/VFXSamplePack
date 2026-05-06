@@ -28,6 +28,9 @@ Saved/
 *.temp
 *.bak
 
+# Local document/render review artifacts
+.codex_pdf_review/
+
 # Python generated files
 __pycache__/
 *.py[cod]
@@ -35,4 +38,3 @@ __pycache__/
 # OS metadata
 .DS_Store
 Thumbs.db
-

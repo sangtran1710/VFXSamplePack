@@ -81,7 +81,7 @@ void FForgePilotModule::OpenBridgeWindow()
 
 	const TSharedRef<SWindow> Window = SNew(SWindow)
 		.Title(LOCTEXT("BridgeWindowTitle", "ForgePilot Bridge"))
-		.ClientSize(FVector2D(430.0f, 230.0f))
+		.ClientSize(FVector2D(500.0f, 340.0f))
 		.SizingRule(ESizingRule::FixedSize)
 		.SupportsMaximize(false)
 		.SupportsMinimize(false)

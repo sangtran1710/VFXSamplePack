@@ -59,7 +59,7 @@ TSharedRef<FSlateStyleSet> FForgePilotStyle::Create()
 		FVector2D(40.0f, 40.0f)));
 	Style->Set("ForgePilot.OpenPanel.Small", new FSlateImageBrush(
 		RootToContentDir(TEXT("ForgePilot_Icon_20"), TEXT(".png")),
-		FVector2D(20.0f, 20.0f)));
+		FVector2D(24.0f, 24.0f)));
 	Style->Set("ForgePilot.OpenPanel.Large", new FSlateImageBrush(
 		RootToContentDir(TEXT("ForgePilot_Icon_64"), TEXT(".png")),
 		FVector2D(64.0f, 64.0f)));

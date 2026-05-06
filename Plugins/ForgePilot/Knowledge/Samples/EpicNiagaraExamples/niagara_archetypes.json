@@ -1,0 +1,338 @@
+{
+  "schema_version": "1.0",
+  "source_project": "VFXSamplePack",
+  "content_root": "/Game/NiagaraExamples",
+  "summary": "Representative Niagara system patterns that connect Epic sample materials to emitter structure, renderers, timing, and user parameters.",
+  "archetypes": [
+    {
+      "id": "layered_explosion",
+      "intent": "Build a readable one-shot explosion from separate flash, streamer, sprite body, debris, spark debris, post-process, decal, and ground dust layers.",
+      "systems": ["/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion"],
+      "observed_structure": {
+        "user_parameters": ["User.Decal Material", "User.Dirt Color", "User.Smoke Color"],
+        "emitter_count": 8,
+        "emitters": ["Streamers_Source", "Streamers", "Decal_Light_Flash", "Explosion", "Debris", "SparkDebris", "NE_PostProcess", "GroundDust"],
+        "sample_renderer_bindings": [
+          {
+            "emitter": "Explosion",
+            "renderer": "NiagaraSpriteRendererProperties",
+            "materials": ["/Game/NiagaraExamples/Materials/MI_ExplosionRoil_8x8.MI_ExplosionRoil_8x8"]
+          },
+          {
+            "emitter": "Debris",
+            "renderers": ["NiagaraMeshRendererProperties", "NiagaraSpriteRendererProperties"],
+            "materials": [
+              "/Game/NiagaraExamples/StaticMesh/Concrete_Rubble_uc1iccejw/MI_Concrete_Rubble_uc1iccejw_1K.MI_Concrete_Rubble_uc1iccejw_1K",
+              "/Game/NiagaraExamples/Materials/MI_SimpleDebris.MI_SimpleDebris"
+            ]
+          }
+        ],
+        "sample_modules": ["Spawn Burst Instantaneous", "Spawn Rate", "Initialize Particle", "Shape Location", "Add Velocity", "Linear Force", "Wind Force", "Partition Particles"]
+      },
+      "core_graph_or_stack": [
+        "Use multiple emitters, each with one visual job.",
+        "Sprite body owns pyro volume; debris mesh renderer owns physical chunks; decal owns surface evidence.",
+        "Color user parameters expose art direction without editing internal emitters.",
+        "Burst plus short sustain modules create impact first and residual motion second."
+      ],
+      "why_this_approach": [
+        "Explosion readability depends on hierarchy: flash/core, body, debris, dust, mark.",
+        "Separating emitters makes timing and performance easier to tune than one all-purpose emitter.",
+        "Different renderers are chosen per layer: sprite for volume, mesh for chunks, decal for ground mark."
+      ],
+      "pros": [
+        "Strong layer ownership and tuneability.",
+        "Supports size variants such as small/medium by scaling system parameters or emitter counts.",
+        "Renderer/material choices match the visual job."
+      ],
+      "cons": [
+        "Many emitters increase maintenance cost.",
+        "Overdraw can spike from sprite body plus smoke/dust layers.",
+        "Authoring changes require understanding inter-emitter timing."
+      ],
+      "when_to_copy": [
+        "Any one-shot impact with body, debris, dust, and lingering surface evidence."
+      ],
+      "when_to_avoid": [
+        "Small hits that only need a flash and a few particles."
+      ],
+      "teaching_notes_vi": "Explosion tot khong phai mot emitter that lon. No la dan nhac nho: flash doc nhan, body tao khoi, debris cho luc, dust cho moi truong, decal cho dau vet."
+    },
+    {
+      "id": "smoke_plume_loop",
+      "intent": "Create a looping smoke plume with controlled buoyancy, wind, base size, color, sprite growth, and soft volume material.",
+      "systems": ["/Game/NiagaraExamples/FX_Smoke/NS_Smoke_Plume.NS_Smoke_Plume"],
+      "observed_structure": {
+        "sample_renderer_bindings": [
+          {
+            "emitter_index": 0,
+            "renderer": "NiagaraSpriteRendererProperties",
+            "materials": ["/Game/NiagaraExamples/Materials/MI_SmokePuffLight_8x8.MI_SmokePuffLight_8x8"]
+          }
+        ],
+        "sample_modules": [
+          "Set (EMITTER) Buoyancy",
+          "Set (EMITTER) WindDirection",
+          "Set (EMITTER) BaseSize",
+          "Spawn Rate",
+          "Initialize Particle",
+          "Shape Location",
+          "Vector Noise Value",
+          "Set (PARTICLES) Temperature",
+          "Color",
+          "Particle State"
+        ]
+      },
+      "core_graph_or_stack": [
+        "Emitter-level values define the plume personality: buoyancy, wind, and base size.",
+        "Particle spawn sets size, temperature, and initial position variation.",
+        "Particle update fades, moves, and kills puffs over their own lifetime.",
+        "Smoke material supplies atlas detail, normal/fake-lighting response, and depth fade."
+      ],
+      "why_this_approach": [
+        "Smoke is a loop with organic variation; it benefits from particle-time curves and noise rather than pure burst logic.",
+        "Emitter-level controls make art direction faster because many particles inherit the same plume behavior.",
+        "Using a flipbook material gives smoke internal texture without simulating fluid volume."
+      ],
+      "pros": [
+        "Reusable for chimney smoke, dust plumes, steam, and ambient fog wisps.",
+        "Clear split between emitter motion and material surface richness.",
+        "Good teaching example for particle time versus emitter-level controls."
+      ],
+      "cons": [
+        "Sprite overdraw can be high in dense plumes.",
+        "Looping smoke exposes tiling and repeated flipbook frames if variation is weak.",
+        "Needs careful sorting and depth fade tuning."
+      ],
+      "when_to_copy": [
+        "Looping smoke, steam, fog wisps, exhaust, ambient dust."
+      ],
+      "when_to_avoid": [
+        "Sharp one-shot impact flashes or effects that need exact collision boundaries."
+      ],
+      "teaching_notes_vi": "Smoke hay vi no duoc dieu khien boi nhieu hat song rieng. Emitter dat dieu kien chung nhu gio va buoyancy, con moi particle tu fade/grow theo tuoi cua no."
+    },
+    {
+      "id": "boundary_user_parameter_shape",
+      "intent": "Drive boundary visuals from high-level user parameters such as color and dimensions instead of hardcoding each shape variant.",
+      "systems": [
+        "/Game/NiagaraExamples/FX_Misc/NS_Boundary.NS_Boundary",
+        "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Box.NS_Boundary_Box",
+        "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder",
+        "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Sphere.NS_Boundary_Sphere"
+      ],
+      "observed_structure": {
+        "user_parameters": ["User.Color", "User.Dimensions"],
+        "emitters": ["Sparkles", "Decal"],
+        "material_family": "additive_mesh_boundary_grid"
+      },
+      "core_graph_or_stack": [
+        "User.Color controls art direction from outside the system.",
+        "User.Dimensions makes the same concept fit multiple boundary sizes.",
+        "Decal and sparkle/support emitters separate surface boundary read from accent motion.",
+        "M_Mesh_Add/MI_Boundary_TechGrid supplies additive grid and height/noise masking."
+      ],
+      "why_this_approach": [
+        "Boundary effects are often gameplay indicators; they should be data-driven by size and color.",
+        "A few high-level user params are safer than editing emitter internals for each placement.",
+        "Using one material family keeps box/cylinder/sphere variants visually coherent."
+      ],
+      "pros": [
+        "Good Blueprint/Niagara contract.",
+        "Reusable across gameplay markers and environmental zones.",
+        "Easy to recolor or resize at runtime."
+      ],
+      "cons": [
+        "If dimensions and material scale disagree, grid density may look inconsistent.",
+        "Emitter data may be inherited or missing in some variants, so tooling should handle parent/template patterns gracefully."
+      ],
+      "when_to_copy": [
+        "Area of effect indicators, safe zones, capture zones, forcefield boundaries."
+      ],
+      "when_to_avoid": [
+        "Pure cinematic effects where hand-authored shape timing matters more than runtime parameters."
+      ],
+      "teaching_notes_vi": "Boundary la vi du hay ve User Parameters. BP hoac level chi nen noi 'mau gi, kich thuoc nao', con Niagara/material tu lo cach ve dep."
+    },
+    {
+      "id": "pickup_multi_state",
+      "intent": "Represent pickup idle, spawn, success, timeout, and color variants with Niagara systems controlled by a gameplay Blueprint.",
+      "systems": [
+        "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Idle.NS_Pickup_Idle",
+        "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Spawn.NS_Pickup_Spawn",
+        "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Success.NS_Pickup_Success",
+        "/Game/NiagaraExamples/FX_PickUp/NS_Pickup_Timeout.NS_Pickup_Timeout"
+      ],
+      "observed_structure": {
+        "idle_user_parameters": ["User.Color", "User.Color Secondary"],
+        "idle_emitters": ["Sparkles", "Glow", "Element", "Sphere"],
+        "related_materials": [
+          "/Game/NiagaraExamples/FX_PickUp/MI_Pickup_Flare.MI_Pickup_Flare",
+          "/Game/NiagaraExamples/FX_PickUp/MI_Pickup_Sparkles.MI_Pickup_Sparkles",
+          "/Game/NiagaraExamples/FX_PickUp/MI_Pickup_Sphere.MI_Pickup_Sphere"
+        ]
+      },
+      "core_graph_or_stack": [
+        "Idle system owns continuous attraction/readability.",
+        "Spawn, success, and timeout systems own state-transition moments.",
+        "Blueprint holds gameplay state, color choice, timeout/respawn, and system references.",
+        "Materials stay instance-based and color-tunable."
+      ],
+      "why_this_approach": [
+        "Pickup effects need persistent affordance plus discrete feedback moments.",
+        "Separating state systems avoids making one Niagara graph responsible for all gameplay state.",
+        "User color parameters let the same visual structure represent buff, debuff, weapon, or player pickup classes."
+      ],
+      "pros": [
+        "Clean runtime ownership: Blueprint controls state, Niagara controls look.",
+        "Easy to extend with new pickup categories.",
+        "Good user-parameter teaching case."
+      ],
+      "cons": [
+        "More assets to keep synchronized.",
+        "State transitions can drift if Blueprint timing and Niagara lifetimes are not aligned.",
+        "Color-only variants may not be enough for very different item meanings."
+      ],
+      "when_to_copy": [
+        "Pickups, interactables, buffs, timed rewards, collectible state effects."
+      ],
+      "when_to_avoid": [
+        "One-off cinematic items where authored sequence timing is more important than reusable state."
+      ],
+      "teaching_notes_vi": "Pickup nen tach idle va transition. Idle noi 'toi dang o day', success/timeout noi 'chuyen trang thai vua xay ra'. BP quan ly logic, Niagara quan ly cam giac."
+    },
+    {
+      "id": "weapon_muzzle_flash",
+      "intent": "Create a compact weapon flash from burst sprites, SubUV playback, dynamic material parameters, and a light renderer.",
+      "systems": ["/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/NS_MuzzleFlash.NS_MuzzleFlash"],
+      "observed_structure": {
+        "sample_renderer_bindings": [
+          {
+            "emitter_index": 0,
+            "renderers": ["NiagaraSpriteRendererProperties", "NiagaraLightRendererProperties"],
+            "materials": ["/Game/NiagaraExamples/FX_Weapons/MuzzleFlashes/Materials/Instances/MI_MuzzleFlash_Sphere.MI_MuzzleFlash_Sphere"]
+          }
+        ],
+        "sample_modules": [
+          "Spawn Burst Instantaneous",
+          "Initialize Particle",
+          "Set (PARTICLES) SpriteSize",
+          "Sub UVAnimation",
+          "Dynamic Material Parameters",
+          "Scale Sprite Size",
+          "Scale Color",
+          "Light Attributes"
+        ]
+      },
+      "core_graph_or_stack": [
+        "Burst spawns the flash instantly.",
+        "SubUV module chooses fast frame animation.",
+        "Dynamic Material Parameters bridge Niagara timing to material response.",
+        "Light renderer gives real scene flash separate from sprite emissive."
+      ],
+      "why_this_approach": [
+        "Muzzle flashes are extremely short; they need immediate silhouette and light response.",
+        "A light renderer sells the event in the scene better than emissive alone.",
+        "Dynamic params keep the material reusable while Niagara controls per-shot variation."
+      ],
+      "pros": [
+        "Very readable gameplay feedback.",
+        "Good separation of visual flash and scene illumination.",
+        "Reuses smoke/fire material family for pyro texture response."
+      ],
+      "cons": [
+        "Light renderers can be expensive if fired rapidly by many weapons.",
+        "SubUV textures need good frame selection for a one-shot flash.",
+        "Too much emissive plus light can overexpose the shot."
+      ],
+      "when_to_copy": [
+        "Rifle shots, launcher muzzle flashes, short magical casts, impact flashes needing scene light."
+      ],
+      "when_to_avoid": [
+        "Sustained beams or loops where continuous light would be too costly."
+      ],
+      "teaching_notes_vi": "Muzzle flash khong keo dai. No can bat len dung mot khoanh khac: burst, SubUV nhanh, light renderer, roi tat. Day la effect ve timing hon la ve graph phuc tap."
+    },
+    {
+      "id": "footstep_surface_event",
+      "intent": "Trigger small surface-specific effects with a foot-side user parameter and layered flame/smoke/burst/decal style emitters.",
+      "systems": ["/Game/NiagaraExamples/FX_Footstep/NS_Footstep_Fire.NS_Footstep_Fire"],
+      "observed_structure": {
+        "user_parameters": ["User.RightFoot"],
+        "emitters": ["FlamesAndEmbers", "Smoke", "FootprintBase", "Burst"],
+        "renderer_counts": {
+          "FlamesAndEmbers": 2,
+          "Smoke": 1,
+          "Burst": 2
+        }
+      },
+      "core_graph_or_stack": [
+        "User.RightFoot controls left/right placement or orientation logic.",
+        "Small burst layers give immediate contact feedback.",
+        "Smoke/flame layers carry residual visual read.",
+        "Footprint/decal layer leaves grounded evidence."
+      ],
+      "why_this_approach": [
+        "Footsteps are frequent and gameplay-adjacent, so the system needs simple external control.",
+        "The effect must be small but layered enough to read as contact with a surface.",
+        "Separating residual smoke from contact burst makes the step feel less like a generic particle pop."
+      ],
+      "pros": [
+        "Clear animation/BP to Niagara contract.",
+        "Scales to different surface types.",
+        "Good example of small layered VFX."
+      ],
+      "cons": [
+        "Can become noisy if triggered too often.",
+        "Needs strict lifetime and spawn count control for performance.",
+        "Surface-specific variants need consistent naming and material reuse."
+      ],
+      "when_to_copy": [
+        "Footsteps, landing puffs, small contact events, surface reaction VFX."
+      ],
+      "when_to_avoid": [
+        "Large impacts where full explosion layering is more appropriate."
+      ],
+      "teaching_notes_vi": "Footstep la effect nho nhung van co lop: tiep xuc, du am, dau vet. Hay dung user param de BP/animation noi chan nao dang cham dat."
+    },
+    {
+      "id": "tesla_status_ribbon",
+      "intent": "Combine ribbon/electric Niagara with mesh overlay status material and Blueprint target management.",
+      "systems": ["/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"],
+      "observed_structure": {
+        "related_blueprint": "/Game/NiagaraExamples/Blueprints/BP_TeslaCoil.BP_TeslaCoil",
+        "blueprint_components": ["NS_TeslaCoil", "Boundary", "Capsule", "Camera_Sphere"],
+        "blueprint_variables": ["HasTarget", "Attach Point Name", "Looping Impact", "Other Actor", "Status Mesh"],
+        "material_family": "mesh_overlay_status_effect"
+      },
+      "core_graph_or_stack": [
+        "Blueprint manages target/attachment state.",
+        "Niagara ribbon or arc system owns electric connection visuals.",
+        "Mesh overlay material applies status read to affected meshes.",
+        "Boundary Niagara provides local area/interaction feedback."
+      ],
+      "why_this_approach": [
+        "Status effects need gameplay awareness that should not live only inside Niagara.",
+        "Ribbons communicate connection; mesh overlay communicates affected target.",
+        "Separating boundary, ribbon, and overlay makes each layer legible."
+      ],
+      "pros": [
+        "Good full-chain pattern from Blueprint to Niagara to Material.",
+        "Reusable for beams, shocks, buffs, debuffs, and linked-target effects.",
+        "Keeps target logic out of material graphs."
+      ],
+      "cons": [
+        "More moving pieces than a simple emitter.",
+        "Requires careful runtime cleanup of looping impact and overlay state.",
+        "Ribbon/material timing must agree with Blueprint target changes."
+      ],
+      "when_to_copy": [
+        "Electric links, tether spells, beam-to-target gameplay, status effects on actors."
+      ],
+      "when_to_avoid": [
+        "Standalone visual-only loops that do not need target state."
+      ],
+      "teaching_notes_vi": "Tesla la bai hoc full chain: BP biet target, Niagara ve duong dien, material overlay cho thay ai dang bi anh huong. Moi lop co viec rieng."
+    }
+  ]
+}

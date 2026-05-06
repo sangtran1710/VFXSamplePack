@@ -26,7 +26,7 @@ That document is the operating contract for preserving ForgePilot's product inte
 
 ## Tool Surface Lane Rule
 For UE5.7 work, read:
-- `Versions/UE5.7/Plugins/ForgePilot/Docs/Plans/TOOL_SURFACE_LANES.md`
+- `Plugins/ForgePilot/Versions/UE5.7/Plugins/ForgePilot/Docs/Plans/TOOL_SURFACE_LANES.md`
 
 ForgePilot is a general Unreal Editor automation tool. Route by `unreal_domain` and `workflow_lane` first. Use Material, Niagara, and VFX orchestration as the strongest lanes only when the task actually needs visual effect authoring, shader work, particles, visual polish, or VFX review.
 

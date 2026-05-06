@@ -2,6 +2,12 @@
 
 ForgePilot is an Unreal Editor automation plugin with `UE5.7` as the active build and product target.
 
+## Version Split
+
+- Open `Plugins/ForgePilot/Versions/UE5.7/VFXSamplePack.uproject` for the active UE5.7 tool.
+- Open `Plugins/ForgePilot/Versions/UE5.3/VFXSamplePack.uproject` only for legacy UE5.3 maintenance.
+- The root `Plugins/ForgePilot` copy is a UE5.7 staging/shared copy, not the legacy branch.
+
 ## Branch Policy
 
 - `Plugins/ForgePilot/Versions/UE5.7/Plugins/ForgePilot` is the canonical rebuild workspace.
